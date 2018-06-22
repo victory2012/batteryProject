@@ -53,6 +53,11 @@ export default {
           icon: "el-icon- iconfont icon-data",
           index: "alarmdata",
           title: "告警数据"
+        },
+        {
+          icon: "el-icon- iconfont icon-data",
+          index: "city",
+          title: "显示城市"
         }
         // ,
         // {

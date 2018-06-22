@@ -283,6 +283,6 @@ export default {
 <style scoped>
 .positions {
   width: 100%;
-  height: calc(100vh - 130px);
+  height: calc(100vh - 110px);
 }
 </style>

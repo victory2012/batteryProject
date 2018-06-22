@@ -3,32 +3,44 @@
     <el-form label-width="120px" :model="alarmDetail.Form" ref="alarmDetail.Form">
       <el-row :gutter="40">
         <el-col :span="12">
-          <el-form-item label="用户名" prop="content">
-            <el-input v-model="alarmDetail.Form.content" disabled auto-complete="off"></el-input>
+          <el-form-item label="告警项目" prop="project">
+            <el-input v-model="alarmDetail.Form.project" disabled auto-complete="off"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="登陆密码" prop="hierarchy">
+          <el-form-item label="告警层级" prop="content">
+            <el-input v-model="alarmDetail.Form.content" disabled auto-complete="off"></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="40">
+        <el-col :span="12">
+          <el-form-item label="告警级别" prop="level">
+            <el-input v-model="alarmDetail.Form.level" disabled auto-complete="off"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="告警层级" prop="hierarchy">
             <el-input v-model="alarmDetail.Form.hierarchy" disabled auto-complete="off"></el-input>
           </el-form-item>
         </el-col>
       </el-row>
       <el-row :gutter="40">
         <el-col :span="12">
-          <el-form-item label="手机号码" prop="level">
-            <el-input v-model="alarmDetail.Form.level" disabled auto-complete="off"></el-input>
+          <el-form-item label="电池编号" prop="serial">
+            <el-input v-model="alarmDetail.Form.serial" disabled auto-complete="off"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="邮箱（选填）" prop="project">
-            <el-input v-model="alarmDetail.Form.project" disabled auto-complete="off"></el-input>
+          <el-form-item label="电池组编号" prop="serialGroup">
+            <el-input v-model="alarmDetail.Form.serialGroup" disabled auto-complete="off"></el-input>
           </el-form-item>
         </el-col>
       </el-row>
       <el-row :gutter="40">
-        <el-col :span="12">
-          <el-form-item label="企业名称" prop="serial">
-            <el-input v-model="alarmDetail.Form.serial" disabled auto-complete="off"></el-input>
+        <el-col :span="24">
+          <el-form-item label="告警发生时间" prop="startTime">
+            <el-input v-model="alarmDetail.Form.startTime" disabled auto-complete="off"></el-input>
           </el-form-item>
         </el-col>
       </el-row>

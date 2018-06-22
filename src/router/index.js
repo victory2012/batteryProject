@@ -31,6 +31,11 @@ export default new Router({
         path: '/alarmdata',
         component: resolve => require(['../components/page/alarmdata.vue'], resolve),
         meta: { title: '告警数据' }
+      },
+      {
+        path: '/city',
+        component: resolve => require(['../components/page/cityPage.vue'], resolve),
+        meta: { title: '告警数据' }
       }
     ]
   }, {

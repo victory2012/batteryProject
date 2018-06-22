@@ -347,7 +347,7 @@ export default {
   z-index: 999;
 }
 #mapcontainer {
-  height: calc(100vh - 130px);
+  height: calc(100vh - 110px);
 }
 
 #tip {

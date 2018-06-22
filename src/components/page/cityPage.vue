@@ -49,15 +49,23 @@
       </el-row>
     </div>
     <div class="warrp">
+      <div id="tip">
+        选择省：
+        <el-select v-model="defaultOption" id='province' placeholder="请选择" @change="selectChange">
+          <el-option v-for="item in selectArr" :key="item.adcode" :label="item.name" :value="item.adcode">
+          </el-option>
+        </el-select>
+      </div>
       <div id="container" class="mapWarrp"></div>
     </div>
   </div>
 </template>
-
 <script>
 import AMap from "AMap";
 // import { websockets } from "../../api/index.js";
 let map;
+let polygons = [];
+let district;
 export default {
   name: "battery",
   data() {
@@ -65,45 +73,69 @@ export default {
       lnglats: [],
       ws: null,
       markers: [],
-      jsonData: { api: "bind", param: ["ddd", "fff"] }
+      jsonData: { api: "bind", param: ["ddd", "fff"] },
+      selectArr: [
+        {
+          adcode: "all",
+          name: "全国"
+        }
+      ],
+      defaultOption: "全国"
     };
   },
-  computed: {
-    role() {
-      return this.name === "admin" ? "超级管理员" : "普通用户";
-    }
-  },
   methods: {
-    init() {
-      map = new AMap.Map("container", {
-        resizeEnable: true,
-        center: [121.52710487067272, 31.22889232359548],
-        zoom: 13
+    getCityData(data) {
+      let bounds = data.boundaries;
+      if (bounds) {
+        for (let i = 0, l = bounds.length; i < l; i++) {
+          let polygon = new AMap.Polygon({
+            map: map,
+            strokeWeight: 1,
+            strokeColor: "#0048ff",
+            fillColor: "#99fbd2",
+            fillOpacity: 0.5,
+            path: bounds[i]
+          });
+          polygons.push(polygon);
+        }
+        map.setFitView(); // 地图自适应
+      }
+      let subList = data.districtList;
+      if (data.level === "country") {
+        // this.selectArr = subList;
+        subList.forEach(key => {
+          this.selectArr.push(key);
+        });
+      }
+      setTimeout(() => {
+        map.setLimitBounds(map.getBounds());
+      }, 300);
+      map.setFitView(); // 地图自适应
+    },
+    // 检查是否已经设置了区域设置
+    getLimitBounds() {
+      let limitBounds = map.getLimitBounds();
+      if (limitBounds) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    selectChange() {
+      // 先获取一下是否已经设置了区域限制，如果设置了 就先清除掉
+      if (this.getLimitBounds()) {
+        map.clearLimitBounds();
+      }
+      for (var i = 0, l = polygons.length; i < l; i++) {
+        polygons[i].setMap(null);
+      }
+      district.setLevel("province");
+      district.setExtensions("all");
+      district.search(this.defaultOption, (status, result) => {
+        if (status === "complete") {
+          this.getCityData(result.districtList[0]);
+        }
       });
-      let ws = new WebSocket("ws://192.168.1.190:8180/ws");
-      ws.onopen = () => {
-        // Web Socket 已连接上，使用 send() 方法发送数据
-        console.log("onopen...");
-        ws.send(JSON.stringify(this.jsonData));
-        // ws.send(this.jsonData);
-      };
-      ws.onmessage = evt => {
-        this.markers && map.remove(this.markers);
-        console.log("onmessage...", evt);
-        var data = JSON.parse(evt.data);
-        // console.log(data)
-        this.mapInit(data.data);
-      };
-      ws.onclose = () => {
-        console.log("连接已关闭...");
-      };
-      ws.onerror = () => {
-        console.log("onerror...");
-      };
-      // 组件销毁时调用，中断websocket链接
-      this.over = () => {
-        ws.close();
-      };
     },
     mapInit(data) {
       console.log(data);
@@ -125,15 +157,28 @@ export default {
       });
       // map.setFitView(); // 自适应地图
     },
-    dataCallBack(data, ws) {
-    },
-    getData() {}
+    init() {
+      map = new AMap.Map("container", {
+        resizeEnable: true,
+        zoom: 4
+      });
+      AMap.service("AMap.DistrictSearch", () => {
+        district = new AMap.DistrictSearch({
+          subdistrict: 1,
+          showbiz: false,
+          level: "province"
+        });
+        district.search("中国", (status, result) => {
+          if (status === "complete") {
+            let data = result.districtList[0];
+            this.getCityData(data);
+          }
+        });
+      });
+    }
   },
   mounted() {
     this.init();
-  },
-  beforeDestroy() {
-    this.over();
   }
 };
 </script>
@@ -142,9 +187,22 @@ export default {
 .el-row {
   margin-bottom: 20px;
 }
+#tip {
+  background-color: #fff;
+  padding: 0 10px;
+  border: 1px solid silver;
+  box-shadow: 3px 4px 3px 0px silver;
+  position: absolute;
+  font-size: 12px;
+  right: 30px;
+  top: 153px;
+  border-radius: 3px;
+  line-height: 36px;
+  z-index: 999;
+}
 .mapWarrp {
   width: 100%;
-  height: calc(100vh - 232px);
+  height: calc(100vh - 252px);
 }
 .grid-content {
   display: flex;
@@ -246,5 +304,48 @@ export default {
 .todo-item-del {
   text-decoration: line-through;
   color: #999;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+}
+
+#mapContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.button-group {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 12px;
+  padding: 10px;
+}
+
+.button-group .button {
+  height: 28px;
+  line-height: 28px;
+  background-color: #97a564;
+  color: #fff;
+  border: 0;
+  outline: none;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.amap-info-content {
+  font-size: 12px;
 }
 </style>

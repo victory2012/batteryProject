@@ -32,7 +32,7 @@
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="userMsg"><i class="iconfont icon-user"></i>个人信息</el-dropdown-item>
-            <el-dropdown-item command="userPwd"><i class="el-icon-setting"></i>修改密码</el-dropdown-item>
+            <el-dropdown-item divided command="userPwd"><i class="el-icon-setting"></i>修改密码</el-dropdown-item>
             <el-dropdown-item divided command="loginout"><i class="iconfont icon-logout"></i>退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
