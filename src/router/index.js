@@ -9,37 +9,42 @@ export default new Router({
     redirect: '/login'
   }, {
     path: '/home',
-    component: resolve => require(['../components/common/Home.vue'], resolve),
+    component: resolve => require(['../layout/Home.vue'], resolve),
     meta: { title: '自述文件' },
     children: [
       {
         path: '/home',
-        component: resolve => require(['../components/page/battery.vue'], resolve),
+        component: resolve => require(['../views/battery.vue'], resolve),
         meta: { title: '电池总览' }
       },
       {
         path: '/position',
-        component: resolve => require(['../components/page/position.vue'], resolve),
+        component: resolve => require(['../views/position.vue'], resolve),
         meta: { title: '实时位置' }
       },
       {
         path: '/history',
-        component: resolve => require(['../components/page/history.vue'], resolve),
+        component: resolve => require(['../views/history.vue'], resolve),
         meta: { title: '历史轨迹' }
       },
       {
         path: '/alarmdata',
-        component: resolve => require(['../components/page/alarmdata.vue'], resolve),
+        component: resolve => require(['../views/alarmdata.vue'], resolve),
         meta: { title: '告警数据' }
       },
       {
         path: '/city',
-        component: resolve => require(['../components/page/cityPage.vue'], resolve),
-        meta: { title: '告警数据' }
+        component: resolve => require(['../views/cityPage.vue'], resolve),
+        meta: { title: '省份' }
+      },
+      {
+        path: '/fence',
+        component: resolve => require(['../views/fence.vue'], resolve),
+        meta: { title: '地理围栏' }
       }
     ]
   }, {
     path: '/login',
-    component: resolve => require(['../components/page/Login.vue'], resolve)
+    component: resolve => require(['../views/Login.vue'], resolve)
   }]
 })

@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import bus from "../common/bus";
+import bus from "../utils/bus";
 export default {
   data() {
     return {
@@ -36,7 +36,7 @@ export default {
       items: [
         {
           icon: "el-icon-view",
-          index: "home",
+          index: "city",
           title: "设备总览"
         },
         {
@@ -51,13 +51,13 @@ export default {
         },
         {
           icon: "el-icon- iconfont icon-data",
-          index: "alarmdata",
-          title: "告警数据"
+          index: "fence",
+          title: "地理围栏"
         },
         {
           icon: "el-icon- iconfont icon-data",
-          index: "city",
-          title: "显示城市"
+          index: "alarmdata",
+          title: "告警数据"
         }
         // ,
         // {

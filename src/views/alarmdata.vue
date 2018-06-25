@@ -49,8 +49,8 @@
 }
 </style>
 <script>
-import Detail from "../pageComponent/alarmDetail";
-import { transLatLng } from "../../utils/transition.js"; // 硬件位置坐标 转高德坐标
+import Detail from "../components/alarmdata/alarmDetail";
+import { transLatLng } from "../utils/transition.js"; // 硬件位置坐标 转高德坐标
 export default {
   components: {
     "v-detail": Detail

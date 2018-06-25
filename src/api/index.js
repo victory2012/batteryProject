@@ -153,18 +153,9 @@ export function addManufacturerAdmin(params) {
 /*
  * websocket 请求
  */
-export function websockets(params, cb) {
-  var ws = new WebSocket(socketUrl);
-  if (ws.readyState === 1) {
-    ws.onopen = function () {
-      ws.send(params)
-    }
-    ws.onmessage = function (evt) {
-      cb(evt, ws)
-    };
-  } else {
-    cb(ws.readyState, ws)
-  }
+export function websockets(callBack) {
+  let ws = new WebSocket(socketUrl);
+  callBack(ws)
   // switch (ws.readyState) {
   //   case 0:
   //     cb(CONNECTING)

@@ -10,7 +10,8 @@
             <el-input v-model="loginForm.userName" size="small" placeholder="用户名"></el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input type="password" placeholder="密码" size="small" v-model="loginForm.password"></el-input>
+            <!-- <input type="text" placeholder="密码" v-model="loginForm.password" @keyup.enter="submitForm('loginForm')"> -->
+            <el-input type="password" placeholder="密码" size="small" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')"></el-input>
           </el-form-item>
           <el-form-item prop="checkBox">
             <el-checkbox style="float:left" v-model="account">记住账户</el-checkbox>
