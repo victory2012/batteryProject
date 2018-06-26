@@ -2,80 +2,150 @@
   <div class="outer-box">
     <div id="AddContainer" class="fenceContainer"></div>
     <div class="HandleBtn" v-show="addFence">
-      <el-button type="info">取消设置</el-button>
-      <el-button type="primary">确定设置</el-button>
+      <span class="Tiptext">Tip：选择区域后，鼠标右键结束选区</span>
+      <el-button @click="cancelSetings" type="info">取消设置</el-button>
+      <el-button @click="doAddFence" type="primary">确定设置</el-button>
+      <p></p>
     </div>
   </div>
 </template>
 <script>
 import AMap from "AMap";
-// import * as api from "../api/index.js";
-// let json = {
-//   name: "测试围栏高德",
-//   enable: "true",
-//   points: "",
-//   repeat: "Mon,Tues,Wed,Thur,Fri,Sat,Sun",
-//   desc: "测试围栏描述",
-//   alert_condition: "enter;leave"
-// };
+import { getFence, addFence } from "../api/index.js";
 let map;
 let marker;
+let markers = [];
 let allPointers = [];
-let pointers =
-  "109.102039,41.467529;106.685046,40.938516;105.542468,39.935115;103.081531,38.60839;102.554187,36.447907;102.114734,34.588108;105.586414,33.970809;112.83739,33.751859;114.419421,36.377175;114.99071,40.170581;113.232898,41.795988;111.562976,42.382993";
+let mouseTool;
 export default {
   data() {
     return {
       addFence: false,
-      json: {
-        points: ""
-      }
+      json: ""
     };
   },
   methods: {
+    // 没有设置过围栏
     buildFence() {
       this.addFence = true;
-      map.setDefaultCursor("pointer");
-      map.on("click", e => {
-        if (!this.hasMarked) {
-          this.json.points += `${e.lnglat.getLng()},${e.lnglat.getLat()};`;
-          marker = new AMap.Marker({
-            icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-            position: [e.lnglat.getLng(), e.lnglat.getLat()]
-          });
-          marker.setMap(map);
-          console.log(this.json);
-        }
+      map.setDefaultCursor("pointer"); // 手势
+      /*
+        AMap.MouseTool 根据点击的点 画出多边形
+      */
+      map.plugin(["AMap.MouseTool"], () => {
+        mouseTool = new AMap.MouseTool(map);
+        mouseTool.polygon();
+      });
+      map.on("click", this.callBackFn); // 地图的点击事件
+      /*
+      * 鼠标右击事件 右击后 要移除地图的点击事件 和画多边形的事件
+      */
+      this.mapRightClick();
+    },
+    mapRightClick() {
+      map.on("rightclick", e => {
+        map.setDefaultCursor(); // 手势
+        map.off("click", this.callBackFn); // 移除地图点击事件
+        mouseTool.close(false); // 移除 画多边形的功能
       });
     },
-    hasFence() {
+    callBackFn(e) {
+      if (markers.length === 9) {
+        mouseTool.close(false); // 移除 画多边形的功能
+      }
+      if (markers.length > 9) {
+        map.setDefaultCursor(); // 手势
+        map.off("click", this.callBackFn); // 移除地图点击事件
+        mouseTool.close(false); // 移除 画多边形的功能
+      } else {
+        this.json += `${e.lnglat.getLng()},${e.lnglat.getLat()};`; // 获取地图点击的jps坐标位置 集合
+        marker = new AMap.Marker({
+          map: map,
+          position: [e.lnglat.getLng(), e.lnglat.getLat()]
+        });
+        markers.push(marker);
+      }
+    },
+    // 已经添加了围栏，根据围栏坐标 画出围栏
+    hasFence(gpsList) {
       this.addFence = false;
-      let poi = pointers.split(";");
+      let poi = gpsList.split(";");
       poi.forEach(res => {
-        console.log(res);
-        var item = res.split(",");
-        var arr = [item[0], item[1]];
+        let item = res.split(",");
+        let arr = [item[0], item[1]];
         allPointers.push(arr);
       });
-      // console.log("allPointers", allPointers);
-      var polygon = new AMap.Polygon({
+      /*
+        画多边形
+      */
+      let polygon = new AMap.Polygon({
         map: map,
-        strokeColor: "#97EC71",
+        strokeColor: "#0000ff",
         strokeWeight: 2,
-        fillColor: "#D1B3E3",
-        fillOpacity: 0.7
+        fillColor: "#f5deb3",
+        fillOpacity: 0.3
       });
       polygon.setPath(allPointers);
-      map.setFitView();
+      // map.setFitView(); // 地图自适应
+    },
+    // 确认设置 添加围栏
+    doAddFence() {
+      let gpsObj = {
+        gpsList: this.json.substring(0, this.json.length - 1)
+      };
+      console.log(gpsObj);
+      addFence(gpsObj).then(res => {
+        console.log(res.data);
+      });
+    },
+    /*
+      取消设置
+    */
+    cancelSetings() {
+      this.json = "";
+      markers && map.remove(markers); // 清除marker点
+      mouseTool.close(true); // 清除多边形
+      markers = [];
+      /*
+      * 点击取消设置后 需要恢复地图的点击事件 和 “AMap.MouseTool”画多边形事件
+      * 所以 在执行一下 buildFence（）方法 即可解决
+      */
+      this.buildFence();
     },
     init() {
-      // 数据请求 go here
       map = new AMap.Map("AddContainer", {
         resizeEnable: true,
         zoom: 5
       });
       this.buildFence();
-      // this.hasFence();
+      getFence()
+        .then(res => {
+          console.log(res);
+          if (res.data.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (res.data.code === 0) {
+            // if (res.data.data.length > 0) {
+            //   let gpsList = res.data.data[0].gpsList;
+            //   this.hasFence(gpsList);
+            // } else {
+            //   this.buildFence();
+            // }
+            this.buildFence();
+          }
+          if (res.data.code === -1) {
+            this.$message.error(res.data.msg);
+          }
+        })
+        .catch(() => {
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
     }
   },
   mounted() {
@@ -89,7 +159,11 @@ export default {
   height: 100%;
   // padding-right: 320px;
 }
-
+.Tiptext {
+  color: red;
+  font-size: 14px;
+  padding-right: 10px;
+}
 .fenceContainer {
   height: 100%;
   width: 100%;

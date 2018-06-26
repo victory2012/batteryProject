@@ -151,7 +151,7 @@ export default {
         resizeEnable: false,
         zoom: 15
       });
-      AMap.plugin(["AMap.Heatmap"], function() {
+      AMap.plugin(["AMap.Heatmap"], () => {
         // 初始化heatmap对象
         heatmap = new AMap.Heatmap(map, {
           radius: 12, // 给定半径
@@ -162,6 +162,33 @@ export default {
           max: 100
         });
       });
+      // let lnglat1 = new AMap.LngLat(json.track[0].lng, json.track[0].lat);
+      // let lnglat2 = new AMap.LngLat(json.track[1].lng, json.track[1].lat);
+      /* eslint-disable */
+      // AMap.GeometryUtil.distance(lnglat1, lnglat2)
+      // new AMap.Text({
+      //   text: "两点相距" + Math.round(lnglat1.distance(lnglat2)) + "米",
+      //   position: lnglat1.divideBy(2).add(lnglat2.divideBy(2)),
+      //   map: map,
+      //   style: {
+      //     "background-color": "#ccccff",
+      //     "border-color": "green",
+      //     "font-size": "12px"
+      //   }
+      // });
+      // let lnglat1 = new AMap.LngLat(json.track[0].lng, json.track[0].lat);
+      // let lnglat2 = new AMap.LngLat(json.track[1].lng, json.track[1].lat);
+      /* eslint-disable */
+      // let mapText = new AMap.Text({
+      //   text: "两点相距" + Math.round(lnglat1.distance(lnglat2)) + "米",
+      //   position: lnglat1.divideBy(2).add(lnglat2.divideBy(2)),
+      //   map: map,
+      //   style: {
+      //     "background-color": "#ccccff",
+      //     "border-color": "green",
+      //     "font-size": "12px"
+      //   }
+      // });
     },
     // 历史轨迹
     historyTrajectory() {
@@ -172,8 +199,7 @@ export default {
         resizeEnable: false,
         zoom: 15
       });
-      AMap.plugin(["AMap.Geolocation"], () => {
-      });
+      AMap.plugin(["AMap.Geolocation"], () => {});
       this.track();
     },
     track() {

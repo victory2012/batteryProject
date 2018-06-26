@@ -1,10 +1,19 @@
 <template>
-  <div>
+  <div id="outer-box">
     <div id="positions" class="positions"></div>
+    <div id="panel">
+      <div class="panelTop">
+        <div id="intro" class="intro">
+          <h3>列表</h3>
+        </div>
+        <ul id="my-list"></ul>
+      </div>
+    </div>
   </div>
 </template>
 <script>
 import AMap from "AMap";
+// import AMapUI from "AMapUI";
 let map;
 let marker = null;
 let index = 0;
@@ -217,7 +226,7 @@ export default {
           position: this.lnglat
         });
         marker.setMap(map);
-        marker.setAnimation('AMAP_ANIMATION_BOUNCE');
+        marker.setAnimation("AMAP_ANIMATION_BOUNCE");
       }, 5000);
       this.lnglat = [mapData[0].lng, mapData[0].lat];
       marker = new AMap.Marker({
@@ -225,7 +234,7 @@ export default {
         position: this.lnglat
       });
       marker.setMap(map);
-      marker.setAnimation('AMAP_ANIMATION_BOUNCE');
+      marker.setAnimation("AMAP_ANIMATION_BOUNCE");
       // this.lnglat = [mapData[0].lng, mapData[0].lat];
 
       // for (var i = 0; i < mapData.length; i++) {
@@ -284,5 +293,45 @@ export default {
 .positions {
   width: 100%;
   height: calc(100vh - 110px);
+}
+.intro h3 {
+  padding: 0 0 10px 5px;
+}
+.amap-marker-label {
+  display: none;
+}
+#outer-box {
+  height: 100%;
+  padding-right: 220px;
+}
+#container {
+  height: 100%;
+  width: 100%;
+}
+#panel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 190px;
+  padding: 10px 0 0;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-bottom: none;
+  border-radius: 5px;
+  z-index: 999;
+}
+.panelTop {
+  height: auto;
+  max-height: 550px;
+  overflow: auto;
+  width: 190px;
+  padding: 10px 0 0;
+  background: #ffffff;
+}
+.history {
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  z-index: 1000;
 }
 </style>

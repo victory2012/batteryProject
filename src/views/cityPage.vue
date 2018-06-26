@@ -71,9 +71,9 @@ export default {
   data() {
     return {
       lnglats: [],
-      ws: null,
+      limit: false,
       markers: [],
-      jsonData: { api: "bind", param: ["ddd", "fff"] },
+      jsonData: { api: "bind", param: ["123"] },
       selectArr: [
         {
           adcode: "all",
@@ -107,9 +107,11 @@ export default {
           this.selectArr.push(key);
         });
       }
-      setTimeout(() => {
-        map.setLimitBounds(map.getBounds());
-      }, 300);
+      if (this.limit) {
+        setTimeout(() => {
+          map.setLimitBounds(map.getBounds());
+        }, 300);
+      }
       // map.setFitView(); // 地图自适应
     },
     // 检查是否已经设置了区域设置
@@ -122,6 +124,7 @@ export default {
       }
     },
     selectChange() {
+      this.limit = true;
       // 先获取一下是否已经设置了区域限制，如果设置了 就先清除掉
       if (this.getLimitBounds()) {
         map.clearLimitBounds();
@@ -139,6 +142,7 @@ export default {
     },
     mapInit(data) {
       console.log(data);
+      if (!data) return;
       data.forEach(key => {
         var lnglats = key.gps.split(",");
         var lnglatsArr = [lnglats[0], lnglats[1]];
@@ -183,21 +187,28 @@ export default {
         };
         ws.onmessage = evt => {
           this.markers && map.remove(this.markers);
-          // console.log("onmessage...", evt);
+          console.log("onmessage...", evt);
           var data = JSON.parse(evt.data);
-          this.mapInit(data.data);
+          console.log(data);
+          if (data.code === 1) {
+          }
+          if (data.code === 2) {
+            // code 为 1时 既绑定成功，2时为 收到了数据
+            this.mapInit(data.data);
+          }
         };
         ws.onerror = () => {
           console.log("onerror...");
           this.$message({
             message: "服务器繁忙，请稍后重试。",
-            type: 'error'
-          })
+            type: "error"
+          });
+          this.over();
         };
         this.over = () => {
           ws.close();
         };
-      })
+      });
     }
   },
   mounted() {

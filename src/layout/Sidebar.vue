@@ -50,7 +50,7 @@ export default {
           title: "历史轨迹"
         },
         {
-          icon: "el-icon- iconfont icon-data",
+          icon: "el-icon- iconfont icon-electricfence",
           index: "fence",
           title: "地理围栏"
         },

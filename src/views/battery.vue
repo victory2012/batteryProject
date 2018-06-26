@@ -65,7 +65,7 @@ export default {
       lnglats: [],
       ws: null,
       markers: [],
-      jsonData: { api: "bind", param: ["ddd", "fff"] }
+      jsonData: { api: "bind", param: ["123"] }
     };
   },
   computed: {

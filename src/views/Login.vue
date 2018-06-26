@@ -27,8 +27,7 @@
 </template>
 
 <script>
-// import { getAdminInfo } from "../../api/index.js";
-// import { mapActions, mapState } from "vuex";
+import { getAdminInfo } from "../api/index.js";
 export default {
   data() {
     return {
@@ -52,55 +51,33 @@ export default {
     submitForm(params) {
       this.$refs[params].validate(valid => {
         if (valid) {
-          this.$router.push('/home')
-          // this.isLogin = true;
-          // if (!this.loginForm.userName) {
-          //   this.$notify.error({
-          //     title: "错误",
-          //     message: "请输入用户名",
-          //     offset: 100
-          //   });
-          //   this.isLogin = false;
-          //   // return;
-          // }
-          // if (!this.loginForm.password) {
-          //   this.$notify.error({
-          //     title: "错误",
-          //     message: "请输入密码",
-          //     offset: 100
-          //   });
-          //   this.isLogin = false;
-          //   // return
-          // }
-          /* getAdminInfo(this.loginForm)
-        .then(res => {
-          this.isLogin = false;
-          console.log(res);
-          if (res.data.code === 0) {
-            localStorage.setItem("loginData", JSON.stringify(res.data.data));
-            localStorage.setItem("account", this.loginForm.userName);
-            localStorage.setItem("password", this.loginForm.password);
-            this.$router.push({
-              path: "/battery"
+          getAdminInfo(this.loginForm)
+            .then(res => {
+              this.isLogin = false;
+              console.log(res);
+              if (res.data.code === 0) {
+                localStorage.setItem(
+                  "loginData",
+                  JSON.stringify(res.data.data)
+                );
+                localStorage.setItem("account", this.loginForm.userName);
+                localStorage.setItem("password", this.loginForm.password);
+                this.$router.push("/home");
+              } else {
+                this.$notify.error({
+                  title: "错误",
+                  message: "请输入正确的用户名密码",
+                  offset: 100
+                });
+              }
+            })
+            .catch(error => {
+              console.log(error);
+              this.isLogin = false;
+              this.$message.error("服务器请求超时，请稍后重试");
             });
-          } else {
-            this.$notify.error({
-              title: "错误",
-              message: "请输入正确的用户名密码",
-              offset: 100
-            });
-          }
-        })
-        .catch(error => {
-          console.log(error);
-          this.isLogin = false;
-          this.$message.error("服务器请求超时，请稍后重试");
-        }); */
         }
       });
-    },
-    checkBoxChange() {
-      console.log(this.checkList);
     },
     init() {
       let account = localStorage.getItem("account");

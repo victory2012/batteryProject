@@ -31,9 +31,12 @@
             <i class="el-icon-caret-bottom"></i>
           </span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="userMsg"><i class="iconfont icon-user"></i>个人信息</el-dropdown-item>
-            <el-dropdown-item divided command="userPwd"><i class="el-icon-setting"></i>修改密码</el-dropdown-item>
-            <el-dropdown-item divided command="loginout"><i class="iconfont icon-logout"></i>退出登录</el-dropdown-item>
+            <el-dropdown-item command="userMsg">
+              <i class="iconfont icon-user"></i>个人信息</el-dropdown-item>
+            <el-dropdown-item divided command="userPwd">
+              <i class="el-icon-setting"></i>修改密码</el-dropdown-item>
+            <el-dropdown-item divided command="loginout">
+              <i class="iconfont icon-logout"></i>退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -47,23 +50,28 @@ export default {
     return {
       collapse: false,
       fullscreen: false,
-      name: "linxin",
-      message: 2
+      name: "admin"
     };
   },
   computed: {
     username() {
-      let username = localStorage.getItem("ms_username");
-      return username ? username : this.name;
+      let userData = JSON.parse(localStorage.getItem("loginData"));
+      return userData ? userData.enterpriseName : this.name;
     }
   },
   methods: {
     // 用户名下拉菜单选择事件
     handleCommand(command) {
-      console.log(command)
+      console.log(command);
       if (command === "loginout") {
-        localStorage.removeItem("ms_username");
+        localStorage.removeItem("loginData");
         this.$router.push("/login");
+      }
+      if (command === "userMsg") {
+        this.$router.push("/user");
+      }
+      if (command === "userPwd") {
+        this.$router.push("/password");
       }
     },
     // 侧边栏折叠
@@ -100,7 +108,7 @@ export default {
     }
   },
   mounted() {
-    if (document.body.clientWidth < 1500) {
+    if (document.body.clientWidth < 1400) {
       this.collapseChage();
     }
   }

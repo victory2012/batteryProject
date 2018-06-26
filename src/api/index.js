@@ -1,6 +1,6 @@
 import Axios from "axios";
-let BaseUrl = "192.168.0.190:8180";
-let socketUrl = 'ws://192.168.1.190:8180/ws';
+let BaseUrl = "http://192.168.1.113:8181";
+let socketUrl = 'ws://192.168.1.113:8081/gps';
 Axios.defaults.withCredentials = true; // 让ajax携带cookie
 
 let instance = Axios.create({
@@ -76,29 +76,6 @@ export function doLogOut() {
 };
 
 /*
- * 拉黑设备列表
- * params {
- *  pageSize
- *  pageNum
- * }
- */
-export function getBlackList(params) {
-  return instance.post('/device/black_list', params)
-};
-
-/*
- * 恢复拉黑设备
- * params {
- *    manufacturerId 生产商id(平台管理员不传)
- *    customerId 客户id(平台管理员不传)
- *    deviceId
- *  }
- */
-export function recoveBattery(params) {
-  return instance.post(`/device/${params.manufacturer}/${params.customer}/${params.deviceId}/recover`)
-};
-
-/*
  * 获取设备列表
  * params入参 包含pageSize pageNum 两个字段
  */
@@ -107,10 +84,26 @@ export function GetDeviceList(params) {
 };
 
 /*
- * 获取生产企业列表
+ * 添加电子围栏
+ * params： gpsList 坐标点
  */
-export function ManufacturerList() {
-  return instance.post('/enterprise/manufacturer/list')
+export function addFence(params) {
+  return instance.post('/fence/add', params)
+};
+
+/*
+ * 获取电子围栏
+ */
+export function getFence() {
+  return instance.post('/fence/list')
+};
+
+/*
+ * websocket 请求
+ */
+export function websockets(callBack) {
+  let ws = new WebSocket(socketUrl);
+  callBack(ws)
 };
 
 /*
@@ -122,60 +115,16 @@ export function getUserInfo() {
 
 /*
  * 修改个人信息
- * params入参 包含pageSize pageNum 两个字段
+ * params入参
  */
 export function changeUserInfo(params) {
   return instance.post('/user/info/modify', params)
 };
 
 /*
- * 获取生产企业列表
- * params入参 包含pageSize pageNum 两个字段
+ * 修改个人信息
+ * params入参 包含password 字段
  */
-export function getEnterprise(params) {
-  return instance.post('/user/manufacturer/list', params)
-};
-
-/*
- * 添加客户
- */
-export function addCustomerAdmin(params) {
-  return instance.post('/user/customer/add', params)
-};
-
-/*
- * 添加企业管理员
- */
-export function addManufacturerAdmin(params) {
-  return instance.post('/user/manufacturer_admin/add', params)
-};
-
-/*
- * websocket 请求
- */
-export function websockets(callBack) {
-  let ws = new WebSocket(socketUrl);
-  callBack(ws)
-  // switch (ws.readyState) {
-  //   case 0:
-  //     cb(CONNECTING)
-  //     break;
-  //   case 1:
-  //     ws.onopen = function () {
-  //       ws.send(params)
-  //     }
-  //     ws.onmessage = function (evt) {
-  //       cb(evt, ws)
-  //     };
-  //     break;
-  //   case 2:
-  //     break;
-  //   case 3:
-  //     cb(CLOSED)
-  //     break;
-  //   default:
-  // }
-  // ws.onclose = function (evt) {
-  //   cb(evt, ws);
-  // };
+export function changePassword(params) {
+  return instance.post('/user/change_password', params)
 };
