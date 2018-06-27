@@ -7,7 +7,7 @@
             <div class="grid-content grid-con-1">
               <i class="grid-con-icon iconfont">&#xe644;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">1234</div>
+                <div class="grid-num">{{allDevice}}</div>
                 <div>电池总数</div>
               </div>
             </div>
@@ -18,7 +18,7 @@
             <div class="grid-content grid-con-2">
               <i class="grid-con-icon iconfont">&#xe656;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">321</div>
+                <div class="grid-num">{{onLine}}</div>
                 <div>在线电池</div>
               </div>
             </div>
@@ -29,7 +29,7 @@
             <div class="grid-content grid-con-3">
               <i class="grid-con-icon iconfont">&#xe6a8;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">200</div>
+                <div class="grid-num">{{allDevice - onLine}}</div>
                 <div>离线电池</div>
               </div>
             </div>
@@ -40,7 +40,7 @@
             <div class="grid-content grid-con-4">
               <i class="grid-con-icon iconfont">&#xe6f5;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">100</div>
+                <div class="grid-num">0</div>
                 <div>无效电池</div>
               </div>
             </div>
@@ -62,7 +62,7 @@
 </template>
 <script>
 import AMap from "AMap";
-import { websockets } from "../api/index.js";
+import { websockets, GetDeviceList } from "../api/index.js";
 let map;
 let polygons = [];
 let district;
@@ -71,9 +71,11 @@ export default {
   data() {
     return {
       lnglats: [],
+      onLine: 1,
+      allDevice: 1,
       limit: false,
       markers: [],
-      jsonData: { api: "bind", param: ["123"] },
+      sendData: { api: "bind", param: [] },
       selectArr: [
         {
           adcode: "all",
@@ -143,23 +145,112 @@ export default {
     mapInit(data) {
       console.log(data);
       if (!data) return;
-      data.forEach(key => {
-        var lnglats = key.gps.split(",");
-        var lnglatsArr = [lnglats[0], lnglats[1]];
-        var marker = new AMap.Marker({
-          icon: new AMap.Icon({
-            image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
-            size: new AMap.Size(20, 35)
-          }),
-          position: lnglatsArr,
-          offset: new AMap.Pixel(-12, -12),
-          zIndex: 101,
-          clickable: true,
-          map: map
-        });
-        this.markers.push(marker);
+      // data.forEach(key => {
+      //   var lnglats = key.gps.split(",");
+      //   var lnglatsArr = [lnglats[0], lnglats[1]];
+      //   var marker = new AMap.Marker({
+      //     icon: new AMap.Icon({
+      //       image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
+      //       size: new AMap.Size(20, 35)
+      //     }),
+      //     position: lnglatsArr,
+      //     offset: new AMap.Pixel(-12, -12),
+      //     zIndex: 101,
+      //     clickable: true,
+      //     map: map
+      //   });
+      //   this.markers.push(marker);
+      // });
+      var lnglats = data.toString().split(",");
+      var lnglatsArr = [lnglats[0], lnglats[1]];
+      var marker = new AMap.Marker({
+        icon: new AMap.Icon({
+          image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
+          size: new AMap.Size(20, 35)
+        }),
+        position: lnglatsArr,
+        offset: new AMap.Pixel(-12, -12),
+        zIndex: 101,
+        clickable: true,
+        map: map
       });
+      this.markers.push(marker);
       // map.setFitView(); // 自适应地图
+    },
+    /*
+      http请求 获取全部电池设备
+     */
+    narmleHttp(ws) {
+      let pageObj = {
+        pageNum: 1,
+        pageSize: 999999999
+      };
+      GetDeviceList(pageObj)
+        .then(res => {
+          console.log(res.data);
+          if (res.data.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (res.data.code === 0) {
+            let result = res.data.data;
+            this.allDevice = result.length || 0;
+            if (result.length > 0) {
+              result.forEach(key => {
+                this.sendData.param.push(key.deviceId);
+              });
+            }
+            // console.log(this.sendData);
+            // ws.send(JSON.stringify(this.sendData));
+          }
+          if (res.data.code === -1) {
+            this.$message.error(res.data.msg);
+          }
+        })
+        .catch(() => {
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
+    },
+    /*
+      websockets 请求
+     */
+    sockets() {
+      websockets(ws => {
+        ws.onopen = () => {
+          console.log("open....");
+          // this.narmleHttp(ws);
+          ws.send(JSON.stringify({ api: "bind", param: ["2B85ACC19D5E"] }));
+        };
+        ws.onmessage = evt => {
+          this.markers && map.remove(this.markers);
+          console.log("onmessage...", evt);
+          let data = JSON.parse(evt.data);
+          console.log(data);
+          if (data.code === 1) {
+            this.onLine = data.data;
+          }
+          if (data.code === 2) {
+            // code 为 1时 既绑定成功，2时为 收到了数据
+            this.mapInit(data.data);
+          }
+        };
+        ws.onerror = () => {
+          console.log("onerror...");
+          this.$message({
+            message: "服务器繁忙，请稍后重试。",
+            type: "error"
+          });
+          this.over();
+        };
+        this.over = () => {
+          ws.close();
+        };
+      });
     },
     init() {
       map = new AMap.Map("container", {
@@ -179,36 +270,7 @@ export default {
           }
         });
       });
-      websockets(ws => {
-        ws.onopen = () => {
-          // Web Socket 已连接上，使用 send() 方法发送数据
-          console.log("onopen...");
-          ws.send(JSON.stringify(this.jsonData));
-        };
-        ws.onmessage = evt => {
-          this.markers && map.remove(this.markers);
-          console.log("onmessage...", evt);
-          var data = JSON.parse(evt.data);
-          console.log(data);
-          if (data.code === 1) {
-          }
-          if (data.code === 2) {
-            // code 为 1时 既绑定成功，2时为 收到了数据
-            this.mapInit(data.data);
-          }
-        };
-        ws.onerror = () => {
-          console.log("onerror...");
-          this.$message({
-            message: "服务器繁忙，请稍后重试。",
-            type: "error"
-          });
-          this.over();
-        };
-        this.over = () => {
-          ws.close();
-        };
-      });
+      this.sockets();
     }
   },
   mounted() {
@@ -239,7 +301,7 @@ export default {
 }
 .mapWarrp {
   width: 100%;
-  height: calc(100vh - 252px);
+  height: calc(100vh - 232px);
 }
 .grid-content {
   display: flex;

@@ -50,7 +50,8 @@
 </style>
 <script>
 import Detail from "../components/alarmdata/alarmDetail";
-import { transLatLng } from "../utils/transition.js"; // 硬件位置坐标 转高德坐标
+import { alarmList } from "../api/index.js";
+// import { transLatLng } from "../utils/transition.js"; // 硬件位置坐标 转高德坐标
 export default {
   components: {
     "v-detail": Detail
@@ -87,8 +88,33 @@ export default {
   },
   methods: {
     init() {
-      let data = transLatLng(31.225388, 121.531416);
-      console.log(data);
+      // let data = transLatLng(31.225388, 121.531416);
+      // console.log(data);
+      let pageObj = {
+        pageNum: this.currentPage2,
+        pageSize: this.handleSize
+      };
+      alarmList(pageObj)
+        .then(res => {
+          console.log(res);
+          if (res.data.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (res.data.code === 0) {
+          }
+          if (res.data.code === -1) {
+            this.$message.error(res.data.msg);
+          }
+        })
+        .catch(() => {
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
     },
     checkItem(index, data) {
       console.log("index", index);

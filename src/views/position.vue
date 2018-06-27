@@ -1,126 +1,41 @@
 <template>
   <div id="outer-box">
     <div id="positions" class="positions"></div>
-    <div id="panel">
+    <!-- <div id="panel">
       <div class="panelTop">
         <div id="intro" class="intro">
-          <h3>列表</h3>
+          <h3>设备列表</h3>
         </div>
-        <ul id="my-list"></ul>
+        <el-collapse v-model="activeName" :accordion="true" @change="collapseChange(activeName)">
+          <el-collapse-item v-for="(item, index) in lnglats" :key="item.id" :title='item.id' :name='index + 1'>
+            <div>{{item.desc}}</div>
+            <div>{{item.position}}</div>
+          </el-collapse-item>
+        </el-collapse>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 <script>
 import AMap from "AMap";
 // import AMapUI from "AMapUI";
+import { websockets, realTimeLocation, GetDeviceList } from "../api/index.js";
 let map;
 let marker = null;
-let index = 0;
-let timer = null;
-let mapData = [
-  {
-    lng: 121.515152,
-    lat: 31.233275,
-    count: 150
-  },
-  {
-    lng: 121.51469,
-    lat: 31.233422,
-    count: 150
-  },
-  {
-    lng: 121.514401,
-    lat: 31.233522,
-    count: 150
-  },
-  {
-    lng: 121.514197,
-    lat: 31.233568,
-    count: 150
-  },
-  {
-    lng: 121.513993,
-    lat: 31.233669,
-    count: 150
-  },
-  {
-    lng: 121.513778,
-    lat: 31.233724,
-    count: 150
-  },
-  {
-    lng: 121.513542,
-    lat: 31.233825,
-    count: 150
-  },
-  {
-    lng: 121.513403,
-    lat: 31.233853,
-    count: 150
-  },
-  {
-    lng: 121.512705,
-    lat: 31.234064,
-    count: 150
-  },
-  {
-    lng: 121.511504,
-    lat: 31.234394,
-    count: 150
-  },
-  {
-    lng: 121.510442,
-    lat: 31.234743,
-    count: 150
-  },
-  {
-    lng: 121.509208,
-    lat: 31.235109,
-    count: 150
-  },
-  {
-    lng: 121.508725,
-    lat: 31.235247,
-    count: 150
-  },
-  {
-    lng: 121.507212,
-    lat: 31.235742,
-    count: 150
-  },
-  {
-    lng: 121.506805,
-    lat: 31.235871,
-    count: 150
-  },
-  {
-    lng: 121.506011,
-    lat: 31.236219,
-    count: 150
-  },
-  {
-    lng: 121.505496,
-    lat: 31.236339,
-    count: 150
-  },
-  {
-    lng: 121.504949,
-    lat: 31.236531,
-    count: 150
-  },
-  {
-    lng: 121.503232,
-    lat: 31.237201,
-    count: 150
-  },
-  {
-    lng: 121.502202,
-    lat: 31.237641,
-    count: 150
-  }
-];
-// let lnglat;
+// let index = 0;
+// let timer = null;
+// let mapData = [
+//   {
+//     lng: 121.53798361550186,
+//     lat: 31.22376799858114,
+//     count: 150
+//   },
+//   {
+//     lng: 116.328911,
+//     lat: 39.937229,
+//     count: 150
+//   }
+// ];
 export default {
   data() {
     return {
@@ -174,67 +89,45 @@ export default {
           id: "aba",
           position: [116.330711, 39.994911],
           desc: "数据_12"
-        },
-        {
-          id: "cbb",
-          position: [116.445111, 39.664111],
-          desc: "数据_22"
-        },
-        {
-          id: "cfc",
-          position: [116.669555, 39.114555],
-          desc: "数据_13"
-        },
-        {
-          id: "abqa",
-          position: [114.330711, 39.294911],
-          desc: "数据_12"
-        },
-        {
-          id: "cbbd",
-          position: [115.445111, 39.364111],
-          desc: "数据_22"
-        },
-        {
-          id: "cfwc",
-          position: [117.669555, 39.614555],
-          desc: "数据_13"
         }
       ],
-      lnglat: ""
+      lnglat: "",
+      activeName: 1
     };
   },
   methods: {
     init() {
       map = new AMap.Map("positions", {
         resizeEnable: true,
-        // center: [116.397428, 39.90923],
-        zoom: 10
+        center: [121.533669, 31.225885],
+        zoom: 15
       });
-      timer = setInterval(() => {
-        // marker.setMap(null);
-        // marker = null;
-        marker.setAnimation();
-        index++;
-        if (index > mapData.length) {
-          clearInterval(timer);
-        }
-        console.log(mapData[index]);
-        this.lnglat = [mapData[index].lng, mapData[index].lat];
-        marker = new AMap.Marker({
-          icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-          position: this.lnglat
-        });
-        marker.setMap(map);
-        marker.setAnimation("AMAP_ANIMATION_BOUNCE");
-      }, 5000);
-      this.lnglat = [mapData[0].lng, mapData[0].lat];
-      marker = new AMap.Marker({
-        icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-        position: this.lnglat
-      });
-      marker.setMap(map);
-      marker.setAnimation("AMAP_ANIMATION_BOUNCE");
+      this.sockets();
+
+      // timer = setInterval(() => {
+      //   marker.setAnimation();
+      //   index++;
+      //   if (index > mapData.length) {
+      //     clearInterval(timer);
+      //   }
+      //   console.log(mapData[index]);
+      //   this.lnglat = [mapData[index].lng, mapData[index].lat];
+      //   marker = new AMap.Marker({
+      //     icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+      //     position: this.lnglat
+      //   });
+      //   marker.setMap(map);
+      //   marker.setAnimation("AMAP_ANIMATION_BOUNCE");
+      // }, 5000);
+
+      // this.lnglat = [mapData[0].lng, mapData[0].lat];
+      // marker = new AMap.Marker({
+      //   icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+      //   position: this.lnglat
+      // });
+      // marker.setMap(map);
+
+      // marker.setAnimation("AMAP_ANIMATION_BOUNCE");
       // this.lnglat = [mapData[0].lng, mapData[0].lat];
 
       // for (var i = 0; i < mapData.length; i++) {
@@ -266,26 +159,102 @@ export default {
       //   clickable: true,
       //   map: map
       // });
-      // AMap.event.addListener(marker, "click", e => {
-      //   console.log(e);
-      //   console.log("1231321");
-      //   // this.$router.push({ name: "map2" });
-      // });
       map.setFitView();
+    },
+    narmleHttp(ws) {
+      let pageObj = {
+        pageNum: 1,
+        pageSize: 999999999
+      };
+      GetDeviceList(pageObj)
+        .then(res => {
+          console.log(res.data);
+          if (res.data.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (res.data.code === 0) {
+            // let result = res.data.data;
+            // console.log(this.sendData)
+            // ws.send(JSON.stringify(this.sendData));
+          }
+          if (res.data.code === -1) {
+            this.$message.error(res.data.msg);
+          }
+        })
+        .catch(() => {
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
+    },
+    /*
+      websockets 请求
+     */
+    sockets() {
+      websockets(ws => {
+        ws.onopen = () => {
+          console.log("open....");
+          // this.narmleHttp(ws);
+          ws.send(JSON.stringify({ api: "bind", param: ["2B85ACC19D5E"] }));
+        };
+        ws.onmessage = evt => {
+          this.markers && map.remove(this.markers);
+          console.log("onmessage...", evt);
+          let data = JSON.parse(evt.data);
+          console.log(data);
+          if (data.code === 1) {
+            this.onLine = data.data;
+          }
+          if (data.code === 2) {
+            // code 为 1时 既绑定成功，2时为 收到了数据
+            this.mapInit(data.data);
+          }
+        };
+        ws.onerror = () => {
+          console.log("onerror...");
+          this.$message({
+            message: "服务器繁忙，请稍后重试。",
+            type: "error"
+          });
+          this.over();
+        };
+        this.over = () => {
+          ws.close();
+        };
+      });
+    },
+    mapInit(data) {
+      marker && marker.setAnimation();
+      console.log(data)
+      let langlat = data.toString().split(",");
+      this.lnglat = [langlat[0], langlat[1]];
+      // this.lnglat = [mapData[0].lng, mapData[0].lat];
+      marker = new AMap.Marker({
+        icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+        position: this.lnglat
+      });
+      marker.setMap(map);
+      marker.setAnimation("AMAP_ANIMATION_BOUNCE");
+    },
+    getData() {
+      realTimeLocation().then(res => {
+        console.log(res.data.data);
+        // this.lnglats = res.data.data;
+      });
+    },
+    collapseChange(activeName) {
+      console.log(activeName);
     }
-    // getData() {
-    //   api.GetList().then(res => {
-    //     console.log(res.data.data);
-    //     // this.lnglats = res.data.data;
-    //     this.init();
-    //   });
-    // }
   },
   mounted() {
     this.init();
   },
-  destroyed() {
-    clearInterval(timer);
+  beforeDestroy() {
+    this.over();
   }
 };
 </script>
@@ -294,15 +263,38 @@ export default {
   width: 100%;
   height: calc(100vh - 110px);
 }
+.deviceList {
+  font-size: 14px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.deviceList h2 {
+  font-weight: 600;
+  font-size: 14px;
+}
+.deviceList li {
+  cursor: pointer;
+  padding: 5px;
+}
+.deviceList li:hover {
+  background: #f0f0f0;
+  border-left: 2px solid red;
+}
+.desc {
+  padding-left: 20px;
+}
 .intro h3 {
-  padding: 0 0 10px 5px;
+  padding-left: 8px;
+  font-weight: normal;
+  font-size: 16px;
+  margin-bottom: 10px;
 }
 .amap-marker-label {
   display: none;
 }
 #outer-box {
   height: 100%;
-  padding-right: 220px;
+  /* padding-right: 220px; */
 }
 #container {
   height: 100%;
@@ -310,22 +302,20 @@ export default {
 }
 #panel {
   position: absolute;
-  top: 80px;
+  top: 20px;
   right: 20px;
-  width: 190px;
-  padding: 10px 0 0;
+  width: 220px;
+  box-sizing: border-box;
+  padding: 10px 0;
+  height: calc(100vh - 110px);
   background: #ffffff;
-  border: 1px solid #cccccc;
-  border-bottom: none;
-  border-radius: 5px;
+  border-left: 1px solid #f0f0f0;
   z-index: 999;
 }
 .panelTop {
   height: auto;
-  max-height: 550px;
-  overflow: auto;
-  width: 190px;
-  padding: 10px 0 0;
+  padding: 0 5px;
+  overflow-x: hidden;
   background: #ffffff;
 }
 .history {

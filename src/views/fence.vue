@@ -1,11 +1,14 @@
 <template>
   <div class="outer-box">
     <div id="AddContainer" class="fenceContainer"></div>
-    <div class="HandleBtn" v-show="addFence">
+    <div class="HandleBtn" v-if="addFence">
       <span class="Tiptext">Tip：选择区域后，鼠标右键结束选区</span>
       <el-button @click="cancelSetings" type="info">取消设置</el-button>
       <el-button @click="doAddFence" type="primary">确定设置</el-button>
       <p></p>
+    </div>
+    <div class="HandleBtn" v-else>
+      <el-button @click="ToAddFence" type="primary">添加围栏</el-button>
     </div>
   </div>
 </template>
@@ -15,48 +18,44 @@ import { getFence, addFence } from "../api/index.js";
 let map;
 let marker;
 let markers = [];
+let polygon;
 let allPointers = [];
-let mouseTool;
 export default {
   data() {
     return {
       addFence: false,
-      json: ""
+      json: "",
+      mouseTool: null
     };
   },
   methods: {
     // 没有设置过围栏
     buildFence() {
       this.addFence = true;
-      map.setDefaultCursor("pointer"); // 手势
-      /*
-        AMap.MouseTool 根据点击的点 画出多边形
-      */
       map.plugin(["AMap.MouseTool"], () => {
-        mouseTool = new AMap.MouseTool(map);
-        mouseTool.polygon();
+        this.mouseTool = new AMap.MouseTool(map);
+        this.mouseTool.polygon();
+        // this.mouseTool.close(true); // 移除 画多边形的功能
       });
+      map.setDefaultCursor("pointer"); // 手势
       map.on("click", this.callBackFn); // 地图的点击事件
       /*
       * 鼠标右击事件 右击后 要移除地图的点击事件 和画多边形的事件
       */
-      this.mapRightClick();
-    },
-    mapRightClick() {
       map.on("rightclick", e => {
         map.setDefaultCursor(); // 手势
         map.off("click", this.callBackFn); // 移除地图点击事件
-        mouseTool.close(false); // 移除 画多边形的功能
+        this.mouseTool.close(false); // 移除 画多边形的功能
       });
     },
     callBackFn(e) {
       if (markers.length === 9) {
-        mouseTool.close(false); // 移除 画多边形的功能
+        this.mouseTool.close(false); // 移除 画多边形的功能
       }
       if (markers.length > 9) {
         map.setDefaultCursor(); // 手势
         map.off("click", this.callBackFn); // 移除地图点击事件
-        mouseTool.close(false); // 移除 画多边形的功能
+        // mouseTool.close(false); // 移除 画多边形的功能
       } else {
         this.json += `${e.lnglat.getLng()},${e.lnglat.getLat()};`; // 获取地图点击的jps坐标位置 集合
         marker = new AMap.Marker({
@@ -76,9 +75,9 @@ export default {
         allPointers.push(arr);
       });
       /*
-        画多边形
+      * 画多边形
       */
-      let polygon = new AMap.Polygon({
+      polygon = new AMap.Polygon({
         map: map,
         strokeColor: "#0000ff",
         strokeWeight: 2,
@@ -93,32 +92,7 @@ export default {
       let gpsObj = {
         gpsList: this.json.substring(0, this.json.length - 1)
       };
-      console.log(gpsObj);
-      addFence(gpsObj).then(res => {
-        console.log(res.data);
-      });
-    },
-    /*
-      取消设置
-    */
-    cancelSetings() {
-      this.json = "";
-      markers && map.remove(markers); // 清除marker点
-      mouseTool.close(true); // 清除多边形
-      markers = [];
-      /*
-      * 点击取消设置后 需要恢复地图的点击事件 和 “AMap.MouseTool”画多边形事件
-      * 所以 在执行一下 buildFence（）方法 即可解决
-      */
-      this.buildFence();
-    },
-    init() {
-      map = new AMap.Map("AddContainer", {
-        resizeEnable: true,
-        zoom: 5
-      });
-      this.buildFence();
-      getFence()
+      addFence(gpsObj)
         .then(res => {
           console.log(res);
           if (res.data.code === 1) {
@@ -131,13 +105,12 @@ export default {
             });
           }
           if (res.data.code === 0) {
-            // if (res.data.data.length > 0) {
-            //   let gpsList = res.data.data[0].gpsList;
-            //   this.hasFence(gpsList);
-            // } else {
-            //   this.buildFence();
-            // }
-            this.buildFence();
+            this.$message({
+              message: "添加成功",
+              type: "success"
+            });
+            this.cancelSetings();
+            this.getData();
           }
           if (res.data.code === -1) {
             this.$message.error(res.data.msg);
@@ -146,6 +119,63 @@ export default {
         .catch(() => {
           this.$message.error("服务器请求超时，请稍后重试");
         });
+    },
+    /*
+      取消设置
+    */
+    cancelSetings() {
+      this.json = "";
+      markers && map.remove(markers); // 清除marker点
+      this.mouseTool.close(true); // 清除多边形
+      markers = [];
+      /*
+      * 点击取消设置后 需要恢复地图的点击事件 和 “AMap.MouseTool”画多边形事件
+      * 所以 在执行一下 buildFence（）方法 即可解决
+      */
+      this.buildFence();
+    },
+    getData() {
+      getFence().then(res => {
+        console.log(res);
+        if (res.data.code === 1) {
+          this.$message({
+            message: "登录超时，请重新登录",
+            type: "warning"
+          });
+          this.$router.push({
+            path: "/login"
+          });
+        }
+        if (res.data.code === 0) {
+          if (res.data.data.length > 0) {
+            let result = res.data.data;
+            // result.forEach(key => {
+            //   console.log("key", key);
+            //   let gpsList = key.gpsList;
+            //   this.hasFence(gpsList);
+            // });
+            this.hasFence(result[0].gpsList);
+          } else {
+            this.buildFence();
+          }
+          // this.buildFence();
+        }
+        if (res.data.code === -1) {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    ToAddFence() {
+      this.addFence = true;
+      polygon.hide();
+      this.buildFence();
+    },
+    init() {
+      map = new AMap.Map("AddContainer", {
+        resizeEnable: true,
+        zoom: 5
+      });
+      this.getData();
     }
   },
   mounted() {

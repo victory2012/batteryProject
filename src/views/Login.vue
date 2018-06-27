@@ -51,6 +51,7 @@ export default {
     submitForm(params) {
       this.$refs[params].validate(valid => {
         if (valid) {
+          this.isLogin = true;
           getAdminInfo(this.loginForm)
             .then(res => {
               this.isLogin = false;

@@ -223,8 +223,8 @@ export default {
             autoRotate: true,
             lineJoin: "round",
             content: "defaultPathNavigtor",
-            fillStyle: "#087EC4",
-            strokeStyle: "#116394",
+            fillStyle: "#ff0000",
+            strokeStyle: "#ff0000",
             lineWidth: 1,
             pathLinePassedStyle: {
               lineWidth: 2,
