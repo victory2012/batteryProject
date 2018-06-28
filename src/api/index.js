@@ -1,6 +1,7 @@
 import Axios from "axios";
-let BaseUrl = "http://192.168.1.113:8181";
-let socketUrl = 'ws://192.168.1.113:8081/gps';
+let BaseUrl = "http://47.98.232.46:8181";
+// let BaseUrl = "http://192.168.1.122:8181";
+let socketUrl = 'ws://47.98.232.46:8081/gps';
 Axios.defaults.withCredentials = true; // 让ajax携带cookie
 
 let instance = Axios.create({
@@ -92,6 +93,14 @@ export function addFence(params) {
 };
 
 /*
+ * 刪除电子围栏
+ * params：围栏id
+ */
+export function delFence(fenceId) {
+  return instance.post(`/fence/${fenceId}/delete`)
+};
+
+/*
  * 获取电子围栏
  */
 export function getFence() {
@@ -122,9 +131,30 @@ export function changeUserInfo(params) {
 };
 
 /*
- * 修改个人信息
+ * 修改密码
  * params入参 包含password 字段
  */
 export function changePassword(params) {
   return instance.post('/user/change_password', params)
+};
+/*
+ * 告警数据
+ * @params入参 分页字段
+ */
+export function alarmList(params) {
+  return instance.post('/alarm/list', params)
+};
+
+/*
+ * 获取设备gps 实时位置
+ */
+export function realTimeLocation(deviceId) {
+  return instance.post(`/device/${deviceId}/gps/get`)
+};
+
+/*
+ * 获取历史轨迹
+ */
+export function trajectory(params) {
+  return instance.post(`/device/gps/history/list`, params)
 };

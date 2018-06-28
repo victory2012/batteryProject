@@ -36,7 +36,7 @@ export default {
       items: [
         {
           icon: "el-icon-view",
-          index: "city",
+          index: "home",
           title: "设备总览"
         },
         {

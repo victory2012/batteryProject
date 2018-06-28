@@ -21,7 +21,7 @@ import AMap from "AMap";
 // import AMapUI from "AMapUI";
 import { websockets, realTimeLocation, GetDeviceList } from "../api/index.js";
 let map;
-let marker = null;
+let marker;
 // let index = 0;
 // let timer = null;
 // let mapData = [
@@ -103,7 +103,6 @@ export default {
         zoom: 15
       });
       this.sockets();
-
       // timer = setInterval(() => {
       //   marker.setAnimation();
       //   index++;
@@ -120,9 +119,9 @@ export default {
       //   marker.setAnimation("AMAP_ANIMATION_BOUNCE");
       // }, 5000);
 
-      // this.lnglat = [mapData[0].lng, mapData[0].lat];
+      // this.lnglat = [116.403322, 39.900255];
       // marker = new AMap.Marker({
-      //   icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+      //   icon: "http://www.17sucai.com/static/i/loading.gif",
       //   position: this.lnglat
       // });
       // marker.setMap(map);
@@ -228,17 +227,19 @@ export default {
       });
     },
     mapInit(data) {
-      marker && marker.setAnimation();
-      console.log(data)
-      let langlat = data.toString().split(",");
-      this.lnglat = [langlat[0], langlat[1]];
-      // this.lnglat = [mapData[0].lng, mapData[0].lat];
+      if (marker) {
+        marker.setAnimation();
+        marker.setMap(null);
+      }
+      var lnglats = data.toString().split(",");
+      var lnglatsArr = [lnglats[1], lnglats[0]];
       marker = new AMap.Marker({
         icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-        position: this.lnglat
+        position: lnglatsArr
       });
       marker.setMap(map);
-      marker.setAnimation("AMAP_ANIMATION_BOUNCE");
+      // marker.setAnimation("AMAP_ANIMATION_BOUNCE");
+      map.setFitView(); // 自适应地图
     },
     getData() {
       realTimeLocation().then(res => {

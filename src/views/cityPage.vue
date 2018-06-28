@@ -145,24 +145,8 @@ export default {
     mapInit(data) {
       console.log(data);
       if (!data) return;
-      // data.forEach(key => {
-      //   var lnglats = key.gps.split(",");
-      //   var lnglatsArr = [lnglats[0], lnglats[1]];
-      //   var marker = new AMap.Marker({
-      //     icon: new AMap.Icon({
-      //       image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
-      //       size: new AMap.Size(20, 35)
-      //     }),
-      //     position: lnglatsArr,
-      //     offset: new AMap.Pixel(-12, -12),
-      //     zIndex: 101,
-      //     clickable: true,
-      //     map: map
-      //   });
-      //   this.markers.push(marker);
-      // });
       var lnglats = data.toString().split(",");
-      var lnglatsArr = [lnglats[0], lnglats[1]];
+      var lnglatsArr = [lnglats[1], lnglats[0]];
       var marker = new AMap.Marker({
         icon: new AMap.Icon({
           image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
@@ -255,7 +239,7 @@ export default {
     init() {
       map = new AMap.Map("container", {
         resizeEnable: true,
-        zoom: 4
+        zoom: 10
       });
       AMap.service("AMap.DistrictSearch", () => {
         district = new AMap.DistrictSearch({

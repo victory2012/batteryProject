@@ -1,14 +1,14 @@
 <template>
-  <el-dialog title="创建生产企业管理员" :visible.sync="alarmDetail.show" width="770px">
+  <el-dialog title="详情" :visible.sync="alarmDetail.show" width="770px">
     <el-form label-width="120px" :model="alarmDetail.Form" ref="alarmDetail.Form">
       <el-row :gutter="40">
         <el-col :span="12">
-          <el-form-item label="告警项目" prop="project">
-            <el-input v-model="alarmDetail.Form.project" disabled auto-complete="off"></el-input>
+          <el-form-item label="电池编号" prop="serial">
+            <el-input v-model="alarmDetail.Form.serial" disabled auto-complete="off"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="告警层级" prop="content">
+          <el-form-item label="设备id" prop="content">
             <el-input v-model="alarmDetail.Form.content" disabled auto-complete="off"></el-input>
           </el-form-item>
         </el-col>
@@ -25,7 +25,7 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row :gutter="40">
+      <!-- <el-row :gutter="40">
         <el-col :span="12">
           <el-form-item label="电池编号" prop="serial">
             <el-input v-model="alarmDetail.Form.serial" disabled auto-complete="off"></el-input>
@@ -36,7 +36,7 @@
             <el-input v-model="alarmDetail.Form.serialGroup" disabled auto-complete="off"></el-input>
           </el-form-item>
         </el-col>
-      </el-row>
+      </el-row> -->
       <el-row :gutter="40">
         <el-col :span="24">
           <el-form-item label="告警发生时间" prop="startTime">

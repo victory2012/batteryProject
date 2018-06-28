@@ -41,3 +41,43 @@ export function transLng(x, y, pi) {
   ret += (150.0 * Math.sin(x / 12.0 * pi) + 300.0 * Math.sin(x / 30.0 * pi)) * 2.0 / 3.0;
   return ret;
 }
+
+export function timeFormat(time) {
+  if (!time) return
+  let timeDate = new Date(time);
+  let year = timeDate.getFullYear();
+  let mounth = timeDate.getMonth() + 1;
+  let day = timeDate.getDate();
+  let hours = timeDate.getHours();
+  let minute = timeDate.getMinutes();
+  let second = timeDate.getSeconds();
+  mounth = mounth < 10 ? "0" + mounth : mounth
+  day = day < 10 ? "0" + day : day;
+  hours = hours < 10 ? "0" + hours : hours;
+  minute = minute < 10 ? ('0' + minute) : minute;
+  second = second < 10 ? ('0' + second) : second;
+  return year + "-" + mounth + "-" + day + " " + hours + ":" + minute + ":" + second
+}
+
+export function timeFormatSort(time) {
+  if (!time) return
+  let timeDate = new Date(time);
+  let year = timeDate.getFullYear().toString().substring(2, 4);
+  let mounth = timeDate.getMonth() + 1;
+  let day = timeDate.getDate();
+  mounth = mounth < 10 ? "0" + mounth : mounth
+  day = day < 10 ? "0" + day : day;
+  return year + "" + mounth + "" + day;
+}
+
+export function userData() {
+  let data = JSON.parse(localStorage.getItem('loginData'));
+  if (data.userRole === "palt_super_admin") {
+    return {}
+  }
+  if (data.userRole === "super_admin") {
+    return {
+      manufacturerId: data.enterpriseRole
+    }
+  }
+}

@@ -2,11 +2,23 @@
   <div class="all">
     <div class="control">
       <div class="date" v-show="trajectory">
-        <el-button type="primary" size="mini" plain @click="startOnclick">开始运动</el-button>
-        <el-button type="primary" size="mini" plain @click="pauseOnclick">暂停运动</el-button>
-        <el-button type="primary" size="mini" plain @click="resumeOnclick">继续运动</el-button>
-        <el-button type="primary" size="mini" plain @click="stopOnclick">停止运动</el-button>
-        <el-button type="danger" size="mini" @click="heatmapFirst">活动热区</el-button>
+        <el-date-picker @change="timeChanged" :editable="false" v-model="chooseTime" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2">
+        </el-date-picker>
+        <!-- <el-date-picker type="date" v-model="timeChanged" placeholder="选择一个或多个日期"></el-date-picker>
+        <el-date-picker type="dates" v-model="timeChanged" placeholder="选择一个或多个日期"></el-date-picker> -->
+        <el-button size="mini" plain @click="startOnclick">
+          <i class="iconfont icon-ic_song_next"></i>
+        </el-button>
+        <el-button size="mini" plain @click="pauseOnclick">
+          <i class="iconfont icon-artboard25copy"></i>
+        </el-button>
+        <el-button size="mini" plain @click="resumeOnclick">
+          <i class="iconfont icon-icons-resume_button"></i>
+        </el-button>
+        <el-button size="mini" plain @click="stopOnclick">
+          <i class="iconfont icon-stop"></i>
+        </el-button>
+        <el-button type="danger" size="small" @click="heatmapFirst">活动热区</el-button>
       </div>
       <div class="date" v-show="active">
         <el-button type="primary" size="mini" @click="historyTrajectory">轨迹回放</el-button>
@@ -20,111 +32,8 @@
 <script>
 import AMap from "AMap";
 import AMapUI from "AMapUI";
-const json = {
-  name: "张三",
-  track: [
-    {
-      lng: 121.515152,
-      lat: 31.233275,
-      count: 150
-    },
-    {
-      lng: 121.51469,
-      lat: 31.233422,
-      count: 150
-    },
-    {
-      lng: 121.514401,
-      lat: 31.233522,
-      count: 150
-    },
-    {
-      lng: 121.514197,
-      lat: 31.233568,
-      count: 150
-    },
-    {
-      lng: 121.513993,
-      lat: 31.233669,
-      count: 150
-    },
-    {
-      lng: 121.513778,
-      lat: 31.233724,
-      count: 150
-    },
-    {
-      lng: 121.513542,
-      lat: 31.233825,
-      count: 150
-    },
-    {
-      lng: 121.513403,
-      lat: 31.233853,
-      count: 150
-    },
-    {
-      lng: 121.512705,
-      lat: 31.234064,
-      count: 150
-    },
-    {
-      lng: 121.511504,
-      lat: 31.234394,
-      count: 150
-    },
-    {
-      lng: 121.510442,
-      lat: 31.234743,
-      count: 150
-    },
-    {
-      lng: 121.509208,
-      lat: 31.235109,
-      count: 150
-    },
-    {
-      lng: 121.508725,
-      lat: 31.235247,
-      count: 150
-    },
-    {
-      lng: 121.507212,
-      lat: 31.235742,
-      count: 150
-    },
-    {
-      lng: 121.506805,
-      lat: 31.235871,
-      count: 150
-    },
-    {
-      lng: 121.506011,
-      lat: 31.236219,
-      count: 150
-    },
-    {
-      lng: 121.505496,
-      lat: 31.236339,
-      count: 150
-    },
-    {
-      lng: 121.504949,
-      lat: 31.236531,
-      count: 150
-    },
-    {
-      lng: 121.503232,
-      lat: 31.237201,
-      count: 150
-    },
-    {
-      lng: 121.502202,
-      lat: 31.237641,
-      count: 150
-    }
-  ]
-};
+import { trajectory } from "../api/index.js";
+import { timeFormatSort } from "../utils/transition.js";
 var map, navg, heatmap, pathSimplifierIns;
 export default {
   data() {
@@ -132,63 +41,129 @@ export default {
       trajectory: false,
       active: true,
       navg: null,
-      map: null
+      map: null,
+      pickerOptions2: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近一个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近三个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            }
+          }
+        ],
+        disabledDate: time => {
+          return time.getTime() < new Date(2018, 1, 1);
+        }
+      },
+      chooseTime: [],
+      gridData: []
     };
   },
   mounted() {
-    this.getData();
+    this.init();
   },
   methods: {
+    timeChanged() {
+      let opts = {
+        pushDateStart: timeFormatSort(this.chooseTime[0]),
+        pushDateEnd: timeFormatSort(this.chooseTime[1]),
+        deviceId: "2B85ACC19D5E"
+      };
+      console.log(opts);
+      this.getData(opts);
+    },
+    getData(params) {
+      trajectory(params)
+        .then(res => {
+          console.log(res);
+          if (res.data.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (res.data.code === 0) {
+            let result = res.data.data;
+            if (result.length > 0) {
+              result.forEach(key => {
+                var obj = {};
+                obj.lng = key.longitude;
+                obj.lat = key.latitude;
+                obj.count = 150;
+                this.gridData.push(obj);
+              });
+              map = new AMap.Map("mapcontainer", {
+                center: [this.gridData[0].lng, this.gridData[0].lat],
+                resizeEnable: false,
+                zoom: 17
+              });
+              AMap.plugin(["AMap.Heatmap"], () => {
+                // 初始化heatmap对象
+                heatmap = new AMap.Heatmap(map, {
+                  radius: 12, // 给定半径
+                  opacity: [0, 1] // 透明度
+                });
+              });
+              heatmap.setDataSet({
+                data: this.gridData, // 热力图数据
+                max: 100
+              });
+            } else {
+              this.$message({
+                message: "暂无数据",
+                type: "warning"
+              });
+            }
+          }
+          if (res.data.code === -1) {
+            this.$message.error(res.data.msg);
+          }
+        })
+        .catch(() => {
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
+    },
     heatmapFirst() {
-      this.getData();
+      this.init();
       this.trajectory = false;
       this.active = true;
       pathSimplifierIns.hide();
     },
-    getData() {
-      map = new AMap.Map("mapcontainer", {
-        center: [json.track[0].lng, json.track[0].lat],
-        resizeEnable: false,
-        zoom: 15
-      });
-      AMap.plugin(["AMap.Heatmap"], () => {
-        // 初始化heatmap对象
-        heatmap = new AMap.Heatmap(map, {
-          radius: 12, // 给定半径
-          opacity: [0, 1] // 透明度
-        });
-        heatmap.setDataSet({
-          data: json.track, // 热力图数据
-          max: 100
-        });
-      });
-      // let lnglat1 = new AMap.LngLat(json.track[0].lng, json.track[0].lat);
-      // let lnglat2 = new AMap.LngLat(json.track[1].lng, json.track[1].lat);
-      /* eslint-disable */
-      // AMap.GeometryUtil.distance(lnglat1, lnglat2)
-      // new AMap.Text({
-      //   text: "两点相距" + Math.round(lnglat1.distance(lnglat2)) + "米",
-      //   position: lnglat1.divideBy(2).add(lnglat2.divideBy(2)),
-      //   map: map,
-      //   style: {
-      //     "background-color": "#ccccff",
-      //     "border-color": "green",
-      //     "font-size": "12px"
-      //   }
-      // });
-      // let lnglat1 = new AMap.LngLat(json.track[0].lng, json.track[0].lat);
-      // let lnglat2 = new AMap.LngLat(json.track[1].lng, json.track[1].lat);
-      /* eslint-disable */
-      // let mapText = new AMap.Text({
-      //   text: "两点相距" + Math.round(lnglat1.distance(lnglat2)) + "米",
-      //   position: lnglat1.divideBy(2).add(lnglat2.divideBy(2)),
-      //   map: map,
-      //   style: {
-      //     "background-color": "#ccccff",
-      //     "border-color": "green",
-      //     "font-size": "12px"
-      //   }
-      // });
+    init() {
+      let start = new Date();
+      let starts = start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+      let params = {
+        pushDateStart: timeFormatSort(starts),
+        pushDateEnd: timeFormatSort(new Date()),
+        deviceId: "2B85ACC19D5E"
+      };
+      this.chooseTime.push(starts);
+      this.chooseTime.push(new Date());
+      this.getData(params);
     },
     // 历史轨迹
     historyTrajectory() {
@@ -205,11 +180,11 @@ export default {
     track() {
       let lineArr = [];
       let tra = [];
-      for (var i = 0; i < json.track.length; i++) {
-        var lngX = json.track[i].lng;
-        var latY = json.track[i].lat;
+      for (var i = 0; i < this.gridData.length; i++) {
+        var lngX = this.gridData[i].lng;
+        var latY = this.gridData[i].lat;
         lineArr.push([lngX, latY]);
-        tra.push(json.track[i]);
+        tra.push(this.gridData[i]);
       }
       AMapUI.load(["ui/misc/PathSimplifier"], function(PathSimplifier) {
         if (!PathSimplifier.supportCanvas) {
@@ -265,7 +240,6 @@ export default {
             path: lineArr
           }
         ]);
-        /* eslint-disable */
         navg = pathSimplifierIns.createPathNavigator(0, {
           loop: true,
           speed: 100,
@@ -284,6 +258,7 @@ export default {
         });
         let startPot = lineArr[0];
         let endPot = lineArr[lineArr.length - 1];
+        /* eslint-disable */
         let stmarker = new AMap.Marker({
           map: map,
           position: [startPot[0], startPot[1]], // 基点位置  开始位置
@@ -326,7 +301,7 @@ export default {
       navg.stop();
       // map.clearMap();
     },
-    /* 
+    /*
     * heatmap：hide()          ---- 隐藏热力图
     *          show()          ---- 显示热力图
     * pathSimplifierIns： hide() ---- 隐藏轨迹
@@ -355,7 +330,9 @@ export default {
   left: 350px;
   font-size: 12px;
 }
-
+.date {
+  font-size: 16px;
+}
 #speed {
   vertical-align: middle;
   width: 60px;
