@@ -7,23 +7,23 @@
       </el-table-column>
       <!-- <el-table-column prop="project" align="center" label="告警项目">
       </el-table-column> -->
-      <el-table-column prop="serial" align="center" label="电池编号">
+      <el-table-column prop="batteryId" align="center" width="160" label="电池编号">
       </el-table-column>
-      <el-table-column prop="serialId" align="center" label="设备编号">
+      <el-table-column prop="deviceId" align="center" width="160" label="设备编号">
       </el-table-column>
       <el-table-column prop="content" align="center" label="告警内容">
       </el-table-column>
       <el-table-column prop="grid" align="center" label="设备坐标">
       </el-table-column>
-      <el-table-column prop="level" align="center" label="告警级别">
-      </el-table-column>
-      <!-- <el-table-column align="center" label="操作">
+      <!-- <el-table-column prop="level" align="center" label="告警级别">
+      </el-table-column> -->
+      <el-table-column align="center" label="操作" width="160">
         <template slot-scope="scope">
-          <el-button @click.native.prevent="checkItem(scope.$index, tableData)" type="text" size="small">
-            查看
+          <el-button @click.native.prevent="checkPosition(scope.$index, tableData)" type="text" size="small">
+            查看位置
           </el-button>
         </template>
-      </el-table-column> -->
+      </el-table-column>
     </el-table>
     <div class="block">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage2" :page-sizes="handleSizeData" :page-size="handleSize" layout="sizes, prev, pager, next" :total="totalNum">
@@ -79,14 +79,16 @@ export default {
   },
   methods: {
     init() {
-      // let data = transLatLng(31.225388, 121.531416);
-      // console.log(data);
       let pageObj = {
         pageNum: this.currentPage2,
         pageSize: this.handleSize
       };
+      this.getData(pageObj);
+    },
+    getData(pageObj) {
       alarmList(pageObj)
         .then(res => {
+          console.log(res);
           if (res.data.code === 1) {
             this.$message({
               message: "登录超时，请重新登录",
@@ -100,15 +102,16 @@ export default {
             let result = res.data.data;
             console.log(result);
             this.totalNum = result.total;
+            this.tableData = [];
             if (result.data.length > 0) {
-              result.forEach(key => {
+              result.data.forEach(key => {
                 var obj = {};
                 obj.startTime = timeFormat(key.alarmedTime);
-                obj.serial = key.batteryId; // 电池id
-                obj.serialId = key.deviceId; // 设备id
+                obj.batteryId = key.batteryId; // 电池id
+                obj.deviceId = key.deviceId; // 设备id
                 obj.content = key.msg; // 告警内容
                 obj.level = key.level; // 告警级别
-                obj.grid = key.longitude + "," + key.latitute;
+                obj.grid = key.longitude + ";" + key.latitude;
                 this.tableData.push(obj);
               });
             }
@@ -117,21 +120,36 @@ export default {
             this.$message.error(res.data.msg);
           }
         })
-        .catch(() => {
+        .catch(err => {
+          console.log(err);
           this.$message.error("服务器请求超时，请稍后重试");
         });
     },
-    checkItem(index, data) {
+    checkPosition(index, data) {
       console.log("index", index);
       console.log("data", data);
-      this.details.show = true;
+      console.log(data[index].deviceId);
+      this.$router.push({
+        path: "position",
+        query: { deviceId: data[index].deviceId }
+      });
     },
     handleSizeChange(index) {
       // index为选中的页数
       console.log("index", index);
+      let pageObj = {
+        pageNum: this.currentPage2,
+        pageSize: index
+      };
+      this.getData(pageObj);
     },
     handleCurrentChange() {
       console.log("handleCurrentChange", this.currentPage2);
+      let pageObj = {
+        pageNum: this.currentPage2,
+        pageSize: this.handleSize
+      };
+      this.getData(pageObj);
     }
   },
   mounted() {

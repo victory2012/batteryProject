@@ -103,61 +103,6 @@ export default {
         zoom: 15
       });
       this.sockets();
-      // timer = setInterval(() => {
-      //   marker.setAnimation();
-      //   index++;
-      //   if (index > mapData.length) {
-      //     clearInterval(timer);
-      //   }
-      //   console.log(mapData[index]);
-      //   this.lnglat = [mapData[index].lng, mapData[index].lat];
-      //   marker = new AMap.Marker({
-      //     icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-      //     position: this.lnglat
-      //   });
-      //   marker.setMap(map);
-      //   marker.setAnimation("AMAP_ANIMATION_BOUNCE");
-      // }, 5000);
-
-      // this.lnglat = [116.403322, 39.900255];
-      // marker = new AMap.Marker({
-      //   icon: "http://www.17sucai.com/static/i/loading.gif",
-      //   position: this.lnglat
-      // });
-      // marker.setMap(map);
-
-      // marker.setAnimation("AMAP_ANIMATION_BOUNCE");
-      // this.lnglat = [mapData[0].lng, mapData[0].lat];
-
-      // for (var i = 0; i < mapData.length; i++) {
-      //   var marker = new AMap.Marker({
-      //     icon: new AMap.Icon({
-      //       image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
-      //       size: new AMap.Size(20, 35)
-      //     }),
-      //     // position: this.lnglats[i].position,
-      //     position: [mapData[i].lng, mapData[i].lat],
-      //     offset: new AMap.Pixel(-12, -12),
-      //     zIndex: 101,
-      //     clickable: true,
-      //     map: map
-      //   });
-      //   var content = i + 1;
-
-      //   marker.emit("dblclick", { target: marker });
-      // }
-      // var marker = new AMap.Marker({
-      //   icon: new AMap.Icon({
-      //     image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
-      //     size: new AMap.Size(20, 35)
-      //   }),
-      //   position: this.lnglat,
-      //   // position: [mapData[i].lng, mapData[i].lat],
-      //   offset: new AMap.Pixel(-12, -12),
-      //   zIndex: 101,
-      //   clickable: true,
-      //   map: map
-      // });
       map.setFitView();
     },
     narmleHttp(ws) {
@@ -198,7 +143,13 @@ export default {
         ws.onopen = () => {
           console.log("open....");
           // this.narmleHttp(ws);
-          ws.send(JSON.stringify({ api: "bind", param: ["2B85ACC19D5E"] }));
+          console.log(this.$route);
+          let deviceId = this.$route.query.deviceId;
+          if (deviceId) {
+            ws.send(JSON.stringify({ api: "bind", param: [deviceId] }));
+          } else {
+            ws.send(JSON.stringify({ api: "bind", param: ["2B85ACC19D5F"] }));
+          }
         };
         ws.onmessage = evt => {
           this.markers && map.remove(this.markers);

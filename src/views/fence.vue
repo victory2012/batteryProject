@@ -97,7 +97,7 @@ export default {
         console.log("e", e);
         if (polygonArr.length > 0) {
           polygonArr.forEach(key => {
-            console.log("key", key);
+            // console.log("key", key);
             key.setOptions({
               strokeColor: "#0000ff",
               fillColor: "#f5deb3",
@@ -115,7 +115,7 @@ export default {
           fillOpacity: 0.6
         });
         this.fenceId = e.target.getExtData();
-        // console.log(e.target.getExtData());
+        console.log(e.target.getExtData());
         // console.log(e.target.getPath());
       });
       map.setFitView(); // 地图自适应

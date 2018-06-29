@@ -66,13 +66,14 @@ import { websockets, GetDeviceList } from "../api/index.js";
 let map;
 let polygons = [];
 let district;
+let markerArr = {};
 export default {
   name: "battery",
   data() {
     return {
       lnglats: [],
-      onLine: 1,
-      allDevice: 1,
+      onLine: 0,
+      allDevice: 2,
       limit: false,
       markers: [],
       sendData: { api: "bind", param: [] },
@@ -142,24 +143,32 @@ export default {
         }
       });
     },
-    mapInit(data) {
-      console.log(data);
-      if (!data) return;
-      var lnglats = data.toString().split(",");
-      var lnglatsArr = [lnglats[1], lnglats[0]];
-      var marker = new AMap.Marker({
-        icon: new AMap.Icon({
-          image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
-          size: new AMap.Size(20, 35)
-        }),
-        position: lnglatsArr,
-        offset: new AMap.Pixel(-12, -12),
-        zIndex: 101,
-        clickable: true,
-        map: map
+    mapInit(obj) {
+      // let po = []
+      if (obj[0] === "2B85ACC19D5F") {
+        var str = `${obj[2]},${obj[1]}`;
+        markerArr.abc = str;
+      } else {
+        var opts = `${obj[2]},${obj[1]}`;
+        markerArr.def = opts;
+      }
+      let allmarkerArr = Object.values(markerArr);
+      allmarkerArr.forEach(key => {
+        console.log(key);
+        var lngs = key.toString().split(",");
+        var marker = new AMap.Marker({
+          icon: new AMap.Icon({
+            image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
+            size: new AMap.Size(20, 35)
+          }),
+          position: [lngs[0], lngs[1]],
+          offset: new AMap.Pixel(-12, -12),
+          zIndex: 101,
+          clickable: true,
+          map: map
+        });
+        this.markers.push(marker);
       });
-      this.markers.push(marker);
-      // map.setFitView(); // 自适应地图
     },
     /*
       http请求 获取全部电池设备
@@ -208,19 +217,26 @@ export default {
         ws.onopen = () => {
           console.log("open....");
           // this.narmleHttp(ws);
-          ws.send(JSON.stringify({ api: "bind", param: ["2B85ACC19D5E"] }));
+          ws.send(
+            JSON.stringify({
+              api: "bind",
+              param: ["2B85ACC19D5F", "2B85ACC19D5E"]
+            })
+          );
         };
         ws.onmessage = evt => {
-          this.markers && map.remove(this.markers);
           console.log("onmessage...", evt);
           let data = JSON.parse(evt.data);
           console.log(data);
+          this.markers && map.remove(this.markers);
           if (data.code === 1) {
             this.onLine = data.data;
+            // markerArr = new Array(data.data);
           }
           if (data.code === 2) {
             // code 为 1时 既绑定成功，2时为 收到了数据
-            this.mapInit(data.data);
+            let obj = data.data.split(",");
+            this.mapInit(obj);
           }
         };
         ws.onerror = () => {

@@ -65,9 +65,15 @@ export function timeFormatSort(time) {
   let year = timeDate.getFullYear().toString().substring(2, 4);
   let mounth = timeDate.getMonth() + 1;
   let day = timeDate.getDate();
+  let hours = timeDate.getHours();
+  let minute = timeDate.getMinutes();
+  let second = timeDate.getSeconds();
   mounth = mounth < 10 ? "0" + mounth : mounth
   day = day < 10 ? "0" + day : day;
-  return year + "" + mounth + "" + day;
+  hours = hours < 10 ? "0" + hours : hours;
+  minute = minute < 10 ? ('0' + minute) : minute;
+  second = second < 10 ? ('0' + second) : second;
+  return year + "" + mounth + "" + day + "" + hours + "" + minute + "" + second;
 }
 
 export function userData() {
@@ -79,5 +85,16 @@ export function userData() {
     return {
       manufacturerId: data.enterpriseRole
     }
+  }
+}
+export function trakTimeformat(str) {
+  if (str) {
+    let yy = str.substring(0, 2);
+    let mm = str.substring(2, 4);
+    let day = str.substring(4, 6);
+    let hour = str.substring(6, 8);
+    let minute = str.substring(8, 10);
+    let seconds = str.substring(10, 12);
+    return `20${yy}-${mm}-${day} ${hour}:${minute}:${seconds}`;
   }
 }

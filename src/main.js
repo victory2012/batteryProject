@@ -6,7 +6,9 @@ import router from './router'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css'; // 默认主题
 import '../static/icon/iconfont.css'
-
+import DatePicker from "./components/datepicker/index"
+console.log(DatePicker)
+Vue.use(DatePicker)
 Vue.config.productionTip = false
 Vue.use(ElementUI, {
   size: 'small'
@@ -15,6 +17,8 @@ Vue.use(ElementUI, {
 new Vue({
   el: '#app',
   router,
-  components: { App },
+  components: {
+    App
+  },
   template: '<App/>'
 })

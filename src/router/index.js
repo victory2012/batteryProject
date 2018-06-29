@@ -19,6 +19,7 @@ export default new Router({
       },
       {
         path: '/position',
+        name: 'position',
         component: resolve => require(['../views/position.vue'], resolve),
         meta: { title: '实时位置' }
       },
@@ -50,7 +51,7 @@ export default new Router({
       {
         path: '/password',
         component: resolve => require(['../views/password.vue'], resolve),
-        meta: { title: '修改秘密' }
+        meta: { title: '修改密码' }
       }
     ]
   }, {
