@@ -13,6 +13,15 @@
     </div>
   </div>
 </template>
+<style scoped>
+.page-comonent_scroll {
+  height: 100%;
+}
+.page-comonent_scroll .el-scrollbar__wrap {
+  overflow: auto;
+}
+</style>
+
 <script>
 import vHead from "./Header.vue";
 import vSidebar from "./Sidebar.vue";
@@ -25,8 +34,8 @@ export default {
     };
   },
   components: {
-    'v-head': vHead,
-    'v-sidebar': vSidebar
+    "v-head": vHead,
+    "v-sidebar": vSidebar
   },
   created() {
     bus.$on("collapse", msg => {

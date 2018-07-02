@@ -52,6 +52,12 @@ export default new Router({
         path: '/password',
         component: resolve => require(['../views/password.vue'], resolve),
         meta: { title: '修改密码' }
+      },
+      {
+        path: '/abnormal',
+        name: 'abnormal',
+        component: resolve => require(['../views/abnormal.vue'], resolve),
+        meta: { title: '报警数据' }
       }
     ]
   }, {

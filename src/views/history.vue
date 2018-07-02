@@ -2,11 +2,8 @@
   <div class="all">
     <div class="control">
       <div class="date">
-        <!-- <el-date-picker @change="timeChanged" :editable="false" v-model="chooseTime" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2">
-        </el-date-picker> -->
-        <!-- <el-date-picker type="date" v-model="timeChanged" placeholder="选择一个或多个日期"></el-date-picker>
-        <el-date-picker type="dates" v-model="timeChanged" placeholder="选择一个或多个日期"></el-date-picker> -->
-        <vue-datepicker-local style="cursor: pointer" v-model="chooseTime" format="YYYY-MM-DD HH:mm:ss" :disabled-date="disabledDate" :local="local" show-buttons @confirm="selectedDate" />
+        <vue-datepicker-local v-model="starts" clearable placeholder="选择开始时间" format="YYYY-MM-DD HH:mm:ss" show-buttons @confirm="selectedDate" />
+        <vue-datepicker-local v-model="endtime" format="YYYY-MM-DD HH:mm:ss" clearable placeholder="选择结束时间" show-buttons @confirm="selectedDate" />
         <el-button v-show="trajectory" size="mini" plain @click="startOnclick">
           <i class="iconfont icon-ic_song_next"></i>
         </el-button>
@@ -22,9 +19,6 @@
         <el-button v-show="trajectory" type="danger" size="small" @click="heatmapFirst">活动热区</el-button>
         <el-button v-show="active" type="primary" size="mini" @click="historyTrajectory">轨迹回放</el-button>
       </div>
-      <!-- <div class="date" v-show="active">
-        <el-button type="primary" size="mini" @click="historyTrajectory">轨迹回放</el-button>
-      </div> -->
     </div>
     <div class="">
       <div id="mapcontainer"></div>
@@ -35,9 +29,13 @@
 import AMap from "AMap";
 import AMapUI from "AMapUI";
 import { trajectory } from "../api/index.js";
-import { timeFormatSort, trakTimeformat } from "../utils/transition.js";
+import {
+  timeFormatSort,
+  trakTimeformat,
+  yesTody
+} from "../utils/transition.js";
 var map, navg, heatmap, pathSimplifierIns;
-const min = new Date(2018, 5, 1, 0, 0, 0);
+// const min = new Date(2018, 5, 1, 0, 0, 0);
 export default {
   data() {
     return {
@@ -45,34 +43,42 @@ export default {
       active: true,
       navg: null,
       map: null,
+      starts: yesTody(),
+      endtime: new Date(),
       chooseTime: [],
-      gridData: [],
-      local: {
-        dow: 1, // Monday is the first day of the week
-        hourTip: '选择小时', // tip of select hour
-        minuteTip: '选择分钟', // tip of select minute
-        secondTip: '选择秒数', // tip of select second
-        yearSuffix: '年', // format of head
-        monthsHead: '1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月'.split('_'), // months of head
-        months: '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split('_'), // months of panel
-        weeks: '一_二_三_四_五_六_日'.split('_'), // weeks
-        cancelTip: '取消', // default text for cancel button
-        submitTip: '确定' // default text for submit button
-      }
+      gridData: []
     };
   },
   mounted() {
     this.init();
   },
   methods: {
-    disabledDate(time) {
-      return time < min;
-    },
     /* 时间确认按钮 */
     selectedDate(date) {
+      if (!this.starts) {
+        this.$message({
+          message: "请选择开始时间",
+          type: "warning"
+        });
+        return;
+      }
+      if (!this.endtime) {
+        this.$message({
+          message: "请选择结束时间",
+          type: "warning"
+        });
+        return;
+      };
+      if (Number(this.starts) > Number(this.endtime)) {
+        this.$message({
+          message: "开始时间应小于结束时间",
+          type: "warning"
+        });
+        return
+      }
       let opts = {
-        pushDateStart: timeFormatSort(date[0]),
-        pushDateEnd: timeFormatSort(date[1]),
+        pushDateStart: timeFormatSort(this.starts),
+        pushDateEnd: timeFormatSort(this.endtime),
         deviceId: "2B85ACC19D5E"
       };
       console.log(opts);
@@ -105,13 +111,6 @@ export default {
                 this.gridData.push(obj);
               });
               map.setCenter([this.gridData[0].lng, this.gridData[0].lat]);
-              AMap.plugin(["AMap.Heatmap"], () => {
-                // 初始化heatmap对象
-                heatmap = new AMap.Heatmap(map, {
-                  radius: 12, // 给定半径
-                  opacity: [0, 1] // 透明度
-                });
-              });
               heatmap.setDataSet({
                 data: this.gridData // 热力图数据
               });
@@ -131,27 +130,31 @@ export default {
         });
     },
     heatmapFirst() {
-      this.init();
+      this.selectByTime();
       this.trajectory = false;
       this.active = true;
       pathSimplifierIns.hide();
     },
     init() {
       map = new AMap.Map("mapcontainer", {
-        // center: [this.gridData[0].lng, this.gridData[0].lat],
         resizeEnable: true,
         zoom: 15
       });
-      map.setFitView();
-      let start = new Date();
-      let starts = start.setTime(start.getTime() - 3600 * 1000 * 24);
+      this.selectByTime();
+    },
+    selectByTime() {
+      AMap.plugin(["AMap.Heatmap"], () => {
+        // 初始化heatmap对象
+        heatmap = new AMap.Heatmap(map, {
+          radius: 12, // 给定半径
+          opacity: [0, 1] // 透明度
+        });
+      });
       let params = {
-        pushDateStart: timeFormatSort(starts),
-        pushDateEnd: timeFormatSort(new Date()),
+        pushDateStart: timeFormatSort(this.starts),
+        pushDateEnd: timeFormatSort(this.endtime),
         deviceId: "2B85ACC19D5E"
       };
-      this.chooseTime.push(starts);
-      this.chooseTime.push(new Date());
       this.getData(params);
     },
     // 历史轨迹
@@ -169,7 +172,6 @@ export default {
     },
     track() {
       let lineArr = [];
-      // let tra = [];
       for (var i = 0; i < this.gridData.length; i++) {
         var lngX = this.gridData[i].lng;
         var latY = this.gridData[i].lat;

@@ -1,98 +1,50 @@
 <template>
   <div id="outer-box">
     <div id="positions" class="positions"></div>
-    <!-- <div id="panel">
+    <div id="panel">
       <div class="panelTop">
         <div id="intro" class="intro">
           <h3>设备列表</h3>
         </div>
-        <el-collapse v-model="activeName" :accordion="true" @change="collapseChange(activeName)">
-          <el-collapse-item v-for="(item, index) in lnglats" :key="item.id" :title='item.id' :name='index + 1'>
-            <div>{{item.desc}}</div>
-            <div>{{item.position}}</div>
-          </el-collapse-item>
-        </el-collapse>
+        <ul class="list_warp">
+          <li v-for="item in lnglats" :key="item.id" @click="checkItem(item.id)">{{item.id}}</li>
+        </ul>
+        <!-- <el-collapse v-model="activeName" :accordion="true" @change="collapseChange(activeName)">
+          <el-collapse-item v-for="(item, index) in lnglats" :key="item.id" :title='item.id' :name='index + 1'> -->
+        <!-- <div>设备编号：{{item.id}}</div>
+            <div>{{item.times}}</div> -->
+        <!-- </el-collapse-item>
+        </el-collapse> -->
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
 <script>
 import AMap from "AMap";
-// import AMapUI from "AMapUI";
-import { websockets, realTimeLocation, GetDeviceList } from "../api/index.js";
+import AMapUI from "AMapUI";
+import { websockets, GetDeviceList } from "../api/index.js";
+import { timeFormats } from "../utils/transition.js";
 let map;
-let marker;
-// let index = 0;
-// let timer = null;
-// let mapData = [
-//   {
-//     lng: 121.53798361550186,
-//     lat: 31.22376799858114,
-//     count: 150
-//   },
-//   {
-//     lng: 116.328911,
-//     lat: 39.937229,
-//     count: 150
-//   }
-// ];
+let infoWindow;
+let pointerObj = {};
 export default {
   data() {
     return {
       lnglats: [
         {
-          id: "a",
-          position: [116.020764, 39.904989],
+          id: "2B85ACC19D5F",
+          times: "",
           desc: "数据_1"
         },
         {
-          id: "b",
-          position: [116.405285, 39.904989],
-          desc: "数据_2"
-        },
-        {
-          id: "c",
-          position: [116.789806, 39.904989],
-          desc: "数据_3"
-        },
-        {
-          id: "e",
-          position: [114.020711, 38.904911],
-          desc: "数据_12"
-        },
-        {
-          id: "f",
-          position: [115.405111, 37.904111],
-          desc: "数据_22"
-        },
-        {
-          id: "g",
-          position: [115.789555, 36.904555],
-          desc: "数据_13"
-        },
-        {
-          id: "aa",
-          position: [116.920711, 39.104911],
-          desc: "数据_12"
-        },
-        {
-          id: "bb",
-          position: [116.205111, 39.304111],
-          desc: "数据_22"
-        },
-        {
-          id: "cc",
-          position: [116.289555, 39.704555],
-          desc: "数据_13"
-        },
-        {
-          id: "aba",
-          position: [116.330711, 39.994911],
-          desc: "数据_12"
+          id: "2B85ACC19D5E",
+          times: "",
+          desc: "数据_1"
         }
       ],
       lnglat: "",
-      activeName: 1
+      activeName: 1,
+      markers: []
     };
   },
   methods: {
@@ -138,7 +90,7 @@ export default {
     /*
       websockets 请求
      */
-    sockets() {
+    sockets(item) {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
@@ -147,13 +99,20 @@ export default {
           let deviceId = this.$route.query.deviceId;
           if (deviceId) {
             ws.send(JSON.stringify({ api: "bind", param: [deviceId] }));
+          } else if (item) {
+            ws.send(JSON.stringify({ api: "bind", param: [item] }));
           } else {
-            ws.send(JSON.stringify({ api: "bind", param: ["2B85ACC19D5F"] }));
+            ws.send(
+              JSON.stringify({
+                api: "bind",
+                param: ["2B85ACC19D5F", "2B85ACC19D5E"]
+              })
+            );
           }
         };
         ws.onmessage = evt => {
           this.markers && map.remove(this.markers);
-          console.log("onmessage...", evt);
+          // console.log("onmessage...", evt);
           let data = JSON.parse(evt.data);
           console.log(data);
           if (data.code === 1) {
@@ -161,7 +120,14 @@ export default {
           }
           if (data.code === 2) {
             // code 为 1时 既绑定成功，2时为 收到了数据
-            this.mapInit(data.data);
+            if (infoWindow) {
+              // infoWindow
+            }
+            let obj = data.data.split(",");
+            obj.forEach(() => {
+              pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+            });
+            this.mapInit(pointerObj);
           }
         };
         ws.onerror = () => {
@@ -178,28 +144,82 @@ export default {
       });
     },
     mapInit(data) {
-      if (marker) {
-        marker.setAnimation();
-        marker.setMap(null);
-      }
-      var lnglats = data.toString().split(",");
-      var lnglatsArr = [lnglats[1], lnglats[0]];
-      marker = new AMap.Marker({
-        icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-        position: lnglatsArr
+      let allmarkerArr = Object.values(data);
+      this.markers = [];
+      allmarkerArr.forEach(key => {
+        var lngs = key.toString().split(",");
+        var marker = new AMap.Marker({
+          icon: new AMap.Icon({
+            image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
+            size: new AMap.Size(20, 35)
+          }),
+          position: [lngs[0], lngs[1]],
+          offset: new AMap.Pixel(-12, -12),
+          zIndex: 101,
+          extData: {
+            position: `${lngs[0]},${lngs[1]}`,
+            times: new Date()
+          },
+          clickable: true,
+          map: map
+        });
+        this.markers.push(marker);
       });
-      marker.setMap(map);
-      // marker.setAnimation("AMAP_ANIMATION_BOUNCE");
+      AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
+        let positionPicker = new PositionPicker({
+          mode: "dragMarker",
+          map: map,
+          iconStyle: {
+            url: "../../static/img/iocna.png",
+            size: [1, 1],
+            ancher: [1, 1]
+          }
+        });
+        if (this.markers.length > 0) {
+          this.markers.forEach(key => {
+            console.log(key);
+            key.on("mouseover", e => {
+              console.log(e);
+              let pointerData = key.getExtData();
+              let point = pointerData.position.split(",");
+              let position = new AMap.LngLat(point[0], point[1]);
+              positionPicker.start(position);
+              positionPicker.on("success", result => {
+                var info = [];
+                info.push(
+                  `<div><div>更新时间：${timeFormats(pointerData.times)}</div>`
+                );
+                info.push(
+                  `<div style="font-size:14px;">路口 :${
+                    result.nearestJunction
+                  }</div>`
+                );
+                info.push(
+                  `<div style="font-size:14px;">地址 :${
+                    result.address
+                  }</div></div>`
+                );
+                infoWindow = new AMap.InfoWindow({
+                  content: info.join("<br/>"), // 使用默认信息窗体框样式，显示信息内容
+                  offset: new AMap.Pixel(0, -10)
+                });
+                infoWindow.open(map, position);
+              });
+            });
+            key.on("mouseout", () => {
+              infoWindow && infoWindow.close();
+            });
+          });
+        }
+      });
       map.setFitView(); // 自适应地图
     },
-    getData() {
-      realTimeLocation().then(res => {
-        console.log(res.data.data);
-        // this.lnglats = res.data.data;
-      });
-    },
-    collapseChange(activeName) {
-      console.log(activeName);
+    checkItem(deviceId) {
+      // if (this.over) {
+      //   this.over();
+      // }
+      this.sockets(deviceId);
+      console.log(deviceId);
     }
   },
   mounted() {
@@ -211,6 +231,18 @@ export default {
 };
 </script>
 <style scoped>
+.list_warp {
+  border-top: 1px solid #f0f0f0;
+}
+.list_warp li {
+  height: 50px;
+  border-bottom: 1px solid #f0f0f0;
+  line-height: 50px;
+  font-size: 14px;
+  color: #303133;
+  cursor: pointer;
+  padding-left: 10px;
+}
 .positions {
   width: 100%;
   height: calc(100vh - 110px);
@@ -246,7 +278,7 @@ export default {
 }
 #outer-box {
   height: 100%;
-  /* padding-right: 220px; */
+  padding-right: 220px;
 }
 #container {
   height: 100%;

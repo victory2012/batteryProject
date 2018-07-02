@@ -66,7 +66,8 @@ import { websockets, GetDeviceList } from "../api/index.js";
 let map;
 let polygons = [];
 let district;
-let markerArr = {};
+// let markerArr = {};
+let pointerObj = {};
 export default {
   name: "battery",
   data() {
@@ -144,17 +145,8 @@ export default {
       });
     },
     mapInit(obj) {
-      // let po = []
-      if (obj[0] === "2B85ACC19D5F") {
-        var str = `${obj[2]},${obj[1]}`;
-        markerArr.abc = str;
-      } else {
-        var opts = `${obj[2]},${obj[1]}`;
-        markerArr.def = opts;
-      }
-      let allmarkerArr = Object.values(markerArr);
+      let allmarkerArr = Object.values(obj);
       allmarkerArr.forEach(key => {
-        console.log(key);
         var lngs = key.toString().split(",");
         var marker = new AMap.Marker({
           icon: new AMap.Icon({
@@ -174,13 +166,14 @@ export default {
       http请求 获取全部电池设备
      */
     narmleHttp(ws) {
+      let loginData = JSON.parse(localStorage.getItem("loginData"));
       let pageObj = {
         pageNum: 1,
-        pageSize: 999999999
+        pageSize: 999999999,
+        manufacturerId: loginData.enterpriseId
       };
       GetDeviceList(pageObj)
         .then(res => {
-          console.log(res.data);
           if (res.data.code === 1) {
             this.$message({
               message: "登录超时，请重新登录",
@@ -192,14 +185,14 @@ export default {
           }
           if (res.data.code === 0) {
             let result = res.data.data;
-            this.allDevice = result.length || 0;
-            if (result.length > 0) {
-              result.forEach(key => {
+            console.log(result)
+            this.allDevice = result.total;
+            if (result.data.length > 0) {
+              result.data.forEach(key => {
                 this.sendData.param.push(key.deviceId);
               });
             }
-            // console.log(this.sendData);
-            // ws.send(JSON.stringify(this.sendData));
+            ws.send(JSON.stringify(this.sendData));
           }
           if (res.data.code === -1) {
             this.$message.error(res.data.msg);
@@ -216,27 +209,31 @@ export default {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
-          // this.narmleHttp(ws);
-          ws.send(
-            JSON.stringify({
-              api: "bind",
-              param: ["2B85ACC19D5F", "2B85ACC19D5E"]
-            })
-          );
+          this.narmleHttp(ws);
+          // ws.send(
+          //   JSON.stringify({
+          //     api: "bind",
+          //     param: ["2B85ACC19D5F", "2B85ACC19D5E"]
+          //   })
+          // );
         };
         ws.onmessage = evt => {
           console.log("onmessage...", evt);
           let data = JSON.parse(evt.data);
           console.log(data);
-          this.markers && map.remove(this.markers);
+          if (this.markers.length > 0) {
+            map.remove(this.markers);
+          }
           if (data.code === 1) {
             this.onLine = data.data;
-            // markerArr = new Array(data.data);
           }
           if (data.code === 2) {
             // code 为 1时 既绑定成功，2时为 收到了数据
             let obj = data.data.split(",");
-            this.mapInit(obj);
+            obj.forEach(() => {
+              pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+            });
+            this.mapInit(pointerObj);
           }
         };
         ws.onerror = () => {

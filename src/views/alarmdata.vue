@@ -1,5 +1,6 @@
 <template>
   <div class="table-wapper">
+    <!-- <el-scrollbar class="page-comonent_scroll"> -->
     <el-table size="medium" :data="tableData" style="width: 100%">
       <el-table-column align="center" type="index" width="100" label="序号">
       </el-table-column>
@@ -30,6 +31,8 @@
       </el-pagination>
     </div>
     <!-- <v-detail :alarmDetail=details></v-detail> -->
+
+    <!-- </el-scrollbar> -->
   </div>
 </template>
 <style scoped>
@@ -38,7 +41,15 @@
   background-color: #ffffff;
   border-radius: 5px;
   margin-bottom: 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
+/* .page-comonent_scroll {
+  height: calc(100vh - 110px);
+}
+.page-comonent_scroll .el-scrollbar__wrap {
+  overflow: auto;
+} */
 .block {
   text-align: right;
   padding-top: 20px;
@@ -79,6 +90,10 @@ export default {
   },
   methods: {
     init() {
+      let alarmdataPage = localStorage.getItem("alarmdataPage");
+      if (alarmdataPage) {
+        this.currentPage2 = alarmdataPage;
+      }
       let pageObj = {
         pageNum: this.currentPage2,
         pageSize: this.handleSize
@@ -126,12 +141,13 @@ export default {
         });
     },
     checkPosition(index, data) {
-      console.log("index", index);
-      console.log("data", data);
-      console.log(data[index].deviceId);
+      // console.log("index", index);
+      // console.log("data", data);
+      // console.log(data[index].deviceId);
+      localStorage.setItem("alarmdataPage", this.currentPage2);
       this.$router.push({
-        path: "position",
-        query: { deviceId: data[index].deviceId }
+        path: "abnormal",
+        query: { grid: data[index].grid }
       });
     },
     handleSizeChange(index) {
@@ -154,6 +170,9 @@ export default {
   },
   mounted() {
     this.init();
+  },
+  beforeDestroy() {
+    // localStorage.removeItem("alarmdataPage");
   }
 };
 </script>

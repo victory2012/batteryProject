@@ -37,6 +37,7 @@ a {
   height: calc(100vh - 110px);
   width: auto;
   padding: 20px;
+  overflow: auto;
 }
 
 .content-collapse {

@@ -29,6 +29,7 @@ module.exports = {
     'semi': 0,
     'quotes': 0,
     'space-before-function-paren': 0,
-    'no-unneeded-ternary': 0
+    'no-unneeded-ternary': 0,
+    'no-new': 0
   }
 }
