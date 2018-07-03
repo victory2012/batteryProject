@@ -23,6 +23,22 @@
     <div class="">
       <div id="mapcontainer"></div>
     </div>
+    <div id="panel">
+      <div class="panelTop">
+        <div id="intro" class="intro">
+          <h3>设备列表</h3>
+        </div>
+        <ul class="list_warp">
+          <li v-for="item in lnglats" :key="item.id" @click="checkItem(item.id)">{{item.id}}</li>
+        </ul>
+        <!-- <el-collapse v-model="activeName" :accordion="true" @change="collapseChange(activeName)">
+          <el-collapse-item v-for="(item, index) in lnglats" :key="item.id" :title='item.id' :name='index + 1'> -->
+        <!-- <div>设备编号：{{item.id}}</div>
+            <div>{{item.times}}</div> -->
+        <!-- </el-collapse-item>
+        </el-collapse> -->
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -46,7 +62,19 @@ export default {
       starts: yesTody(),
       endtime: new Date(),
       chooseTime: [],
-      gridData: []
+      gridData: [],
+      lnglats: [
+        {
+          id: "2B85ACC19D5F",
+          times: "",
+          desc: "数据_1"
+        },
+        {
+          id: "2B85ACC19D5E",
+          times: "",
+          desc: "数据_1"
+        }
+      ]
     };
   },
   mounted() {
@@ -68,13 +96,13 @@ export default {
           type: "warning"
         });
         return;
-      };
+      }
       if (Number(this.starts) > Number(this.endtime)) {
         this.$message({
           message: "开始时间应小于结束时间",
           type: "warning"
         });
-        return
+        return;
       }
       let opts = {
         pushDateStart: timeFormatSort(this.starts),
@@ -318,8 +346,8 @@ export default {
 <style scoped>
 .all {
   position: relative;
-  width: 100%;
   height: 100%;
+  padding-right: 220px;
 }
 .info {
   position: absolute;
@@ -338,7 +366,7 @@ export default {
 .control {
   position: absolute;
   top: 0;
-  right: 0;
+  right: 220px;
   padding: 5px 10px;
   border-radius: 3px;
   border: 1px solid #000;
@@ -364,5 +392,47 @@ export default {
 #tip input[type="text"] {
   border: none;
   background: #fff;
+}
+#panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 220px;
+  box-sizing: border-box;
+  padding: 10px 0;
+  height: calc(100vh - 110px);
+  background: #ffffff;
+  border-left: 1px solid #f0f0f0;
+  z-index: 999;
+}
+.panelTop {
+  height: auto;
+  padding: 0 5px;
+  overflow-x: hidden;
+  background: #ffffff;
+}
+.history {
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  z-index: 1000;
+}
+.list_warp {
+  border-top: 1px solid #f0f0f0;
+}
+.list_warp li {
+  height: 50px;
+  border-bottom: 1px solid #f0f0f0;
+  line-height: 50px;
+  font-size: 14px;
+  color: #303133;
+  cursor: pointer;
+  padding-left: 10px;
+}
+.intro h3 {
+  padding-left: 8px;
+  font-weight: normal;
+  font-size: 16px;
+  margin-bottom: 10px;
 }
 </style>

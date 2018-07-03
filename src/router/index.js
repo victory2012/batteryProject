@@ -58,6 +58,19 @@ export default new Router({
         name: 'abnormal',
         component: resolve => require(['../views/abnormal.vue'], resolve),
         meta: { title: '报警数据' }
+      },
+      {
+        path: '/batteryList',
+        component: resolve => require(['../views/batteryList.vue'], resolve),
+        meta: { title: '电池列表' }
+      }, {
+        path: '/userManage',
+        component: resolve => require(['../views/userManage.vue'], resolve),
+        meta: { title: '用户管理' }
+      }, {
+        path: '/device',
+        component: resolve => require(['../views/device.vue'], resolve),
+        meta: { title: '设备管理' }
       }
     ]
   }, {

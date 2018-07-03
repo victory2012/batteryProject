@@ -28,61 +28,13 @@
 </template>
 
 <script>
+import { menuList } from "../config/config.js";
 import bus from "../utils/bus";
 export default {
   data() {
     return {
       collapse: false,
-      items: [
-        {
-          icon: "el-icon-view",
-          index: "home",
-          title: "设备总览"
-        },
-        {
-          icon: "el-icon-location",
-          index: "position",
-          title: "实时位置"
-        },
-        {
-          icon: "el-icon-tickets",
-          index: "history",
-          title: "历史轨迹"
-        },
-        {
-          icon: "el-icon- iconfont icon-electricfence",
-          index: "fence",
-          title: "地理围栏"
-        },
-        {
-          icon: "el-icon- iconfont icon-data",
-          index: "alarmdata",
-          title: "告警数据"
-        }
-        // ,
-        // {
-        //   icon: "el-icon-warning",
-        //   index: "aass",
-        //   title: "告警通知",
-        //   subs: [
-        //     {
-        //       icon: "el-icon- iconfont icon-c_inside",
-        //       index: "inalarm",
-        //       title: "告警接收人"
-        //     },
-        //     {
-        //       icon: "el-icon- iconfont icon-collection_added",
-        //       index: "hasalarm",
-        //       title: "已添加接收人"
-        //     },
-        //     {
-        //       icon: "el-icon- iconfont icon-c_outside",
-        //       index: "outalarm",
-        //       title: "外部告警接收人"
-        //     }
-        //   ]
-        // }
-      ]
+      items: []
     };
   },
   computed: {
@@ -91,6 +43,7 @@ export default {
     }
   },
   created() {
+    this.items = menuList;
     // 通过 Event Bus 进行组件间通信，来折叠侧边栏
     bus.$on("collapse", msg => {
       this.collapse = msg;

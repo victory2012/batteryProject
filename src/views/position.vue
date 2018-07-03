@@ -7,14 +7,8 @@
           <h3>设备列表</h3>
         </div>
         <ul class="list_warp">
-          <li v-for="item in lnglats" :key="item.id" @click="checkItem(item.id)">{{item.id}}</li>
+          <li v-for="item in pointerArr" :key="item.deviceId" @click="checkItem(item.deviceId)">{{item.deviceId}}</li>
         </ul>
-        <!-- <el-collapse v-model="activeName" :accordion="true" @change="collapseChange(activeName)">
-          <el-collapse-item v-for="(item, index) in lnglats" :key="item.id" :title='item.id' :name='index + 1'> -->
-        <!-- <div>设备编号：{{item.id}}</div>
-            <div>{{item.times}}</div> -->
-        <!-- </el-collapse-item>
-        </el-collapse> -->
       </div>
     </div>
   </div>
@@ -30,18 +24,7 @@ let pointerObj = {};
 export default {
   data() {
     return {
-      lnglats: [
-        {
-          id: "2B85ACC19D5F",
-          times: "",
-          desc: "数据_1"
-        },
-        {
-          id: "2B85ACC19D5E",
-          times: "",
-          desc: "数据_1"
-        }
-      ],
+      pointerArr: [],
       lnglat: "",
       activeName: 1,
       markers: []
@@ -55,7 +38,7 @@ export default {
         zoom: 15
       });
       this.sockets();
-      map.setFitView();
+      // map.setFitView();
     },
     narmleHttp(ws) {
       let pageObj = {
@@ -75,9 +58,18 @@ export default {
             });
           }
           if (res.data.code === 0) {
-            // let result = res.data.data;
-            // console.log(this.sendData)
-            // ws.send(JSON.stringify(this.sendData));
+            let sendData = {
+              api: "bind",
+              param: []
+            };
+            this.pointerArr = [];
+            let result = res.data.data;
+            console.log(result);
+            result.forEach(key => {
+              sendData.param.push(key.deviceId);
+              this.pointerArr.push(key);
+            });
+            ws.send(JSON.stringify(sendData));
           }
           if (res.data.code === -1) {
             this.$message.error(res.data.msg);
@@ -95,19 +87,14 @@ export default {
         ws.onopen = () => {
           console.log("open....");
           // this.narmleHttp(ws);
-          console.log(this.$route);
+          // console.log(this.$route);
           let deviceId = this.$route.query.deviceId;
           if (deviceId) {
             ws.send(JSON.stringify({ api: "bind", param: [deviceId] }));
           } else if (item) {
             ws.send(JSON.stringify({ api: "bind", param: [item] }));
           } else {
-            ws.send(
-              JSON.stringify({
-                api: "bind",
-                param: ["2B85ACC19D5F", "2B85ACC19D5E"]
-              })
-            );
+            this.narmleHttp(ws);
           }
         };
         ws.onmessage = evt => {
@@ -120,14 +107,22 @@ export default {
           }
           if (data.code === 2) {
             // code 为 1时 既绑定成功，2时为 收到了数据
-            if (infoWindow) {
-              // infoWindow
-            }
             let obj = data.data.split(",");
             obj.forEach(() => {
               pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
             });
-            this.mapInit(pointerObj);
+            if (this.deviceId && this.deviceId.toString().length > 5) {
+              let keys = Object.keys(pointerObj);
+              let nextObj = {};
+              keys.forEach((item, index) => {
+                if (item === this.deviceId) {
+                  nextObj[this.deviceId] = pointerObj[item];
+                }
+              });
+              this.mapInit(nextObj);
+            } else {
+              this.mapInit(pointerObj);
+            }
           }
         };
         ws.onerror = () => {
@@ -145,14 +140,12 @@ export default {
     },
     mapInit(data) {
       let allmarkerArr = Object.values(data);
+      let markerkeys = Object.keys(data);
       this.markers = [];
-      allmarkerArr.forEach(key => {
-        var lngs = key.toString().split(",");
+      for (let i = 0; i < allmarkerArr.length; i++) {
+        var lngs = allmarkerArr[i].toString().split(",");
         var marker = new AMap.Marker({
-          icon: new AMap.Icon({
-            image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
-            size: new AMap.Size(20, 35)
-          }),
+          icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
           position: [lngs[0], lngs[1]],
           offset: new AMap.Pixel(-12, -12),
           zIndex: 101,
@@ -163,8 +156,14 @@ export default {
           clickable: true,
           map: map
         });
+        marker.setLabel({
+          offset: new AMap.Pixel(15, 20),
+          content: `设备编号：${markerkeys[i]}`
+        });
+        marker.setPosition([lngs[0], lngs[1]]);
         this.markers.push(marker);
-      });
+      }
+      // allmarkerArr.forEach(key => {});
       AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
         let positionPicker = new PositionPicker({
           mode: "dragMarker",
@@ -177,9 +176,7 @@ export default {
         });
         if (this.markers.length > 0) {
           this.markers.forEach(key => {
-            console.log(key);
-            key.on("mouseover", e => {
-              console.log(e);
+            key.on("click", e => {
               let pointerData = key.getExtData();
               let point = pointerData.position.split(",");
               let position = new AMap.LngLat(point[0], point[1]);
@@ -201,25 +198,22 @@ export default {
                 );
                 infoWindow = new AMap.InfoWindow({
                   content: info.join("<br/>"), // 使用默认信息窗体框样式，显示信息内容
+                  autoMove: false,
                   offset: new AMap.Pixel(0, -10)
                 });
                 infoWindow.open(map, position);
               });
             });
-            key.on("mouseout", () => {
+            map.on("click", () => {
               infoWindow && infoWindow.close();
             });
           });
         }
       });
-      map.setFitView(); // 自适应地图
+      // map.setFitView(); // 自适应地图
     },
     checkItem(deviceId) {
-      // if (this.over) {
-      //   this.over();
-      // }
-      this.sockets(deviceId);
-      console.log(deviceId);
+      this.deviceId = deviceId;
     }
   },
   mounted() {

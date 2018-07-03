@@ -48,7 +48,7 @@ export function deleteBattery(params) {
  * params.deviceId
  */
 export function addBattery(params) {
-  return instance.post(`/battery/${params.manufacturer}/${params.customer}/${params.batteryId}/delete`)
+  return instance.post(`/battery/add`, params)
 };
 
 /*
@@ -77,11 +77,10 @@ export function doLogOut() {
 };
 
 /*
- * 获取设备列表
- * params入参 包含pageSize pageNum 两个字段
+ * 获取gps概览
  */
-export function GetDeviceList(params) {
-  return instance.post('/device/list', params)
+export function GetDeviceList() {
+  return instance.post('/device/gps/list')
 };
 
 /*
@@ -153,8 +152,71 @@ export function realTimeLocation(deviceId) {
 };
 
 /*
+ * 获取所有设备列表
+ */
+export function deviceList(params) {
+  return instance.post(`/device/list`, params)
+};
+
+/*
+ * 获取所有设备列表
+ */
+export function deviceListOnly() {
+  return instance.post(`/device/deviceId/list`)
+};
+
+/*
+ * 获取所有设备列表
+ */
+export function createDeviceList(params) {
+  return instance.post(`/device/create`, params)
+};
+
+/*
  * 获取历史轨迹
  */
 export function trajectory(params) {
   return instance.post(`/device/gps/history/list`, params)
+};
+
+/*
+ * 获取生产企业用户列表
+ */
+export function manufacturerList(params) {
+  return instance.post(`/user/list`, params)
+};
+/*
+ * 获取生产企业列表
+ * params入参 包含pageSize pageNum 两个字段
+ */
+// export function getEnterprise(params) {
+//   return instance.post('/user/manufacturer/list', params)
+// };
+
+/*
+ * 添加客户
+ */
+export function addCustomerAdmin(params) {
+  return instance.post('/user/customer/add', params)
+};
+
+/*
+ * 添加生产企业管理员
+ */
+export function addManufacturerAdmin(params) {
+  return instance.post('/user/manufacturer/add', params)
+};
+
+/*
+ * 获取生产企业列表
+ */
+export function enterpriseList() {
+  return instance.post('/enterprise/manufacturer/list')
+};
+
+/*
+ * 获取客户企业列表
+ */
+export function enterpriseCustomer() {
+  return instance.post('/enterprise/manufacturer_customer/list')
 };

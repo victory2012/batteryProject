@@ -74,8 +74,9 @@ export default {
     return {
       lnglats: [],
       onLine: 0,
-      allDevice: 2,
+      allDevice: 0,
       limit: false,
+      // gpsDg: [],
       markers: [],
       sendData: { api: "bind", param: [] },
       selectArr: [
@@ -185,14 +186,22 @@ export default {
           }
           if (res.data.code === 0) {
             let result = res.data.data;
-            console.log(result)
-            this.allDevice = result.total;
-            if (result.data.length > 0) {
-              result.data.forEach(key => {
+            this.allDevice = result.length;
+            if (result.length > 0) {
+              result.forEach(key => {
                 this.sendData.param.push(key.deviceId);
+                pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+              });
+              this.mapInit(pointerObj);
+              setTimeout(() => {
+                ws.send(JSON.stringify(this.sendData));
+              }, 1000);
+            } else {
+              this.$message({
+                message: "暂无设备, 请先注册设备",
+                type: "warning"
               });
             }
-            ws.send(JSON.stringify(this.sendData));
           }
           if (res.data.code === -1) {
             this.$message.error(res.data.msg);
@@ -221,13 +230,13 @@ export default {
           console.log("onmessage...", evt);
           let data = JSON.parse(evt.data);
           console.log(data);
-          if (this.markers.length > 0) {
-            map.remove(this.markers);
-          }
           if (data.code === 1) {
             this.onLine = data.data;
           }
           if (data.code === 2) {
+            if (this.markers.length > 0) {
+              map.remove(this.markers);
+            }
             // code 为 1时 既绑定成功，2时为 收到了数据
             let obj = data.data.split(",");
             obj.forEach(() => {
