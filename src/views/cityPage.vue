@@ -29,7 +29,7 @@
             <div class="grid-content grid-con-3">
               <i class="grid-con-icon iconfont">&#xe6a8;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">{{allDevice - onLine}}</div>
+                <div class="grid-num">{{offLine}}</div>
                 <div>离线电池</div>
               </div>
             </div>
@@ -76,7 +76,7 @@ export default {
       onLine: 0,
       allDevice: 0,
       limit: false,
-      // gpsDg: [],
+      offLine: 0,
       markers: [],
       sendData: { api: "bind", param: [] },
       selectArr: [
@@ -219,19 +219,16 @@ export default {
         ws.onopen = () => {
           console.log("open....");
           this.narmleHttp(ws);
-          // ws.send(
-          //   JSON.stringify({
-          //     api: "bind",
-          //     param: ["2B85ACC19D5F", "2B85ACC19D5E"]
-          //   })
-          // );
         };
         ws.onmessage = evt => {
-          console.log("onmessage...", evt);
           let data = JSON.parse(evt.data);
           console.log(data);
           if (data.code === 1) {
             this.onLine = data.data;
+            if (Number(this.allDevice) < Number(this.onLine)) {
+              this.onLine = this.allDevice;
+            }
+            this.offLine = this.allDevice - this.onLine;
           }
           if (data.code === 2) {
             if (this.markers.length > 0) {

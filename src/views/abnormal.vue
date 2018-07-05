@@ -4,19 +4,26 @@
     <div class="HandleBtn">
       <el-button @click="goBack" type="primary">返回</el-button>
     </div>
+    <div class="localPosition" @click="localPosition" title="查看设备当前位置">
+      <img src="../../static/img/local_normal.png" alt="">
+    </div>
   </div>
 </template>
 <script>
 import AMap from "AMap";
-import { getFence } from "../api/index.js";
+import { getFence, websockets, GetDeviceList } from "../api/index.js";
 let map;
+let grid;
 let polygonArr = [];
+let pointerObj = {};
 export default {
   data() {
     return {
       json: "",
       fenceId: "",
-      polygon: null
+      polygon: null,
+      sendData: { api: "bind", param: [] },
+      markers: []
     };
   },
   methods: {
@@ -76,7 +83,6 @@ export default {
     },
     getData() {
       getFence().then(res => {
-        // console.log(res);
         if (res.data.code === 1) {
           this.$message({
             message: "登录超时，请重新登录",
@@ -103,7 +109,6 @@ export default {
       });
     },
     init() {
-      let grid = this.$route.query.grid;
       if (grid) {
         let point = grid.split(";");
         map = new AMap.Map("AddContainer", {
@@ -124,9 +129,106 @@ export default {
         });
       }
       this.getData();
+    },
+    mapInit(obj) {
+      let allmarkerArr = Object.values(obj);
+      allmarkerArr.forEach(key => {
+        var lngs = key.toString().split(",");
+        var marker = new AMap.Marker({
+          icon: new AMap.Icon({
+            image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
+            size: new AMap.Size(20, 35)
+          }),
+          position: [lngs[0], lngs[1]],
+          offset: new AMap.Pixel(-12, -12),
+          zIndex: 101,
+          map: map
+        });
+        this.markers.push(marker);
+      });
+    },
+    localPosition() {
+      websockets(ws => {
+        ws.onopen = () => {
+          console.log("open....");
+          this.narmleHttp(ws);
+        };
+        ws.onmessage = evt => {
+          let data = JSON.parse(evt.data);
+          console.log(data);
+          if (data.code === 2) {
+            if (this.markers.length > 0) {
+              map.remove(this.markers);
+            }
+            // code 为 1时 既绑定成功，2时为 收到了数据
+            let obj = data.data.split(",");
+            obj.forEach(() => {
+              pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+            });
+            this.mapInit(pointerObj);
+          }
+        };
+        ws.onerror = () => {
+          console.log("onerror...");
+          this.$message({
+            message: "服务器繁忙，请稍后重试。",
+            type: "error"
+          });
+          this.over();
+        };
+        this.over = () => {
+          ws.close();
+        };
+      });
+    },
+    narmleHttp(ws) {
+      let loginData = JSON.parse(localStorage.getItem("loginData"));
+      let pageObj = {
+        pageNum: 1,
+        pageSize: 999999999,
+        manufacturerId: loginData.enterpriseId
+      };
+      GetDeviceList(pageObj)
+        .then(res => {
+          if (res.data.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (res.data.code === 0) {
+            let result = res.data.data;
+            this.allDevice = result.length;
+            if (result.length > 0) {
+              result.forEach(key => {
+                this.sendData.param.push(key.deviceId);
+                pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+              });
+              this.mapInit(pointerObj);
+              setTimeout(() => {
+                ws.send(JSON.stringify(this.sendData));
+              }, 1000);
+            } else {
+              this.$message({
+                message: "暂无设备, 请先注册设备",
+                type: "warning"
+              });
+            }
+          }
+          if (res.data.code === -1) {
+            this.$message.error(res.data.msg);
+          }
+        })
+        .catch(() => {
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
     }
   },
   mounted() {
+    grid = this.$route.query.grid;
     this.init();
   }
 };
@@ -136,6 +238,23 @@ export default {
   position: relative;
   height: 100%;
   // padding-right: 320px;
+}
+.localPosition {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  padding: 5px;
+  bottom: 30px;
+  left: 20px;
+  z-index: 1000;
+  background: #ffffff;
+  border-radius: 3px;
+  cursor: pointer;
+  box-shadow: 0px 0px 10px #333333;
+}
+.localPosition img {
+  width: 25px;
+  height: auto;
 }
 .Tiptext {
   color: red;

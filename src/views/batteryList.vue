@@ -1,7 +1,7 @@
 <template>
   <div class="batterylist">
     <div class="headerBtn">
-      <el-button size="medium" @click="doCreatBattery" type="primary">电池登记
+      <el-button size="medium" v-show="limeted" @click="doCreatBattery" type="primary">电池登记
         <i class="el-icon-circle-plus-outline"></i>
       </el-button>
       <!-- <el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/" multiple :on-exceed="handleExceed">
@@ -29,20 +29,64 @@
       <el-button size="small">清空</el-button> -->
     </div>
     <div class="table">
-      <table-list></table-list>
+      <el-table v-loading="loading" :data="tableData" style="width: 100%" max-height="750">
+        <el-table-column prop="batteryId" align="center" label="电池编号">
+        </el-table-column>
+        <el-table-column prop="model" align="center" label="电池型号">
+        </el-table-column>
+        <el-table-column prop="specification" align="center" label="电池组规格">
+        </el-table-column>
+        <el-table-column prop="customerName" align="center" label="客户企业名称">
+        </el-table-column>
+        <el-table-column prop="deviceId" align="center" label="监测设备编号">
+        </el-table-column>
+        <el-table-column prop="bindingName" align="center" label="绑定状态">
+        </el-table-column>
+        <el-table-column align="center" label="运行状态">
+          <template slot-scope="scope">
+            <el-button @click.native.prevent="examine(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+              查看
+            </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="200">
+          <template slot-scope="scope">
+            <!-- <el-button @click.native.prevent="bind(scope.$index, tableData)" type="text" :disabled="tableData[scope.$index].bindingStatus" size="small">
+            绑定
+          </el-button>
+          <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+            解绑
+          </el-button>
+          <el-button @click.native.prevent="addBlack(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].status" size="small">
+            拉黑
+          </el-button> -->
+            <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="block">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-sizes="handleSizeData" :page-size="handleSize" layout="sizes, prev, pager, next" :total="totalPage">
+        </el-pagination>
+      </div>
     </div>
     <div>
       <el-dialog title="电池登记" :visible.sync="creatBattery" width="600px">
         <el-form :model="BatteryForm" :rules="BatteryRules" ref="BatteryForm">
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="生产商id" prop="manufacturerId">
-                <el-input v-model="BatteryForm.manufacturerId" disabled auto-complete="off" placeholder="请填写生产商id"></el-input>
+              <el-form-item label="生产商id" prop="enterpriseName">
+                <el-input v-model="BatteryForm.enterpriseName" disabled auto-complete="off" placeholder="请填写生产商id"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="客户id" prop="customerId">
-                <el-input v-model="BatteryForm.customerId" auto-complete="off"></el-input>
+              <el-form-item label="客户id" prop="customer">
+                <el-select v-model="BatteryForm.customer" style="width:238px">
+                  <el-option v-for="item in customerList" :key="item" :label="item.customerName" :value="item">
+                  </el-option>
+                </el-select>
+                <!-- <el-input v-model="BatteryForm.customerId" auto-complete="off"></el-input> -->
               </el-form-item>
             </el-col>
           </el-row>
@@ -66,7 +110,7 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="设备编号" prop="deviceId">
-                <el-select v-model="BatteryForm.deviceId">
+                <el-select v-model="BatteryForm.deviceId" style="width:238px">
                   <el-option v-for="item in deviceIdList" :key="item" :label="item" :value="item">
                   </el-option>
                 </el-select>
@@ -77,13 +121,13 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item label="生产日期" prop="createDate">
-                <el-date-picker v-model="BatteryForm.createDate" type="date" value-format="yyyy-MM-dd" @change="formatCreatDate" placeholder="生产日期">
+                <el-date-picker v-model="BatteryForm.createDate" style="width:238px" type="date" value-format="yyyy-MM-dd" @change="formatCreatDate" placeholder="生产日期">
                 </el-date-picker>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="出厂日期" prop="manufactureDate">
-                <el-date-picker v-model="BatteryForm.manufactureDate" type="date" value-format="yyyy-MM-dd" placeholder="出厂日期">
+                <el-date-picker v-model="BatteryForm.manufactureDate" style="width:238px" type="date" value-format="yyyy-MM-dd" placeholder="出厂日期">
                 </el-date-picker>
               </el-form-item>
             </el-col>
@@ -91,7 +135,7 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item label="质保期" prop="warrantyDate">
-                <el-date-picker v-model="BatteryForm.warrantyDate" type="date" value-format="yyyy-MM-dd" placeholder="质保期">
+                <el-date-picker v-model="BatteryForm.warrantyDate" style="width:238px" type="date" value-format="yyyy-MM-dd" placeholder="质保期">
                 </el-date-picker>
               </el-form-item>
             </el-col>
@@ -106,22 +150,27 @@
   </div>
 </template>
 <script>
-import TableList from "../components/battery/batteryTable";
-import { addBattery, deviceListOnly } from "../api/index.js";
+import {
+  addBattery,
+  deviceListOnly,
+  GetList,
+  deleteBattery
+} from "../api/index.js";
 export default {
-  components: {
-    "table-list": TableList
-  },
-  name: "BatteryList",
   data() {
     return {
+      totalPage: 1, // 总页数
+      currentPage: 1, // 当前页
+      handleSize: 10, // 每页显示条数
+      handleSizeData: [10, 20, 30, 40, 50],
+      tableData: [],
+      loading: true,
       formLabelWidth: "120px",
       SureReg: false,
       BatteryForm: {},
       deviceIdList: [],
       deviceId: "",
       BatteryRules: {
-        manufacturerId: [{ required: true, message: "生产商id不能为空" }],
         batteryId: [
           { required: true, message: "请输入电池id", trigger: "blur" }
         ],
@@ -147,34 +196,19 @@ export default {
       input10: "",
       creatBattery: false,
       form: {},
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎"
-        },
-        {
-          value: "选项4",
-          label: "龙须面"
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭"
-        }
-      ],
+      customerList: [],
       CreatDatefirst: "",
       value: ""
     };
   },
+  computed: {
+    limeted() {
+      let loginData = JSON.parse(localStorage.getItem("loginData"));
+      return loginData.userRole !== "plat_super_admin";
+    }
+  },
   mounted() {
-    this.getDeviceListOnly();
+    this.getData();
   },
   methods: {
     handleExceed(files, fileList) {
@@ -190,17 +224,27 @@ export default {
     },
     formatCreatDate(date) {
       this.CreatDatefirst = date;
-      console.log(this.BatteryForm.createDate);
     },
     doCreatBattery() {
+      let loginData = JSON.parse(localStorage.getItem("loginData"));
       this.creatBattery = true;
-      this.BatteryForm.manufacturerId = JSON.parse(
-        localStorage.getItem("loginData")
-      ).enterpriseId;
+      this.customerList = loginData.customer;
+      this.BatteryForm.enterpriseName = loginData.enterpriseName;
+      this.getDeviceListOnly();
+      // this.getCustomerList();
     },
     regBattery(form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          let loginData = JSON.parse(localStorage.getItem("loginData"));
+          if (loginData.customer.length > 0) {
+            this.BatteryForm.customerId = loginData.customer.customerId;
+            this.BatteryForm.customerName = loginData.customer.customerName;
+          }
+          this.BatteryForm.customerId = "";
+          this.BatteryForm.customerName = "";
+          this.BatteryForm.manufacturerName = loginData.enterpriseName;
+          this.BatteryForm.manufacturerId = loginData.enterpriseId;
           console.log(this.BatteryForm);
           addBattery(this.BatteryForm)
             .then(res => {
@@ -210,6 +254,11 @@ export default {
                   message: "创建成功",
                   type: "success"
                 });
+                this.creatBattery = false;
+                this.resetBatteryForm(form);
+                this.getData();
+              } else {
+                this.$message.error("创建失败");
               }
             })
             .catch();
@@ -232,11 +281,131 @@ export default {
           }
         })
         .catch();
+    },
+    // getCustomerList() {
+    //   enterpriseCustomer().then(res => {
+    //     console.log(res);
+    //     if (res.data.code === 0) {
+    //       this.customerList = res.data.data;
+    //     }
+    //   });
+    // },
+    /* 获取电池列表数据 */
+    getData() {
+      let pageObj = {
+        pageSize: this.handleSize,
+        pageNum: this.currentPage
+      };
+      GetList(pageObj)
+        .then(res => {
+          this.loading = false;
+          console.log(res);
+          let result = res.data;
+          if (result.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (result.code === 0) {
+            if (result.data.data) {
+              let tableObj = result.data.data;
+              this.tableData = [];
+              tableObj.forEach(key => {
+                if (key.bindingStatus === 0) {
+                  key.bindingName = "未绑定";
+                  key.bindingStatus = false;
+                } else {
+                  key.bindingName = "已绑定";
+                  key.bindingStatus = true;
+                }
+                key.status = key.status === 0 ? false : true;
+                this.tableData.push(key);
+              });
+            }
+          }
+        })
+        .catch(err => {
+          this.loading = false;
+          console.log(err);
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
+    },
+    /*
+    * 删除
+    */
+    deleteRow(index, tableData) {
+      // console.log("index", index);
+      console.log("data", tableData);
+      this.loading = true;
+      let params = {
+        manufacturer: tableData[index].manufacturerId,
+        customer: tableData[index].customerId,
+        batteryId: tableData[index].batteryId
+      };
+      deleteBattery(params)
+        .then(res => {
+          this.loading = false;
+          if (res.data.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (res.data.code === 0) {
+            this.$message({
+              message: "删除成功",
+              type: "success"
+            });
+            this.getData();
+          }
+        })
+        .catch(err => {
+          this.loading = false;
+          console.log(err);
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
+    },
+    /*
+     * 查看运行状态
+     */
+    examine(index, tableData) {
+      let deviceId = tableData[index];
+      console.log();
+      this.$router.push({
+        path: "position",
+        query: { deviceId: deviceId.deviceId }
+      });
+    },
+    /*
+    * 改变每页显示的条数
+    */
+    handleSizeChange(index) {
+      // index为选中的页数
+      this.handleSize = index;
+      this.getData();
+    },
+    /*
+    * 显示第几页
+    */
+    handleCurrentChange() {
+      console.log("handleCurrentChange", this.currentPage);
+      this.getData();
     }
   }
 };
 </script>
 <style scoped>
+.block {
+  text-align: right;
+  padding-top: 20px;
+}
 .el-form {
   padding: 0 20px;
 }

@@ -25,6 +25,7 @@ export default new Router({
       },
       {
         path: '/history',
+        name: 'history',
         component: resolve => require(['../views/history.vue'], resolve),
         meta: { title: '历史轨迹' }
       },

@@ -125,6 +125,10 @@ export default {
       let gpsObj = {
         gpsList: this.json.substring(0, this.json.length - 1)
       };
+      if (!gpsObj.gpsList) {
+        this.$message.error("请选区围栏点");
+        return;
+      }
       addFence(gpsObj)
         .then(res => {
           // console.log(res);

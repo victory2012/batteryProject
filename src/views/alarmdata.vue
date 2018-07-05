@@ -44,12 +44,6 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
-/* .page-comonent_scroll {
-  height: calc(100vh - 110px);
-}
-.page-comonent_scroll .el-scrollbar__wrap {
-  overflow: auto;
-} */
 .block {
   text-align: right;
   padding-top: 20px;
@@ -144,7 +138,7 @@ export default {
       // console.log("index", index);
       // console.log("data", data);
       // console.log(data[index].deviceId);
-      localStorage.setItem("alarmdataPage", this.currentPage2);
+      // localStorage.setItem("alarmdataPage", this.currentPage2);
       this.$router.push({
         path: "abnormal",
         query: { grid: data[index].grid }

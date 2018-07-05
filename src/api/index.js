@@ -79,8 +79,8 @@ export function doLogOut() {
 /*
  * 获取gps概览
  */
-export function GetDeviceList() {
-  return instance.post('/device/gps/list')
+export function GetDeviceList(params) {
+  return instance.post('/device/gps/list', params)
 };
 
 /*

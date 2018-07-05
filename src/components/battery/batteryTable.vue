@@ -15,14 +15,14 @@
       </el-table-column>
       <el-table-column align="center" label="运行状态">
         <template slot-scope="scope">
-          <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+          <el-button @click.native.prevent="examine(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
             查看
           </el-button>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="200">
         <template slot-scope="scope">
-          <el-button @click.native.prevent="bind(scope.$index, tableData)" type="text" :disabled="tableData[scope.$index].bindingStatus" size="small">
+          <!-- <el-button @click.native.prevent="bind(scope.$index, tableData)" type="text" :disabled="tableData[scope.$index].bindingStatus" size="small">
             绑定
           </el-button>
           <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
@@ -30,7 +30,7 @@
           </el-button>
           <el-button @click.native.prevent="addBlack(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].status" size="small">
             拉黑
-          </el-button>
+          </el-button> -->
           <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
             删除
           </el-button>
@@ -113,7 +113,7 @@ export default {
     */
     deleteRow(index, tableData) {
       // console.log("index", index);
-      // console.log("data", data);
+      console.log("data", tableData);
       this.loading = true;
       let params = {
         manufacturer: tableData[index].manufacturerId,
@@ -145,6 +145,17 @@ export default {
           console.log(err);
           this.$message.error("服务器请求超时，请稍后重试");
         });
+    },
+    /*
+     * 查看运行状态
+     */
+    examine(index, tableData) {
+      let deviceId = tableData[index];
+      console.log();
+      this.$router.push({
+        path: "position",
+        query: { deviceId: deviceId.deviceId }
+      });
     },
     /*
     * 改变每页显示的条数

@@ -37,15 +37,15 @@
         </el-table-column>
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
-            <el-button @click.native.prevent="addBlack(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].status" size="small">
+            <!-- <el-button @click.native.prevent="addBlack(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].status" size="small">
               拉黑
-            </el-button>
+            </el-button> -->
             <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
               删除
             </el-button>
-            <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+            <!-- <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
               设备升级
-            </el-button>
+            </el-button> -->
           </template>
         </el-table-column>
       </el-table>

@@ -29,14 +29,10 @@
           <h3>设备列表</h3>
         </div>
         <ul class="list_warp">
-          <li v-for="item in lnglats" :key="item.id" @click="checkItem(item.id)">{{item.id}}</li>
+          <li v-for="item in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item.deviceId)">
+            <span style="margin-right:5px;">{{item.deviceId}}</span>
+          </li>
         </ul>
-        <!-- <el-collapse v-model="activeName" :accordion="true" @change="collapseChange(activeName)">
-          <el-collapse-item v-for="(item, index) in lnglats" :key="item.id" :title='item.id' :name='index + 1'> -->
-        <!-- <div>设备编号：{{item.id}}</div>
-            <div>{{item.times}}</div> -->
-        <!-- </el-collapse-item>
-        </el-collapse> -->
       </div>
     </div>
   </div>
@@ -44,14 +40,14 @@
 <script>
 import AMap from "AMap";
 import AMapUI from "AMapUI";
-import { trajectory } from "../api/index.js";
+import { trajectory, GetDeviceList } from "../api/index.js";
 import {
   timeFormatSort,
   trakTimeformat,
   yesTody
 } from "../utils/transition.js";
 var map, navg, heatmap, pathSimplifierIns;
-// const min = new Date(2018, 5, 1, 0, 0, 0);
+let infoWindow;
 export default {
   data() {
     return {
@@ -59,22 +55,13 @@ export default {
       active: true,
       navg: null,
       map: null,
+      devicelabel: "",
       starts: yesTody(),
       endtime: new Date(),
       chooseTime: [],
+      pointerArr: [],
       gridData: [],
-      lnglats: [
-        {
-          id: "2B85ACC19D5F",
-          times: "",
-          desc: "数据_1"
-        },
-        {
-          id: "2B85ACC19D5E",
-          times: "",
-          desc: "数据_1"
-        }
-      ]
+      markerArr: []
     };
   },
   mounted() {
@@ -107,7 +94,7 @@ export default {
       let opts = {
         pushDateStart: timeFormatSort(this.starts),
         pushDateEnd: timeFormatSort(this.endtime),
-        deviceId: "2B85ACC19D5E"
+        deviceId: this.devicelabel
       };
       console.log(opts);
       this.getData(opts);
@@ -142,6 +129,10 @@ export default {
               heatmap.setDataSet({
                 data: this.gridData // 热力图数据
               });
+              if (this.trajectory && pathSimplifierIns) {
+                pathSimplifierIns.setData();
+                this.track();
+              }
             } else {
               this.$message({
                 message: "暂无数据",
@@ -158,6 +149,9 @@ export default {
         });
     },
     heatmapFirst() {
+      if (this.markerArr.length > 0) {
+        map.remove(this.markerArr);
+      }
       this.selectByTime();
       this.trajectory = false;
       this.active = true;
@@ -178,12 +172,62 @@ export default {
           opacity: [0, 1] // 透明度
         });
       });
-      let params = {
-        pushDateStart: timeFormatSort(this.starts),
-        pushDateEnd: timeFormatSort(this.endtime),
-        deviceId: "2B85ACC19D5E"
+      this.narmleHttp();
+    },
+    narmleHttp() {
+      let loginData = JSON.parse(localStorage.getItem("loginData"));
+      let pageObj = {
+        pageNum: 1,
+        pageSize: 999999999,
+        manufacturerId: loginData.enterpriseId
       };
-      this.getData(params);
+      GetDeviceList(pageObj)
+        .then(res => {
+          if (res.data.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (res.data.code === 0) {
+            let result = res.data.data;
+            if (result.length > 0) {
+              this.pointerArr = result;
+              console.log(result);
+              let deviceId = this.$route.query.deviceId;
+              let params = {
+                pushDateStart: timeFormatSort(this.starts),
+                pushDateEnd: timeFormatSort(this.endtime)
+              };
+              if (deviceId) {
+                this.devicelabel = deviceId;
+                params.deviceId = deviceId;
+                this.getData(params);
+              } else if (this.devicelabel) {
+                params.deviceId = this.devicelabel;
+                this.getData(params);
+              } else {
+                this.devicelabel = result[0].deviceId;
+                params.deviceId = result[0].deviceId;
+                this.getData(params);
+              }
+            } else {
+              this.$message({
+                message: "暂无设备, 请先注册设备",
+                type: "warning"
+              });
+            }
+          }
+          if (res.data.code === -1) {
+            this.$message.error(res.data.msg);
+          }
+        })
+        .catch(() => {
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
     },
     // 历史轨迹
     historyTrajectory() {
@@ -199,13 +243,15 @@ export default {
       this.track();
     },
     track() {
+      if (this.markerArr.length > 0) {
+        map.remove(this.markerArr);
+      }
       let lineArr = [];
       for (var i = 0; i < this.gridData.length; i++) {
         var lngX = this.gridData[i].lng;
         var latY = this.gridData[i].lat;
         var timer = this.gridData[i].pushTime;
         lineArr.push([lngX, latY, timer]);
-        // tra.push(this.gridData[i]);
       }
       AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
         if (!PathSimplifier.supportCanvas) {
@@ -221,6 +267,11 @@ export default {
           pathSimplifierIns = new PathSimplifier({
             zIndex: 100,
             map: map,
+            getHoverTitle: function(pathData, pathIndex, pointIndex) {
+              if (pointIndex >= 0) {
+                return "第" + pointIndex + "个点";
+              }
+            },
             getPath: function(pathData, pathIndex) {
               console.log("pathData", pathData);
               console.log("pathIndex", pathIndex);
@@ -231,10 +282,15 @@ export default {
                 strokeStyle: "rgb(193,21,52)",
                 lineWidth: 6,
                 dirArrowStyle: true
+              },
+              keyPointTolerance: 10,
+              keyPointStyle: {
+                radius: 3,
+                fillStyle: "#20acff"
               }
             }
           });
-          pathSimplifierIns.on("pointMouseover", function(e, info) {
+          pathSimplifierIns.on("pointClick", function(e, info) {
             let pointIndex = info.pointIndex;
             let pathData = info.pathData;
             let point = pathData.path[pointIndex];
@@ -253,10 +309,13 @@ export default {
                   result.address
                 }</div></div>`
               );
-              var infoWindow = new AMap.InfoWindow({
+              infoWindow = new AMap.InfoWindow({
                 content: info.join("<br/>") // 使用默认信息窗体框样式，显示信息内容
               });
               infoWindow.open(map, position);
+              map.on("click", () => {
+                infoWindow.close();
+              });
             });
           });
           window.pathSimplifierIns = pathSimplifierIns;
@@ -268,7 +327,7 @@ export default {
           ]);
           navg = pathSimplifierIns.createPathNavigator(0, {
             loop: true,
-            speed: 100,
+            speed: 80,
             pathNavigatorStyle: {
               width: 12,
               height: 18,
@@ -283,20 +342,31 @@ export default {
         });
         let startPot = lineArr[0];
         let endPot = lineArr[lineArr.length - 1];
-        /* eslint-disable */
-        let stmarker = new AMap.Marker({
+        let start = new AMap.Marker({
           map: map,
           position: [startPot[0], startPot[1]], // 基点位置  开始位置
           icon: "https://webapi.amap.com/theme/v1.3/markers/n/start.png",
           zIndex: 50
         });
-        let endmarker = new AMap.Marker({
+        let end = new AMap.Marker({
           map: map,
           position: [endPot[0], endPot[1]], // 基点位置  结束位置
           icon: "https://webapi.amap.com/theme/v1.3/markers/n/end.png",
           zIndex: 10
         });
+        this.markerArr.push(start);
+        this.markerArr.push(end);
       });
+    },
+    checkItem(deviceId) {
+      if (!deviceId) return;
+      let params = {
+        pushDateStart: timeFormatSort(this.starts),
+        pushDateEnd: timeFormatSort(this.endtime),
+        deviceId: deviceId
+      };
+      this.devicelabel = deviceId;
+      this.getData(params);
     },
     onchange() {
       navg.setSpeed(this.speed);
@@ -357,6 +427,12 @@ export default {
 }
 .date {
   font-size: 16px;
+}
+.intro h3 {
+  padding-left: 8px;
+  font-weight: normal;
+  font-size: 16px;
+  margin-bottom: 10px;
 }
 #speed {
   vertical-align: middle;
@@ -429,10 +505,8 @@ export default {
   cursor: pointer;
   padding-left: 10px;
 }
-.intro h3 {
-  padding-left: 8px;
-  font-weight: normal;
-  font-size: 16px;
-  margin-bottom: 10px;
+.list_warp .selected {
+  background: green;
+  color: #fff;
 }
 </style>

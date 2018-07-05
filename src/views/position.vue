@@ -1,18 +1,82 @@
 <template>
   <div id="outer-box">
-    <div id="positions" class="positions"></div>
+    <div id="positions" class="positioned"></div>
     <div id="panel">
       <div class="panelTop">
         <div id="intro" class="intro">
           <h3>设备列表</h3>
         </div>
         <ul class="list_warp">
-          <li v-for="item in pointerArr" :key="item.deviceId" @click="checkItem(item.deviceId)">{{item.deviceId}}</li>
+          <li v-for="item in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item.deviceId)">
+            <span style="margin-right:5px;">{{item.deviceId}}</span>
+            <el-button @click="HistoryTrack(item.deviceId)" size="mini">历史轨迹</el-button>
+          </li>
         </ul>
+      </div>
+      <div>
+        <!-- <el-pagination small layout="prev, pager, next" :total="500">
+        </el-pagination> -->
       </div>
     </div>
   </div>
 </template>
+<style>
+.list_warp {
+  border-top: 1px solid #f0f0f0;
+}
+.list_warp li {
+  height: 50px;
+  border-bottom: 1px solid #f0f0f0;
+  line-height: 50px;
+  font-size: 14px;
+  color: #303133;
+  cursor: pointer;
+  padding-left: 10px;
+}
+.list_warp .selected {
+  background: green;
+  color: #fff;
+}
+.positioned {
+  width: 100%;
+  height: calc(100vh - 110px);
+}
+.deviceList {
+  font-size: 14px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.intro h3 {
+  padding-left: 8px;
+  font-weight: normal;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+#outer-box {
+  height: 100%;
+  padding-right: 220px;
+}
+#panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 220px;
+  box-sizing: border-box;
+  padding: 10px 0;
+  height: calc(100vh - 110px);
+  background: #ffffff;
+  border-left: 1px solid #f0f0f0;
+  z-index: 999;
+}
+.panelTop {
+  height: auto;
+  padding: 0 5px;
+  overflow-x: hidden;
+  background: #ffffff;
+}
+</style>
+
 <script>
 import AMap from "AMap";
 import AMapUI from "AMapUI";
@@ -20,12 +84,15 @@ import { websockets, GetDeviceList } from "../api/index.js";
 import { timeFormats } from "../utils/transition.js";
 let map;
 let infoWindow;
+// let marker;
 let pointerObj = {};
 export default {
   data() {
     return {
       pointerArr: [],
       lnglat: "",
+      devicelabel: "",
+      active: true,
       activeName: 1,
       markers: []
     };
@@ -58,24 +125,38 @@ export default {
             });
           }
           if (res.data.code === 0) {
+            let result = res.data.data;
             let sendData = {
               api: "bind",
               param: []
             };
-            this.pointerArr = [];
-            let result = res.data.data;
-            console.log(result);
-            result.forEach(key => {
-              sendData.param.push(key.deviceId);
-              this.pointerArr.push(key);
-            });
-            ws.send(JSON.stringify(sendData));
+            this.pointerArr = result;
+            let pathParams = this.$route.query.deviceId;
+            if (result.length > 0) {
+              result.forEach(key => {
+                if (pathParams === key.deviceId) {
+                  this.devicelabel = key.deviceId;
+                }
+                sendData.param.push(key.deviceId);
+                pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+              });
+              this.mapInit(result);
+              setTimeout(() => {
+                ws.send(JSON.stringify(sendData));
+              }, 1200);
+            } else {
+              this.$message({
+                message: "暂无设备, 请先注册设备",
+                type: "warning"
+              });
+            }
           }
           if (res.data.code === -1) {
             this.$message.error(res.data.msg);
           }
         })
-        .catch(() => {
+        .catch(err => {
+          console.log(err);
           this.$message.error("服务器请求超时，请稍后重试");
         });
     },
@@ -88,18 +169,17 @@ export default {
           console.log("open....");
           // this.narmleHttp(ws);
           // console.log(this.$route);
-          let deviceId = this.$route.query.deviceId;
-          if (deviceId) {
-            ws.send(JSON.stringify({ api: "bind", param: [deviceId] }));
-          } else if (item) {
-            ws.send(JSON.stringify({ api: "bind", param: [item] }));
-          } else {
-            this.narmleHttp(ws);
-          }
+          // let deviceId = this.$route.query.deviceId;
+          // if (deviceId) {
+          //   ws.send(JSON.stringify({ api: "bind", param: [deviceId] }));
+          // } else if (item) {
+          //   ws.send(JSON.stringify({ api: "bind", param: [item] }));
+          // } else {
+          //   this.narmleHttp(ws);
+          // }
+          this.narmleHttp(ws);
         };
         ws.onmessage = evt => {
-          this.markers && map.remove(this.markers);
-          // console.log("onmessage...", evt);
           let data = JSON.parse(evt.data);
           console.log(data);
           if (data.code === 1) {
@@ -107,6 +187,9 @@ export default {
           }
           if (data.code === 2) {
             // code 为 1时 既绑定成功，2时为 收到了数据
+            if (this.markers.length > 0) {
+              map.remove(this.markers);
+            }
             let obj = data.data.split(",");
             obj.forEach(() => {
               pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
@@ -119,9 +202,9 @@ export default {
                   nextObj[this.deviceId] = pointerObj[item];
                 }
               });
-              this.mapInit(nextObj);
+              this.mapInit(nextObj, "fromWs");
             } else {
-              this.mapInit(pointerObj);
+              this.mapInit(pointerObj, "fromWs");
             }
           }
         };
@@ -138,10 +221,19 @@ export default {
         };
       });
     },
-    mapInit(data) {
-      let allmarkerArr = Object.values(data);
-      let markerkeys = Object.keys(data);
-      this.markers = [];
+    mapInit(data, fromWs) {
+      let allmarkerArr;
+      let markerkeys;
+      if (!fromWs) {
+        data.forEach(key => {
+          pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+        });
+        allmarkerArr = Object.values(pointerObj);
+        markerkeys = Object.keys(pointerObj);
+      } else {
+        allmarkerArr = Object.values(data);
+        markerkeys = Object.keys(data);
+      }
       for (let i = 0; i < allmarkerArr.length; i++) {
         var lngs = allmarkerArr[i].toString().split(",");
         var marker = new AMap.Marker({
@@ -163,7 +255,6 @@ export default {
         marker.setPosition([lngs[0], lngs[1]]);
         this.markers.push(marker);
       }
-      // allmarkerArr.forEach(key => {});
       AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
         let positionPicker = new PositionPicker({
           mode: "dragMarker",
@@ -177,6 +268,16 @@ export default {
         if (this.markers.length > 0) {
           this.markers.forEach(key => {
             key.on("click", e => {
+              this.markers.forEach(item => {
+                item.setIcon(
+                  "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png"
+                );
+              });
+              key.setIcon(
+                "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png"
+              );
+              let label = key.getLabel().content.split("：")[1];
+              this.devicelabel = label;
               let pointerData = key.getExtData();
               let point = pointerData.position.split(",");
               let position = new AMap.LngLat(point[0], point[1]);
@@ -213,7 +314,28 @@ export default {
       // map.setFitView(); // 自适应地图
     },
     checkItem(deviceId) {
+      this.devicelabel = deviceId;
       this.deviceId = deviceId;
+      if (this.deviceId && this.deviceId.toString().length > 5 && pointerObj) {
+        let keys = Object.keys(pointerObj);
+        let nextObj = {};
+        if (this.markers.length > 0) {
+          map.remove(this.markers);
+        }
+        keys.forEach((item, index) => {
+          if (item === this.deviceId) {
+            nextObj[this.deviceId] = pointerObj[item];
+          }
+        });
+        this.mapInit(nextObj, "fromWs");
+      }
+    },
+    HistoryTrack(deviceId) {
+      console.log(deviceId);
+      this.$router.push({
+        path: "history",
+        query: { deviceId: deviceId }
+      });
     }
   },
   mounted() {
@@ -224,82 +346,3 @@ export default {
   }
 };
 </script>
-<style scoped>
-.list_warp {
-  border-top: 1px solid #f0f0f0;
-}
-.list_warp li {
-  height: 50px;
-  border-bottom: 1px solid #f0f0f0;
-  line-height: 50px;
-  font-size: 14px;
-  color: #303133;
-  cursor: pointer;
-  padding-left: 10px;
-}
-.positions {
-  width: 100%;
-  height: calc(100vh - 110px);
-}
-.deviceList {
-  font-size: 14px;
-  max-height: 600px;
-  overflow-y: auto;
-}
-.deviceList h2 {
-  font-weight: 600;
-  font-size: 14px;
-}
-.deviceList li {
-  cursor: pointer;
-  padding: 5px;
-}
-.deviceList li:hover {
-  background: #f0f0f0;
-  border-left: 2px solid red;
-}
-.desc {
-  padding-left: 20px;
-}
-.intro h3 {
-  padding-left: 8px;
-  font-weight: normal;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-.amap-marker-label {
-  display: none;
-}
-#outer-box {
-  height: 100%;
-  padding-right: 220px;
-}
-#container {
-  height: 100%;
-  width: 100%;
-}
-#panel {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 220px;
-  box-sizing: border-box;
-  padding: 10px 0;
-  height: calc(100vh - 110px);
-  background: #ffffff;
-  border-left: 1px solid #f0f0f0;
-  z-index: 999;
-}
-.panelTop {
-  height: auto;
-  padding: 0 5px;
-  overflow-x: hidden;
-  background: #ffffff;
-}
-.history {
-  position: absolute;
-  bottom: -50px;
-  left: 0;
-  z-index: 1000;
-}
-</style>

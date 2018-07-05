@@ -37,13 +37,36 @@ export default {
       items: []
     };
   },
+  methods: {
+    sideBarData() {
+      this.items = menuList();
+      const loginData = JSON.parse(localStorage.getItem("loginData"));
+      if (loginData.userRole === "plat_super_admin") {
+        this.items.push({
+          icon: "el-icon-setting",
+          index: "device",
+          title: "设备管理"
+        });
+        this.items.push({
+          icon: "el-icon-tickets",
+          index: "userManage",
+          title: "用户管理"
+        });
+      }
+    }
+  },
+  mounted() {
+    this.sideBarData();
+  },
+  destroyed() {
+    this.items = [];
+  },
   computed: {
     onRoutes() {
       return this.$route.path.replace("/", "");
     }
   },
   created() {
-    this.items = menuList;
     // 通过 Event Bus 进行组件间通信，来折叠侧边栏
     bus.$on("collapse", msg => {
       this.collapse = msg;
