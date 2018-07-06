@@ -47,11 +47,11 @@ export default {
           index: "device",
           title: "设备管理"
         });
-        this.items.push({
-          icon: "el-icon-tickets",
-          index: "userManage",
-          title: "用户管理"
-        });
+        // this.items.push({
+        //   icon: "el-icon-tickets",
+        //   index: "userManage",
+        //   title: "用户管理"
+        // });
       }
     }
   },

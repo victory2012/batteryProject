@@ -134,13 +134,17 @@ export default {
             let pathParams = this.$route.query.deviceId;
             if (result.length > 0) {
               result.forEach(key => {
-                if (pathParams === key.deviceId) {
-                  this.devicelabel = key.deviceId;
-                }
+                // if (pathParams === key.deviceId) {
+                //   this.devicelabel = key.deviceId;
+                // }
                 sendData.param.push(key.deviceId);
                 pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
               });
-              this.mapInit(result);
+              if (pathParams) {
+                this.checkItem(pathParams);
+              } else {
+                this.mapInit(result);
+              }
               setTimeout(() => {
                 ws.send(JSON.stringify(sendData));
               }, 1200);

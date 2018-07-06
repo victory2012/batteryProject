@@ -56,7 +56,7 @@
 <script>
 import Detail from "../components/alarmdata/alarmDetail";
 import { alarmList } from "../api/index.js";
-import { timeFormat } from "../utils/transition.js";
+import { timeFormat, sortGps } from "../utils/transition.js";
 export default {
   components: {
     "v-detail": Detail
@@ -67,19 +67,7 @@ export default {
       handleSize: 10,
       handleSizeData: [10, 20, 30, 40, 50],
       tableData: [],
-      totalNum: 0,
-      details: {
-        show: false,
-        Form: {
-          startTime: "2018-05-05 12:12:10",
-          project: "电流",
-          serial: "-",
-          serialGroup: "x007",
-          content: "放电温度过高",
-          hierarchy: "整组",
-          level: "高"
-        }
-      }
+      totalNum: 0
     };
   },
   methods: {
@@ -120,7 +108,7 @@ export default {
                 obj.deviceId = key.deviceId; // 设备id
                 obj.content = key.msg; // 告警内容
                 obj.level = key.level; // 告警级别
-                obj.grid = key.longitude + ";" + key.latitude;
+                obj.grid = sortGps(key.longitude) + ";" + sortGps(key.latitude);
                 this.tableData.push(obj);
               });
             }
@@ -135,18 +123,14 @@ export default {
         });
     },
     checkPosition(index, data) {
-      // console.log("index", index);
-      // console.log("data", data);
-      // console.log(data[index].deviceId);
-      // localStorage.setItem("alarmdataPage", this.currentPage2);
+      // 查看位置
       this.$router.push({
         path: "abnormal",
-        query: { grid: data[index].grid }
+        query: { grid: data[index].grid, deviceId: data[index].deviceId }
       });
     },
     handleSizeChange(index) {
       // index为选中的页数
-      console.log("index", index);
       let pageObj = {
         pageNum: this.currentPage2,
         pageSize: index
@@ -154,6 +138,7 @@ export default {
       this.getData(pageObj);
     },
     handleCurrentChange() {
+      // currentPage2 为选中的页数
       console.log("handleCurrentChange", this.currentPage2);
       let pageObj = {
         pageNum: this.currentPage2,

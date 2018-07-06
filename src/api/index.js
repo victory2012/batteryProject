@@ -185,26 +185,33 @@ export function trajectory(params) {
 export function manufacturerList(params) {
   return instance.post(`/user/list`, params)
 };
-/*
- * 获取生产企业列表
- * params入参 包含pageSize pageNum 两个字段
- */
-// export function getEnterprise(params) {
-//   return instance.post('/user/manufacturer/list', params)
-// };
 
 /*
- * 添加客户
+ * 添加生产企业超级管理员
  */
-export function addCustomerAdmin(params) {
+export function addManufacturer(params) {
+  return instance.post('/user/manufacturer/add', params)
+};
+
+/*
+ * 添加生产企业普通管理员
+ */
+export function addManufacturerAdmin(params) {
+  return instance.post('/user/manufacturer_admin/add', params)
+};
+
+/*
+ * 添加客户超级管理员
+ */
+export function addCustomer(params) {
   return instance.post('/user/customer/add', params)
 };
 
 /*
- * 添加生产企业管理员
+ * 添加客户普通管理员
  */
-export function addManufacturerAdmin(params) {
-  return instance.post('/user/manufacturer/add', params)
+export function addCustomerAdmin(params) {
+  return instance.post(`/user/customer_admin/add`, params)
 };
 
 /*
@@ -219,4 +226,11 @@ export function enterpriseList() {
  */
 export function enterpriseCustomer() {
   return instance.post('/enterprise/manufacturer_customer/list')
+};
+
+/*
+ * 获取客户企业列表
+ */
+export function singleDeviceId(deviceId) {
+  return instance.post(`/device/${deviceId}/gps/get`)
 };

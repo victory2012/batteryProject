@@ -27,8 +27,7 @@ export function transLatLng(wgLat, wgLng) {
 
 export function transLat(x, y, pi) {
   let ret;
-  ret =
-    -100.0 +
+  ret = -100.0 +
     2.0 * x +
     3.0 * y +
     0.2 * y * y +
@@ -153,5 +152,39 @@ export function yesTody() {
   // let second = str.getSeconds();
   // return `${yy}-${mm}-${day} ${hours}:${minute}:${second}`;
   return `${yy}-${mm}-${day} 00:00:00`;
-  // return allsecond;
+}
+
+export function userRole(str) {
+  switch (str) {
+    case "plat_super_admin":
+      return "平台管理员";
+    case "super_admin":
+      return "超级管理员";
+    case "admin":
+      return "管理员";
+    case "customer_super_admin":
+      return "客户企业管理员";
+    default:
+      return "";
+  }
+}
+export function companyRole(str) {
+  switch (str) {
+    case "platform":
+      return "平台";
+    case "manufacturer":
+      return "生产企业";
+    case "customer":
+      return "客户企业";
+    case "admin":
+      return "管理员";
+    default:
+      return "";
+  }
+}
+export function sortGps(str) {
+  if (!str) return
+  let pos = str.toString().split('.');
+  let las = pos[1].substring(0, 6);
+  return `${pos[0]}.${las}`
 }

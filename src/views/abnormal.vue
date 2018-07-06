@@ -11,7 +11,7 @@
 </template>
 <script>
 import AMap from "AMap";
-import { getFence, websockets, GetDeviceList } from "../api/index.js";
+import { getFence, websockets, singleDeviceId } from "../api/index.js";
 let map;
 let grid;
 let polygonArr = [];
@@ -120,7 +120,11 @@ export default {
         new AMap.Marker({
           map: map,
           position: new AMap.LngLat(point[0], point[1]),
-          icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png"
+          icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+          label: {
+            content: "超出围栏点",
+            offset: new AMap.Pixel(20, 20)
+          }
         });
       } else {
         map = new AMap.Map("AddContainer", {
@@ -144,6 +148,10 @@ export default {
           zIndex: 101,
           map: map
         });
+        marker.setLabel({
+          offset: new AMap.Pixel(20, 20),
+          content: "当前实时位置"
+        });
         this.markers.push(marker);
       });
     },
@@ -151,7 +159,7 @@ export default {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
-          this.narmleHttp(ws);
+          this.singleDevice(ws);
         };
         ws.onmessage = evt => {
           let data = JSON.parse(evt.data);
@@ -181,14 +189,9 @@ export default {
         };
       });
     },
-    narmleHttp(ws) {
-      let loginData = JSON.parse(localStorage.getItem("loginData"));
-      let pageObj = {
-        pageNum: 1,
-        pageSize: 999999999,
-        manufacturerId: loginData.enterpriseId
-      };
-      GetDeviceList(pageObj)
+    singleDevice(ws) {
+      let NowDeviceId = this.$route.query.deviceId;
+      singleDeviceId(NowDeviceId)
         .then(res => {
           if (res.data.code === 1) {
             this.$message({
@@ -201,12 +204,12 @@ export default {
           }
           if (res.data.code === 0) {
             let result = res.data.data;
-            this.allDevice = result.length;
-            if (result.length > 0) {
-              result.forEach(key => {
-                this.sendData.param.push(key.deviceId);
-                pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
-              });
+            console.log(result);
+            if (result) {
+              pointerObj[result.deviceId] = `${result.longitude},${
+                result.latitude
+              }`;
+              this.sendData.param.push(result.deviceId);
               this.mapInit(pointerObj);
               setTimeout(() => {
                 ws.send(JSON.stringify(this.sendData));
@@ -230,6 +233,11 @@ export default {
   mounted() {
     grid = this.$route.query.grid;
     this.init();
+  },
+  beforeDestroy() {
+    if (typeof this.over === "function") {
+      this.over();
+    }
   }
 };
 </script>

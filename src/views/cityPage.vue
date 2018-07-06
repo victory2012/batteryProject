@@ -175,6 +175,7 @@ export default {
       };
       GetDeviceList(pageObj)
         .then(res => {
+          console.log(res);
           if (res.data.code === 1) {
             this.$message({
               message: "登录超时，请重新登录",
@@ -190,11 +191,15 @@ export default {
             if (result.length > 0) {
               result.forEach(key => {
                 this.sendData.param.push(key.deviceId);
-                pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+                if (key.longitude && key.latitude) {
+                  pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+                }
               });
               this.mapInit(pointerObj);
               setTimeout(() => {
-                ws.send(JSON.stringify(this.sendData));
+                if (ws) {
+                  ws.send(JSON.stringify(this.sendData));
+                }
               }, 1000);
             } else {
               this.$message({
@@ -207,7 +212,8 @@ export default {
             this.$message.error(res.data.msg);
           }
         })
-        .catch(() => {
+        .catch(err => {
+          console.log(err);
           this.$message.error("服务器请求超时，请稍后重试");
         });
     },

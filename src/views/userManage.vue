@@ -1,22 +1,30 @@
 <template>
   <div class="user">
-    <div class="userBtn">
+    <div class="userBtn" v-if="adminRole">
       <!-- <div @click="creatUser = true">
         <img src="../../static/img/add-user.png" alt="">
         <p>创建企业用户</p>
       </div> -->
-      <div v-show="manufacturer" @click="creatAdmin = true">
+      <div v-if="manufacturer" @click="creatAdmin = true">
         <img src="../../static/img/add-admin.png" alt="">
-        <p>创建生产企业管理员</p>
+        <p>添加生产企业管理员</p>
       </div>
-      <!-- <div @click="creatUser = true">
-        <img src="../../assets/add-user.png" alt="">
-        <p>创建采购企业用户</p>
-      </div> -->
+      <div v-else-if="customer" @click="creatCustorm = true">
+        <img src="../../static/img/add-user.png" alt="">
+        <p>添加客户企业管理员</p>
+      </div>
+      <div v-if="manufacturerAdmin" @click="manAdmin = true">
+        <img src="../../static/img/add-user.png" alt="">
+        <p>添加生产企业普通管理员</p>
+      </div>
+      <div v-if="customerAdmin" @click="creatCustormAdmin = true">
+        <img src="../../static/img/add-user.png" alt="">
+        <p>添加普通管理员</p>
+      </div>
     </div>
-    <div>
+    <div v-if="manufacturer">
       <el-dialog title="创建生产企业管理员" :visible.sync="creatAdmin" width="600px">
-        <el-form :model="adminForm" :rules="adminRules" ref="adminForm">
+        <el-form :model="adminForm" :rules="customerRules" ref="adminForm">
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item label="用户名" prop="userName">
@@ -55,55 +63,168 @@
         </div>
       </el-dialog>
     </div>
-    <div>
-      <el-dialog title="创建生产企业用户" :visible.sync="creatUser" width="600px">
-        <el-form :model="UserForm" :rules="userRules" ref="UserForm">
+    <div v-if="customer">
+      <el-dialog title="添加客户企业管理员" :visible.sync="creatCustorm" width="600px">
+        <el-form :model="customerForm" :rules="customerRules" ref="customerForm">
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item label="用户名" prop="userName">
-                <el-input v-model="UserForm.userName" auto-complete="off"></el-input>
+                <el-input v-model="customerForm.userName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="登陆密码" prop="password">
-                <el-input v-model="UserForm.password" type="password" auto-complete="off"></el-input>
+                <el-input v-model="customerForm.password" type="password" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item label="手机号码" prop="phoneNumber">
-                <el-input v-model="UserForm.phoneNumber" auto-complete="off"></el-input>
+                <el-input v-model="customerForm.phoneNumber" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="邮箱（选填）" prop="email">
-                <el-input v-model="UserForm.email" auto-complete="off"></el-input>
+              <el-form-item label="企业名称" prop="enterpriseName">
+                <el-input v-model="customerForm.enterpriseName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="企业名称" prop="enterpriseName">
-                <el-input v-model="UserForm.enterpriseName" auto-complete="off"></el-input>
+              <el-form-item label="邮箱（选填）" prop="email">
+                <el-input v-model="customerForm.email" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="resetUser('UserForm')">取 消</el-button>
-          <el-button @click="submitUser('UserForm')" type="primary">确认并发送账号密码</el-button>
+          <el-button @click="resetCustomer('customerForm')">取 消</el-button>
+          <el-button @click="submitCustomer('customerForm')" type="primary">确 认</el-button>
+        </div>
+      </el-dialog>
+    </div>
+    <div v-if="manufacturerAdmin">
+      <el-dialog title="添加生产企业普通管理员" :visible.sync="manAdmin" width="600px">
+        <el-form :model="manAdminForm" :rules="customerRules" ref="manAdminForm">
+          <el-row :gutter="40">
+            <el-col :span="12">
+              <el-form-item label="用户名" prop="userName">
+                <el-input v-model="manAdminForm.userName" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="登陆密码" prop="password">
+                <el-input v-model="manAdminForm.password" type="password" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="40">
+            <el-col :span="12">
+              <el-form-item label="手机号码" prop="phoneNumber">
+                <el-input v-model="manAdminForm.phoneNumber" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="企业名称" prop="enterpriseName">
+                <el-input v-model="manAdminForm.enterpriseName" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="40">
+            <el-col :span="12">
+              <el-form-item label="邮箱（选填）" prop="email">
+                <el-input v-model="manAdminForm.email" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="resetManufacturer('manAdminForm')">取 消</el-button>
+          <el-button @click="submitManufacturerAdmin('manAdminForm')" type="primary">确 认</el-button>
+        </div>
+      </el-dialog>
+    </div>
+    <div v-if="customerAdmin">
+      <el-dialog title="添加普通管理员" :visible.sync="creatCustormAdmin" width="600px">
+        <el-form :model="CustormAdminForm" :rules="customerRules" ref="CustormAdminForm">
+          <el-row :gutter="40">
+            <el-col :span="12">
+              <el-form-item label="用户名" prop="userName">
+                <el-input v-model="CustormAdminForm.userName" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="登陆密码" prop="password">
+                <el-input v-model="CustormAdminForm.password" type="password" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="40">
+            <el-col :span="12">
+              <el-form-item label="手机号码" prop="phoneNumber">
+                <el-input v-model="CustormAdminForm.phoneNumber" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="企业名称" prop="enterpriseName">
+                <el-input v-model="CustormAdminForm.enterpriseName" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="40">
+            <el-col :span="12">
+              <el-form-item label="邮箱（选填）" prop="email">
+                <el-input v-model="CustormAdminForm.email" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="resetCustormAdmin('CustormAdminForm')">取 消</el-button>
+          <el-button @click="submitCustormAdmin('CustormAdminForm')" type="primary">确 认</el-button>
         </div>
       </el-dialog>
     </div>
     <div>
-      <Table></Table>
+      <el-table v-loading="loading" :data="tableData" max-height="750">
+        <el-table-column prop="userName" align="center" label="用户名">
+        </el-table-column>
+        <el-table-column prop="accountRole" align="center" label="账户身份">
+        </el-table-column>
+        <el-table-column prop="enterpriseRole" align="center" label="企业身份">
+        </el-table-column>
+        <el-table-column prop="enterpriseName" align="center" label="企业名称">
+        </el-table-column>
+        <el-table-column prop="phoneNumber" align="center" label="手机号码">
+        </el-table-column>
+        <el-table-column prop="email" align="center" label="邮箱">
+        </el-table-column>
+        <!-- <el-table-column label="操作" align="center">
+        <template slot-scope="scope">
+          <el-button @click.native.prevent="bind(scope.$index, tableData)" type="text" :disabled="tableData[scope.$index].bindingStatus" size="small">
+            修改权限
+          </el-button>
+          <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+            删除
+          </el-button>
+        </template>
+      </el-table-column> -->
+      </el-table>
+      <div class="block">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-sizes="handleSizeData" :page-size="handleSize" layout="sizes, prev, pager, next" :total="totalPage">
+        </el-pagination>
+      </div>
     </div>
   </div>
 </template>
 <style lang="less" scoped>
 .el-form {
   padding: 0 20px;
+}
+.block {
+  text-align: right;
+  padding-top: 20px;
 }
 .user {
   background-color: #ffffff;
@@ -114,7 +235,7 @@
     margin-bottom: 30px;
     & div {
       float: left;
-      width: 150px;
+      width: 160px;
       height: 70px;
       text-align: center;
       border-radius: 5px;
@@ -130,31 +251,46 @@
   }
 }
 </style>
-
 <script>
-import { addCustomerAdmin, addManufacturerAdmin } from "../api/index.js";
-import Table from "../components/userManege/userTable";
+import {
+  addManufacturer, // 添加生产企业超级管理员
+  addManufacturerAdmin, // 添加生产企业普通管理员
+  manufacturerList, // 用户列表
+  addCustomerAdmin, // 添加生产企业普通管理员
+  addCustomer // 添加客户超级管理员
+} from "../api/index.js";
+import { userRole, companyRole } from "../utils/transition.js";
 export default {
   name: "userTable",
-  components: {
-    Table
-  },
   data() {
     return {
+      totalPage: 0, // 总页数
+      currentPage: 1, // 当前页
+      handleSize: 10, // 每页显示条数
+      handleSizeData: [10, 20, 30, 40, 50],
+      tableData: [],
+      loading: true,
+      creatCustormAdmin: false,
+      customer: false,
       manufacturer: false,
+      manufacturerAdmin: false,
+      manAdmin: false,
+      adminRole: true,
       adminForm: {},
-      UserForm: {},
-      userRules: {
+      customerForm: {},
+      manAdminForm: {},
+      CustormAdminForm: {},
+      customerRules: {
         userName: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
+          { required: true, message: "请输入用户名", trigger: "change" },
           { min: 4, message: "用户名至少4位", trigger: "change" }
         ],
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
+          { required: true, message: "请输入密码", trigger: "change" },
           { min: 6, message: "密码至少6位", trigger: "change" }
         ],
         phoneNumber: [
-          { required: true, message: "请输入手机号码", trigger: "blur" },
+          { required: true, message: "请输入手机号码", trigger: "change" },
           {
             pattern: /^1[3|4|5|7|8][0-9]\d{8}$/,
             message: "手机号格式错误",
@@ -162,32 +298,12 @@ export default {
           }
         ],
         enterpriseName: [
-          { required: true, message: "请输入企业名称", trigger: "blur" }
-        ]
-      },
-      adminRules: {
-        userName: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 4, message: "用户名至少4位", trigger: "change" }
-        ],
-        password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { min: 6, message: "密码至少6位", trigger: "change" }
-        ],
-        phoneNumber: [
-          { required: true, message: "请输入手机号码", trigger: "blur" },
-          {
-            pattern: /^1[3|4|5|7|8][0-9]\d{8}$/,
-            message: "手机号格式错误",
-            trigger: "change"
-          }
-        ],
-        enterpriseName: [
-          { required: true, message: "请输入企业名称", trigger: "blur" }
+          { required: true, message: "请输入企业名称", trigger: "change" }
         ]
       },
       creatAdmin: false,
-      creatUser: false,
+      creatCustorm: false,
+      customerAdmin: false,
       formLabelWidth: "120px"
     };
   },
@@ -195,19 +311,174 @@ export default {
     let userData = JSON.parse(localStorage.getItem("loginData"));
     if (userData.userRole === "plat_super_admin") {
       this.manufacturer = true;
+      this.customer = false;
+      this.manufacturerAdmin = false;
+      this.customerAdmin = false;
+    } else if (userData.userRole === "super_admin") {
+      this.manufacturer = false;
+      this.customer = true;
+      this.manufacturerAdmin = true;
+      this.customerAdmin = false;
+    } else if (userData.userRole === "customer_super_admin") {
+      this.manufacturer = false;
+      this.customer = false;
+      this.customerAdmin = true;
+      this.manufacturerAdmin = false;
+    } else {
+      this.manufacturer = false;
+      this.customer = false;
+      this.customerAdmin = false;
+      this.manufacturerAdmin = false;
+      this.adminRole = false;
     }
   },
   methods: {
-    // 创建用户
-    submitUser(formName) {
+    // 添加客户企业管理员
+    submitCustomer(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
           let paramsAdmin = {
-            userName: this.UserForm.userName,
-            password: this.UserForm.password,
-            phoneNumber: this.UserForm.phoneNumber,
-            email: this.UserForm.email || "",
-            enterpriseName: this.UserForm.enterpriseName
+            userName: this.customerForm.userName,
+            password: this.customerForm.password,
+            phoneNumber: this.customerForm.phoneNumber,
+            email: this.customerForm.email || "",
+            enterpriseName: this.customerForm.enterpriseName
+          };
+          addCustomer(paramsAdmin)
+            .then(res => {
+              console.log(res.data);
+              let result = res.data;
+              if (result.code === 1) {
+                this.$message({
+                  message: "登录超时，请重新登录",
+                  type: "warning"
+                });
+                this.$router.push({
+                  path: "/login"
+                });
+              }
+              if (result.code === -1) {
+                this.$message.error(`创建失败，原因${result.msg}`);
+              }
+              if (result.code === 0) {
+                this.$message({
+                  message: "创建成功！",
+                  type: "success"
+                });
+                this.creatCustorm = false;
+                this.resetCustomer(this.customerForm);
+                this.getData();
+              }
+            })
+            .catch(() => {
+              this.$message.error("服务器请求超时，请稍后重试");
+            });
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    // 创建生产企业超级管理员
+    submitAdmin(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          console.log(this.adminForm);
+          let paramsAdmin = {
+            userName: this.adminForm.userName,
+            password: this.adminForm.password,
+            phoneNumber: this.adminForm.phoneNumber,
+            enterpriseName: this.adminForm.enterpriseName,
+            email: this.adminForm.email || ""
+          };
+          // 添加生产企业超级管理员
+          addManufacturer(paramsAdmin)
+            .then(res => {
+              console.log(res.data);
+              let result = res.data;
+              if (result.code === 1) {
+                this.$message({
+                  message: "登录超时，请重新登录",
+                  type: "warning"
+                });
+                this.$router.push({
+                  path: "/login"
+                });
+              }
+              if (result.code === -1) {
+                this.$message.error(`创建失败，原因${result.msg}`);
+              }
+              if (result.code === 0) {
+                this.$message({
+                  message: "创建成功！",
+                  type: "success"
+                });
+                this.resetAdmin("adminForm");
+                this.getData();
+              }
+            })
+            .catch(() => {
+              this.$message.error("服务器请求超时，请稍后重试");
+            });
+        } else {
+          return false;
+        }
+      });
+    },
+    // 添加生产企业普通管理员
+    submitManufacturerAdmin(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          let paramsAdmin = {
+            userName: this.manAdminForm.userName,
+            password: this.manAdminForm.password,
+            phoneNumber: this.manAdminForm.phoneNumber,
+            enterpriseName: this.manAdminForm.enterpriseName,
+            email: this.manAdminForm.email || ""
+          };
+          // 添加生产企业普通管理员
+          addManufacturerAdmin(paramsAdmin)
+            .then(res => {
+              console.log(res.data);
+              let result = res.data;
+              if (result.code === 1) {
+                this.$message({
+                  message: "登录超时，请重新登录",
+                  type: "warning"
+                });
+                this.$router.push({
+                  path: "/login"
+                });
+              }
+              if (result.code === -1) {
+                this.$message.error(`创建失败，原因${result.msg}`);
+              }
+              if (result.code === 0) {
+                this.$message({
+                  message: "创建成功！",
+                  type: "success"
+                });
+                this.getData();
+                this.resetManufacturer("manAdminForm");
+              }
+            })
+            .catch(() => {
+              this.$message.error("服务器请求超时，请稍后重试");
+            });
+        } else {
+          return false;
+        }
+      });
+    },
+    submitCustormAdmin(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          let paramsAdmin = {
+            userName: this.CustormAdminForm.userName,
+            password: this.CustormAdminForm.password,
+            phoneNumber: this.CustormAdminForm.phoneNumber,
+            enterpriseName: this.CustormAdminForm.enterpriseName,
+            email: this.CustormAdminForm.email || ""
           };
           addCustomerAdmin(paramsAdmin)
             .then(res => {
@@ -230,74 +501,130 @@ export default {
                   message: "创建成功！",
                   type: "success"
                 });
+                this.resetCustormAdmin("CustormAdminForm");
+                this.getData();
               }
             })
             .catch(() => {
               this.$message.error("服务器请求超时，请稍后重试");
             });
-        } else {
-          console.log("error submit!!");
-          return false;
         }
       });
     },
-    // 创建生产企业管理员
-    submitAdmin(formName) {
-      this.$refs[formName].validate(valid => {
-        if (valid) {
-          console.log(this.adminForm);
-          let paramsAdmin = {
-            userName: this.adminForm.userName,
-            password: this.adminForm.password,
-            phoneNumber: this.adminForm.phoneNumber,
-            enterpriseName: this.adminForm.enterpriseName,
-            email: this.adminForm.email || ""
-          };
-          addManufacturerAdmin(paramsAdmin)
-            .then(res => {
-              console.log(res.data);
-              let result = res.data;
-              if (result.code === 1) {
-                this.$message({
-                  message: "登录超时，请重新登录",
-                  type: "warning"
-                });
-                this.$router.push({
-                  path: "/login"
-                });
-              }
-              if (result.code === -1) {
-                this.$message.error(`创建失败，原因${result.msg}`);
-              }
-              if (result.code === 0) {
-                this.$message({
-                  message: "创建成功！",
-                  type: "success"
-                });
-                this.resetAdmin("adminForm");
-              }
-            })
-            .catch(() => {
-              this.$message.error("服务器请求超时，请稍后重试");
-            });
-        } else {
-          return false;
-        }
-      });
+    resetCustormAdmin(formName) {
+      this.creatCustormAdmin = false;
+      this.CustormAdminForm = {};
+      this.$refs[formName].resetFields();
     },
-    resetUser(formName) {
+    resetCustomer(formName) {
       this.creatUser = false;
       this.UserForm = {};
       this.$refs[formName].resetFields();
     },
-    resetAdmin(formName) {
-      this.creatAdmin = false;
-      this.adminForm = {};
+    resetManufacturer(formName) {
+      this.manAdmin = false;
+      this.manAdminForm = {};
       this.$refs[formName].resetFields();
+    },
+    resetAdmin(formName) {
+      this.adminForm = {};
+      this.creatAdmin = false;
+      this.$refs[formName].resetFields();
+    },
+    /*
+    *  获取数据
+    *  pageObj：入参分页配置 json格式
+    */
+    getData() {
+      let pageObj = {
+        pageSize: this.handleSize,
+        pageNum: this.currentPage
+      };
+      this.getManufacturer(pageObj);
+    },
+    getManufacturer(pageObj) {
+      manufacturerList(pageObj)
+        .then(res => {
+          this.loading = false;
+          console.log(res);
+          let result = res.data;
+          if (result.code === 1) {
+            this.$message({
+              message: "登录超时，请重新登录",
+              type: "warning"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          }
+          if (result.code === -1) {
+            this.$message.error(result.msg);
+          }
+          if (result.code === 0) {
+            if (result.data.data) {
+              let tableObj = result.data.data;
+              this.totalPage = result.data.total;
+              this.tableData = [];
+              tableObj.forEach(key => {
+                key.accountRole = userRole(key.userRole);
+                key.status = key.status === 0 ? false : true;
+                key.email = key.email || "无";
+                key.enterpriseRole = companyRole(key.enterpriseRole);
+                this.tableData.push(key);
+              });
+            }
+          }
+        })
+        .catch(() => {
+          this.loading = false;
+          this.$message.error("服务器请求超时，请稍后重试");
+        });
+    },
+    /*
+    * 删除
+    */
+    deleteRow(index, tableData) {
+      this.loading = true;
+      let params = {
+        manufacturer: tableData[index].manufacturerId,
+        customer: tableData[index].customerId,
+        deviceId: tableData[index].deviceId
+      };
+      console.log(params);
+    },
+
+    /*
+    *  改变每页显示的条数
+    */
+    handleSizeChange(index) {
+      // index为选中的页数
+      this.loading = true;
+      this.handleSize = index;
+      this.getData();
+    },
+    /*
+    * 显示第几页
+    */
+    handleCurrentChange() {
+      this.loading = true;
+      console.log("handleCurrentChange", this.currentPage);
+      this.getData();
+    },
+    /*
+    * 拉黑
+    */
+    addBlack(index, tableData) {
+      this.loading = true;
+      let params = {
+        manufacturer: tableData[index].manufacturerId,
+        customer: tableData[index].customerId,
+        deviceId: tableData[index].deviceId
+      };
+      console.log(params);
     }
   },
   mounted() {
-    // this.log();
+    this.getData();
   }
 };
 </script>

@@ -4,16 +4,16 @@
       <div class="date">
         <vue-datepicker-local v-model="starts" clearable placeholder="选择开始时间" format="YYYY-MM-DD HH:mm:ss" show-buttons @confirm="selectedDate" />
         <vue-datepicker-local v-model="endtime" format="YYYY-MM-DD HH:mm:ss" clearable placeholder="选择结束时间" show-buttons @confirm="selectedDate" />
-        <el-button v-show="trajectory" size="mini" plain @click="startOnclick">
+        <el-button v-show="trajectory" size="mini" plain @click="startOnclick" title="开始">
           <i class="iconfont icon-ic_song_next"></i>
         </el-button>
-        <el-button v-show="trajectory" size="mini" plain @click="pauseOnclick">
+        <el-button v-show="trajectory" size="mini" plain @click="pauseOnclick" title="暂停">
           <i class="iconfont icon-artboard25copy"></i>
         </el-button>
-        <el-button v-show="trajectory" size="mini" plain @click="resumeOnclick">
+        <el-button v-show="trajectory" size="mini" plain @click="resumeOnclick" title="继续">
           <i class="iconfont icon-icons-resume_button"></i>
         </el-button>
-        <el-button v-show="trajectory" size="mini" plain @click="stopOnclick">
+        <el-button v-show="trajectory" size="mini" plain @click="stopOnclick" title="停止">
           <i class="iconfont icon-stop"></i>
         </el-button>
         <el-button v-show="trajectory" type="danger" size="small" @click="heatmapFirst">活动热区</el-button>
@@ -34,6 +34,11 @@
           </li>
         </ul>
       </div>
+    </div>
+    <div class="timeRange" v-show="trajectory">
+      <span>时间</span>
+      <el-slider v-model="timeSeconds" @change="speedChange" vertical height="200px">
+      </el-slider>
     </div>
   </div>
 </template>
@@ -61,13 +66,23 @@ export default {
       chooseTime: [],
       pointerArr: [],
       gridData: [],
-      markerArr: []
+      markerArr: [],
+      alldistance: 0,
+      timeSeconds: 50
     };
   },
   mounted() {
     this.init();
   },
   methods: {
+    speedChange() {
+      if (this.timeSeconds < 1) {
+        this.timeSeconds = 1;
+      }
+      let speeds = Number(this.alldistance) / this.timeSeconds;
+      console.log(speeds);
+      navg.setSpeed(speeds);
+    },
     /* 时间确认按钮 */
     selectedDate(date) {
       if (!this.starts) {
@@ -122,6 +137,7 @@ export default {
                 obj.lng = key.longitude;
                 obj.lat = key.latitude;
                 obj.pushTime = key.pushTime;
+                obj.distance = key.distance;
                 obj.count = 150;
                 this.gridData.push(obj);
               });
@@ -233,7 +249,6 @@ export default {
     historyTrajectory() {
       this.trajectory = true;
       this.active = false;
-
       map = new AMap.Map("mapcontainer", {
         // center: [121.52710487067272, 31.22889232359548],
         resizeEnable: false,
@@ -247,10 +262,14 @@ export default {
         map.remove(this.markerArr);
       }
       let lineArr = [];
+      this.alldistance = 0;
       for (var i = 0; i < this.gridData.length; i++) {
         var lngX = this.gridData[i].lng;
         var latY = this.gridData[i].lat;
         var timer = this.gridData[i].pushTime;
+        if (this.gridData[i].distance) {
+          this.alldistance += this.gridData[i].distance;
+        }
         lineArr.push([lngX, latY, timer]);
       }
       AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
@@ -325,9 +344,10 @@ export default {
               path: lineArr
             }
           ]);
+          let speeds = Number(this.alldistance) / this.timeSeconds;
           navg = pathSimplifierIns.createPathNavigator(0, {
             loop: true,
-            speed: 80,
+            speed: speeds,
             pathNavigatorStyle: {
               width: 12,
               height: 18,
@@ -367,9 +387,6 @@ export default {
       };
       this.devicelabel = deviceId;
       this.getData(params);
-    },
-    onchange() {
-      navg.setSpeed(this.speed);
     },
     startOnclick() {
       this.historyShow();
@@ -441,11 +458,11 @@ export default {
 }
 .control {
   position: absolute;
-  top: 0;
-  right: 220px;
+  top: 5px;
+  right: 225px;
   padding: 5px 10px;
   border-radius: 3px;
-  border: 1px solid #000;
+  box-shadow: 0 0 15px #000000;
   background: #ffffff;
   line-height: 16px;
   z-index: 999;
@@ -508,5 +525,19 @@ export default {
 .list_warp .selected {
   background: green;
   color: #fff;
+}
+.timeRange {
+  position: absolute;
+  top: 70px;
+  right: 220px;
+  z-index: 1000;
+  padding: 5px 2px 15px;
+  box-shadow: 0 0 15px #000000;
+  background: #ffffff;
+  text-align: center;
+  border-radius: 3px;
+}
+.timeRange span {
+  font-size: 12px;
 }
 </style>

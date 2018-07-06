@@ -329,4 +329,8 @@ export default {
 .el-form-item--small.el-form-item {
   margin-bottom: 30px;
 }
+.block {
+  text-align: right;
+  padding-top: 20px;
+}
 </style>
