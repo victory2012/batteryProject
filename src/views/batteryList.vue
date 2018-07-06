@@ -49,9 +49,9 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="200">
+        <!-- <el-table-column label="操作" align="center" width="200">
           <template slot-scope="scope">
-            <!-- <el-button @click.native.prevent="bind(scope.$index, tableData)" type="text" :disabled="tableData[scope.$index].bindingStatus" size="small">
+            <el-button @click.native.prevent="bind(scope.$index, tableData)" type="text" :disabled="tableData[scope.$index].bindingStatus" size="small">
             绑定
           </el-button>
           <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
@@ -59,12 +59,12 @@
           </el-button>
           <el-button @click.native.prevent="addBlack(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].status" size="small">
             拉黑
-          </el-button> -->
+          </el-button>
             <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
               删除
             </el-button>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
       <div class="block">
         <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-sizes="handleSizeData" :page-size="handleSize" layout="sizes, prev, pager, next" :total="totalPage">
@@ -377,7 +377,6 @@ export default {
      */
     examine(index, tableData) {
       let deviceId = tableData[index];
-      console.log();
       this.$router.push({
         path: "position",
         query: { deviceId: deviceId.deviceId }

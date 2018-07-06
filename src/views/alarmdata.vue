@@ -131,15 +131,17 @@ export default {
     },
     handleSizeChange(index) {
       // index为选中的页数
+      this.handleSize = index;
       let pageObj = {
         pageNum: this.currentPage2,
-        pageSize: index
+        pageSize: this.handleSize
       };
       this.getData(pageObj);
     },
-    handleCurrentChange() {
+    handleCurrentChange(index) {
       // currentPage2 为选中的页数
-      console.log("handleCurrentChange", this.currentPage2);
+      console.log(index);
+      this.currentPage2 = index;
       let pageObj = {
         pageNum: this.currentPage2,
         pageSize: this.handleSize

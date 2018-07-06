@@ -150,8 +150,12 @@ export default {
                 this.track();
               }
             } else {
+              if (pathSimplifierIns) {
+                pathSimplifierIns.setData();
+                this.track();
+              }
               this.$message({
-                message: "暂无数据",
+                message: "此设备暂无历史数据",
                 type: "warning"
               });
             }
@@ -249,18 +253,21 @@ export default {
     historyTrajectory() {
       this.trajectory = true;
       this.active = false;
-      map = new AMap.Map("mapcontainer", {
-        // center: [121.52710487067272, 31.22889232359548],
-        resizeEnable: false,
-        zoom: 15
-      });
-      AMap.plugin(["AMap.Geolocation"], () => {});
+      // map = new AMap.Map("mapcontainer", {
+      //   // center: [121.52710487067272, 31.22889232359548],
+      //   resizeEnable: false,
+      //   zoom: 15
+      // });
+      // AMap.plugin(["AMap.Geolocation"], () => {});
       this.track();
     },
     track() {
       if (this.markerArr.length > 0) {
         map.remove(this.markerArr);
       }
+      // if (this.gridData.length < 1) {
+      //   return;
+      // }
       let lineArr = [];
       this.alldistance = 0;
       for (var i = 0; i < this.gridData.length; i++) {

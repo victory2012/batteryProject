@@ -134,11 +134,10 @@ export default {
             let pathParams = this.$route.query.deviceId;
             if (result.length > 0) {
               result.forEach(key => {
-                // if (pathParams === key.deviceId) {
-                //   this.devicelabel = key.deviceId;
-                // }
-                sendData.param.push(key.deviceId);
-                pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+                if (key.longitude && key.latitude) {
+                  sendData.param.push(key.deviceId);
+                  pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+                }
               });
               if (pathParams) {
                 this.checkItem(pathParams);
@@ -171,16 +170,6 @@ export default {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
-          // this.narmleHttp(ws);
-          // console.log(this.$route);
-          // let deviceId = this.$route.query.deviceId;
-          // if (deviceId) {
-          //   ws.send(JSON.stringify({ api: "bind", param: [deviceId] }));
-          // } else if (item) {
-          //   ws.send(JSON.stringify({ api: "bind", param: [item] }));
-          // } else {
-          //   this.narmleHttp(ws);
-          // }
           this.narmleHttp(ws);
         };
         ws.onmessage = evt => {
@@ -196,7 +185,7 @@ export default {
             }
             let obj = data.data.split(",");
             obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+              pointerObj[obj[0]] = `${obj[2]},${obj[1]},${new Date()}`;
             });
             if (this.deviceId && this.deviceId.toString().length > 5) {
               let keys = Object.keys(pointerObj);
@@ -230,7 +219,9 @@ export default {
       let markerkeys;
       if (!fromWs) {
         data.forEach(key => {
-          pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+          if (key.longitude && key.latitude) {
+            pointerObj[key.deviceId] = `${key.longitude},${key.latitude},${new Date()}`;
+          }
         });
         allmarkerArr = Object.values(pointerObj);
         markerkeys = Object.keys(pointerObj);
@@ -247,7 +238,7 @@ export default {
           zIndex: 101,
           extData: {
             position: `${lngs[0]},${lngs[1]}`,
-            times: new Date()
+            times: lngs[2]
           },
           clickable: true,
           map: map

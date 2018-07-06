@@ -30,24 +30,24 @@
         </el-table-column>
         <el-table-column align="center" label="监测设备">
           <template slot-scope="scope">
-            <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+            <el-button @click.native.prevent="MonitorDevice(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
               查看
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center">
+        <!-- <el-table-column label="操作" align="center">
           <template slot-scope="scope">
-            <!-- <el-button @click.native.prevent="addBlack(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].status" size="small">
+            <el-button @click.native.prevent="addBlack(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].status" size="small">
               拉黑
-            </el-button> -->
+            </el-button>
             <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
               删除
             </el-button>
-            <!-- <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+            <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
               设备升级
-            </el-button> -->
+            </el-button>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
       <div class="block">
         <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-sizes="handleSizeData" :page-size="handleSize" layout="sizes, prev, pager, next" :total="totalPage">
@@ -106,7 +106,7 @@ export default {
       formLabelWidth: "120px",
       regForm: false,
       tableData: [],
-      totalPage: 1, // 总页数
+      totalPage: 0, // 总页数
       currentPage: 1, // 当前页
       handleSize: 10, // 每页显示条数
       handleSizeData: [10, 20, 30, 40, 50],
@@ -133,7 +133,7 @@ export default {
   methods: {
     init() {
       let pageObj = {
-        pageNum: this.totalPage,
+        pageNum: this.currentPage,
         pageSize: this.handleSize
       };
       deviceList(pageObj).then(res => {
@@ -152,6 +152,7 @@ export default {
         if (result.code === 0) {
           if (result.data.data) {
             let tableObj = result.data.data;
+            this.totalPage = result.data.total;
             this.tableData = [];
             tableObj.forEach(key => {
               if (key.bindingStatus === 0) {
@@ -252,13 +253,22 @@ export default {
     handleSizeChange(index) {
       // index为选中的页数
       this.handleSize = index;
-      this.getData();
+      this.init();
     },
     /*
     * 显示第几页
     */
-    handleCurrentChange() {
-      console.log("handleCurrentChange", this.currentPage);
+    handleCurrentChange(index) {
+      console.log("handleCurrentChange", index);
+      this.currentPage = index;
+      this.init();
+    },
+    MonitorDevice(index, data) {
+      let deviceId = data[index];
+      this.$router.push({
+        path: "position",
+        query: { deviceId: deviceId.deviceId }
+      });
     }
   },
   mounted() {

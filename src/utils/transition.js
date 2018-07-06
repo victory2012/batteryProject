@@ -157,13 +157,13 @@ export function yesTody() {
 export function userRole(str) {
   switch (str) {
     case "plat_super_admin":
-      return "平台管理员";
+      return "超级管理员";
     case "super_admin":
       return "超级管理员";
     case "admin":
       return "管理员";
     case "customer_super_admin":
-      return "客户企业管理员";
+      return "管理员";
     default:
       return "";
   }
@@ -173,11 +173,11 @@ export function companyRole(str) {
     case "platform":
       return "平台";
     case "manufacturer":
-      return "生产企业";
+      return "生产商";
     case "customer":
-      return "客户企业";
+      return "客户";
     case "admin":
-      return "管理员";
+      return "客户";
     default:
       return "";
   }
