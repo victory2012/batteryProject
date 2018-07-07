@@ -82,6 +82,7 @@ import AMap from "AMap";
 import AMapUI from "AMapUI";
 import { websockets, GetDeviceList } from "../api/index.js";
 import { timeFormats } from "../utils/transition.js";
+import { onError, onWarn } from "../utils/callback";
 let map;
 let infoWindow;
 // let marker;
@@ -116,13 +117,7 @@ export default {
         .then(res => {
           console.log(res.data);
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onWarn(this.$router);
           }
           if (res.data.code === 0) {
             let result = res.data.data;
@@ -148,19 +143,16 @@ export default {
                 ws.send(JSON.stringify(sendData));
               }, 1200);
             } else {
-              this.$message({
-                message: "暂无设备, 请先注册设备",
-                type: "warning"
-              });
+              onError("暂无设备, 请先注册设备");
             }
           }
           if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
+            onError(res.data.msg);
           }
         })
         .catch(err => {
           console.log(err);
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     /*
@@ -203,10 +195,7 @@ export default {
         };
         ws.onerror = () => {
           console.log("onerror...");
-          this.$message({
-            message: "服务器繁忙，请稍后重试。",
-            type: "error"
-          });
+          onError("服务器繁忙，请稍后重试。");
           this.over();
         };
         this.over = () => {

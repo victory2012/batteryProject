@@ -260,6 +260,7 @@ import {
   addCustomer // 添加客户超级管理员
 } from "../api/index.js";
 import { userRole, companyRole } from "../utils/transition.js";
+import { onWarn, onSuccess, onError } from "../utils/callback"
 export default {
   name: "userTable",
   data() {
@@ -349,29 +350,20 @@ export default {
               console.log(res.data);
               let result = res.data;
               if (result.code === 1) {
-                this.$message({
-                  message: "登录超时，请重新登录",
-                  type: "warning"
-                });
-                this.$router.push({
-                  path: "/login"
-                });
+                onWarn(this.$router);
               }
               if (result.code === -1) {
-                this.$message.error(`创建失败，原因${result.msg}`);
+                onError(`创建失败，原因${result.msg}`);
               }
               if (result.code === 0) {
-                this.$message({
-                  message: "创建成功！",
-                  type: "success"
-                });
+                onSuccess("创建成功！");
                 this.creatCustorm = false;
                 this.resetCustomer(this.customerForm);
                 this.getData();
               }
             })
             .catch(() => {
-              this.$message.error("服务器请求超时，请稍后重试");
+              onError("服务器请求超时，请稍后重试");
             });
         } else {
           console.log("error submit!!");
@@ -397,28 +389,19 @@ export default {
               console.log(res.data);
               let result = res.data;
               if (result.code === 1) {
-                this.$message({
-                  message: "登录超时，请重新登录",
-                  type: "warning"
-                });
-                this.$router.push({
-                  path: "/login"
-                });
+                onWarn(this.$router);
               }
               if (result.code === -1) {
-                this.$message.error(`创建失败，原因${result.msg}`);
+                onError(`创建失败，原因${result.msg}`);
               }
               if (result.code === 0) {
-                this.$message({
-                  message: "创建成功！",
-                  type: "success"
-                });
+                onSuccess("创建成功！");
                 this.resetAdmin("adminForm");
                 this.getData();
               }
             })
             .catch(() => {
-              this.$message.error("服务器请求超时，请稍后重试");
+              onError("服务器请求超时，请稍后重试");
             });
         } else {
           return false;
@@ -442,28 +425,19 @@ export default {
               console.log(res.data);
               let result = res.data;
               if (result.code === 1) {
-                this.$message({
-                  message: "登录超时，请重新登录",
-                  type: "warning"
-                });
-                this.$router.push({
-                  path: "/login"
-                });
+                onWarn(this.$router);
               }
               if (result.code === -1) {
-                this.$message.error(`创建失败，原因${result.msg}`);
+                onError(`创建失败，原因${result.msg}`);
               }
               if (result.code === 0) {
-                this.$message({
-                  message: "创建成功！",
-                  type: "success"
-                });
+                onSuccess("创建成功！");
                 this.getData();
                 this.resetManufacturer("manAdminForm");
               }
             })
             .catch(() => {
-              this.$message.error("服务器请求超时，请稍后重试");
+              onError("服务器请求超时，请稍后重试");
             });
         } else {
           return false;
@@ -485,28 +459,19 @@ export default {
               console.log(res.data);
               let result = res.data;
               if (result.code === 1) {
-                this.$message({
-                  message: "登录超时，请重新登录",
-                  type: "warning"
-                });
-                this.$router.push({
-                  path: "/login"
-                });
+                onWarn(this.$router);
               }
               if (result.code === -1) {
-                this.$message.error(`创建失败，原因${result.msg}`);
+                onError(`创建失败，原因${result.msg}`);
               }
               if (result.code === 0) {
-                this.$message({
-                  message: "创建成功！",
-                  type: "success"
-                });
+                onSuccess("创建成功！");
                 this.resetCustormAdmin("CustormAdminForm");
                 this.getData();
               }
             })
             .catch(() => {
-              this.$message.error("服务器请求超时，请稍后重试");
+              onError("服务器请求超时，请稍后重试");
             });
         }
       });
@@ -549,16 +514,10 @@ export default {
           console.log(res);
           let result = res.data;
           if (result.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onWarn(this.$router);
           }
           if (result.code === -1) {
-            this.$message.error(result.msg);
+            onError(result.msg);
           }
           if (result.code === 0) {
             if (result.data.data) {
@@ -577,7 +536,7 @@ export default {
         })
         .catch(() => {
           this.loading = false;
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     /*
@@ -607,7 +566,7 @@ export default {
     */
     handleCurrentChange() {
       this.loading = true;
-      console.log("handleCurrentChange", this.currentPage);
+      // console.log("handleCurrentChange", this.currentPage);
       this.getData();
     },
     /*

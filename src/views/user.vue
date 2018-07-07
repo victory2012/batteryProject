@@ -97,6 +97,7 @@
 </template>
 <script>
 import { getUserInfo, changeUserInfo } from "../api/index.js";
+import { onWarn, onSuccess, onError } from "../utils/callback"
 export default {
   data() {
     return {
@@ -118,20 +119,17 @@ export default {
         .then(res => {
           console.log(res.data);
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onWarn(this.$router);
           }
           if (res.data.code === 0) {
             this.userArr = res.data.data;
           }
+          if (res.data.code === -1) {
+            onError(res.data.msg);
+          }
         })
         .catch(() => {
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     doEditor() {
@@ -156,29 +154,20 @@ export default {
             .then(res => {
               console.log(res);
               if (res.data.code === 1) {
-                this.$message({
-                  message: "登录超时，请重新登录",
-                  type: "warning"
-                });
-                this.$router.push({
-                  path: "/login"
-                });
+                onWarn(this.$router);
               }
               if (res.data.code === 0) {
                 this.userMsgBox = false;
                 this.ruleForm = {};
-                this.$message({
-                  message: "修改成功",
-                  type: "success"
-                });
+                onSuccess("修改成功");
                 this.getData();
               }
               if (res.data.code === -1) {
-                this.$message.error(res.data.msg);
+                onError(res.data.msg);
               }
             })
             .catch(() => {
-              this.$message.error("服务器请求超时，请稍后重试");
+              onError("服务器请求超时，请稍后重试");
             });
         } else {
           console.log("error submit!!");
