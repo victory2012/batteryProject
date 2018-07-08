@@ -1,5 +1,5 @@
 import { Message } from 'element-ui';
-export function onWarn (route) {
+export function onTimeOut (route) {
   Message.warning({
     message: "登录超时，请重新登录"
   });
@@ -18,4 +18,9 @@ export function onSuccess(msg) {
   return Message.success({
     message: msg
   })
+}
+export function onWarn (msg) {
+  Message.warning({
+    message: msg
+  });
 }

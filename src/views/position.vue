@@ -82,7 +82,7 @@ import AMap from "AMap";
 import AMapUI from "AMapUI";
 import { websockets, GetDeviceList } from "../api/index.js";
 import { timeFormats } from "../utils/transition.js";
-import { onError, onWarn } from "../utils/callback";
+import { onError, onTimeOut } from "../utils/callback";
 let map;
 let infoWindow;
 // let marker;
@@ -117,7 +117,7 @@ export default {
         .then(res => {
           console.log(res.data);
           if (res.data.code === 1) {
-            onWarn(this.$router);
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
             let result = res.data.data;

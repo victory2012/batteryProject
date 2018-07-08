@@ -260,7 +260,7 @@ import {
   addCustomer // 添加客户超级管理员
 } from "../api/index.js";
 import { userRole, companyRole } from "../utils/transition.js";
-import { onWarn, onSuccess, onError } from "../utils/callback"
+import { onTimeOut, onSuccess, onError } from "../utils/callback"
 export default {
   name: "userTable",
   data() {
@@ -350,7 +350,7 @@ export default {
               console.log(res.data);
               let result = res.data;
               if (result.code === 1) {
-                onWarn(this.$router);
+                onTimeOut(this.$router);
               }
               if (result.code === -1) {
                 onError(`创建失败，原因${result.msg}`);
@@ -389,7 +389,7 @@ export default {
               console.log(res.data);
               let result = res.data;
               if (result.code === 1) {
-                onWarn(this.$router);
+                onTimeOut(this.$router);
               }
               if (result.code === -1) {
                 onError(`创建失败，原因${result.msg}`);
@@ -425,7 +425,7 @@ export default {
               console.log(res.data);
               let result = res.data;
               if (result.code === 1) {
-                onWarn(this.$router);
+                onTimeOut(this.$router);
               }
               if (result.code === -1) {
                 onError(`创建失败，原因${result.msg}`);
@@ -459,7 +459,7 @@ export default {
               console.log(res.data);
               let result = res.data;
               if (result.code === 1) {
-                onWarn(this.$router);
+                onTimeOut(this.$router);
               }
               if (result.code === -1) {
                 onError(`创建失败，原因${result.msg}`);
@@ -514,7 +514,7 @@ export default {
           console.log(res);
           let result = res.data;
           if (result.code === 1) {
-            onWarn(this.$router);
+            onTimeOut(this.$router);
           }
           if (result.code === -1) {
             onError(result.msg);

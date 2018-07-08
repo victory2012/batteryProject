@@ -97,7 +97,7 @@
 </template>
 <script>
 import { getUserInfo, changeUserInfo } from "../api/index.js";
-import { onWarn, onSuccess, onError } from "../utils/callback"
+import { onTimeOut, onSuccess, onError } from "../utils/callback"
 export default {
   data() {
     return {
@@ -119,7 +119,7 @@ export default {
         .then(res => {
           console.log(res.data);
           if (res.data.code === 1) {
-            onWarn(this.$router);
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
             this.userArr = res.data.data;
@@ -154,7 +154,7 @@ export default {
             .then(res => {
               console.log(res);
               if (res.data.code === 1) {
-                onWarn(this.$router);
+                onTimeOut(this.$router);
               }
               if (res.data.code === 0) {
                 this.userMsgBox = false;

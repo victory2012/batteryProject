@@ -14,7 +14,7 @@
 </template>
 <script>
 import { changePassword } from "../api/index.js";
-import { onWarn, onError, onSuccess } from "../utils/callback";
+import { onTimeOut, onError, onSuccess } from "../utils/callback";
 
 export default {
   name: "Password",
@@ -42,7 +42,7 @@ export default {
             .then(res => {
               console.log(res);
               if (res.data.code === 1) {
-                onWarn(this.$router);
+                onTimeOut(this.$router);
               }
               if (res.data.code === 0) {
                 this.userMsgBox = false;
