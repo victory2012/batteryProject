@@ -7,11 +7,13 @@ import ElementUI from 'element-ui';
 import i18n from './i18n/i18n';
 import 'element-ui/lib/theme-chalk/index.css'; // 默认主题
 import '../static/icon/iconfont.css'
+import locale from 'element-ui/lib/locale/lang/en'
 import DatePicker from "./components/datepicker/index";
 Vue.use(DatePicker);
 Vue.config.productionTip = false;
 Vue.use(ElementUI, {
-  size: 'small'
+  size: 'small',
+  locale
 });
 /* eslint-disable no-new */
 new Vue({
