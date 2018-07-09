@@ -17,6 +17,7 @@
 <script>
 import AMap from "AMap";
 import { getFence, addFence, delFence } from "../api/index.js";
+import { onTimeOut, onError, onWarn, onSuccess } from "../utils/callback.js";
 let map;
 let marker;
 let markers = [];
@@ -94,10 +95,8 @@ export default {
       polygons.setPath(allPointers);
       polygonArr.push(polygons);
       polygons.on("click", e => {
-        console.log("e", e);
         if (polygonArr.length > 0) {
           polygonArr.forEach(key => {
-            // console.log("key", key);
             key.setOptions({
               strokeColor: "#0000ff",
               fillColor: "#f5deb3",
@@ -115,8 +114,6 @@ export default {
           fillOpacity: 0.6
         });
         this.fenceId = e.target.getExtData();
-        console.log(e.target.getExtData());
-        // console.log(e.target.getPath());
       });
       map.setFitView(); // 地图自适应
     },
@@ -126,35 +123,26 @@ export default {
         gpsList: this.json.substring(0, this.json.length - 1)
       };
       if (!gpsObj.gpsList) {
-        this.$message.error("请选区围栏点");
+        onError("请选区围栏点");
         return;
       }
       addFence(gpsObj)
         .then(res => {
           // console.log(res);
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
-            this.$message({
-              message: "添加成功",
-              type: "success"
-            });
+            onSuccess("添加成功");
             this.cancelSetings();
             this.getData();
           }
           if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
+            onError(res.data.msg);
           }
         })
         .catch(() => {
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     /* 取消设置 */
@@ -173,28 +161,16 @@ export default {
     /* 删除围栏 */
     ToDeleteFence() {
       if (!this.fenceId) {
-        this.$message({
-          message: "请先选择要删除的围栏",
-          type: "warning"
-        });
+        onWarn("请先选择要删除的围栏");
         return;
       }
       delFence(this.fenceId)
         .then(res => {
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
-            this.$message({
-              message: "删除成功",
-              type: "success"
-            });
+            onSuccess("删除成功");
             this.polygon.setMap(null);
           }
           if (res.data.code === -1) {
@@ -202,7 +178,7 @@ export default {
           }
         })
         .catch(() => {
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     /* goBack 返回 */
@@ -218,19 +194,12 @@ export default {
       getFence().then(res => {
         // console.log(res);
         if (res.data.code === 1) {
-          this.$message({
-            message: "登录超时，请重新登录",
-            type: "warning"
-          });
-          this.$router.push({
-            path: "/login"
-          });
+          onTimeOut(this.$router);
         }
         if (res.data.code === 0) {
           if (res.data.data.length > 0) {
             let result = res.data.data;
             result.forEach(key => {
-              // console.log("key", key);
               let gpsList = key.gpsList;
               let id = key.id;
               this.hasFence(gpsList, id);

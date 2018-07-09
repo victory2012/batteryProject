@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
-
 export default new Router({
   routes: [{
     path: '/',
@@ -12,11 +11,6 @@ export default new Router({
     component: resolve => require(['../layout/Home.vue'], resolve),
     meta: { title: '自述文件' },
     children: [
-      {
-        path: '/homea',
-        component: resolve => require(['../views/battery.vue'], resolve),
-        meta: { title: '电池总览' }
-      },
       {
         path: '/position',
         name: 'position',
@@ -31,16 +25,19 @@ export default new Router({
       },
       {
         path: '/alarmdata',
+        name: 'alarmdata',
         component: resolve => require(['../views/alarmdata.vue'], resolve),
         meta: { title: '告警数据' }
       },
       {
         path: '/home',
+        name: 'home',
         component: resolve => require(['../views/cityPage.vue'], resolve),
         meta: { title: '省份' }
       },
       {
         path: '/fence',
+        name: "fence",
         component: resolve => require(['../views/fence.vue'], resolve),
         meta: { title: '地理围栏' }
       },
@@ -62,6 +59,7 @@ export default new Router({
       },
       {
         path: '/batteryList',
+        name: 'batteryList',
         component: resolve => require(['../views/batteryList.vue'], resolve),
         meta: { title: '电池列表' }
       }, {
@@ -70,6 +68,7 @@ export default new Router({
         meta: { title: '用户管理' }
       }, {
         path: '/device',
+        name: "device",
         component: resolve => require(['../views/device.vue'], resolve),
         meta: { title: '设备管理' }
       }

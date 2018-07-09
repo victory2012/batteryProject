@@ -30,9 +30,6 @@
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage2" :page-sizes="handleSizeData" :page-size="handleSize" layout="sizes, prev, pager, next" :total="totalNum">
       </el-pagination>
     </div>
-    <!-- <v-detail :alarmDetail=details></v-detail> -->
-
-    <!-- </el-scrollbar> -->
   </div>
 </template>
 <style scoped>
@@ -54,13 +51,10 @@
 }
 </style>
 <script>
-import Detail from "../components/alarmdata/alarmDetail";
 import { alarmList } from "../api/index.js";
 import { timeFormat, sortGps } from "../utils/transition.js";
+import { onTimeOut, onError } from "../utils/callback.js";
 export default {
-  components: {
-    "v-detail": Detail
-  },
   data() {
     return {
       currentPage2: 1,
@@ -87,17 +81,10 @@ export default {
         .then(res => {
           console.log(res);
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router)
           }
           if (res.data.code === 0) {
             let result = res.data.data;
-            console.log(result);
             this.totalNum = result.total;
             this.tableData = [];
             if (result.data.length > 0) {
@@ -114,12 +101,12 @@ export default {
             }
           }
           if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
+            onError(res.data.msg);
           }
         })
         .catch(err => {
           console.log(err);
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     checkPosition(index, data) {

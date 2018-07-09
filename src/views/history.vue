@@ -36,7 +36,7 @@
       </div>
     </div>
     <div class="timeRange" v-show="trajectory">
-      <span>时间</span>
+      <span>时间(s)</span>
       <el-slider v-model="timeSeconds" @change="speedChange" vertical height="200px">
       </el-slider>
     </div>
@@ -51,6 +51,7 @@ import {
   trakTimeformat,
   yesTody
 } from "../utils/transition.js";
+import { onWarn, onTimeOut, onError } from "../utils/callback.js";
 var map, navg, heatmap, pathSimplifierIns;
 let infoWindow;
 export default {
@@ -79,31 +80,24 @@ export default {
       if (this.timeSeconds < 1) {
         this.timeSeconds = 1;
       }
-      let speeds = Number(this.alldistance) / this.timeSeconds;
+      let distance = Number(this.alldistance) / 1000;
+      let times = Number(this.timeSeconds) / 3600;
+      let speeds = Math.ceil(distance / times);
       console.log(speeds);
       navg.setSpeed(speeds);
     },
     /* 时间确认按钮 */
     selectedDate(date) {
       if (!this.starts) {
-        this.$message({
-          message: "请选择开始时间",
-          type: "warning"
-        });
+        onWarn("请选择开始时间");
         return;
       }
       if (!this.endtime) {
-        this.$message({
-          message: "请选择结束时间",
-          type: "warning"
-        });
+        onWarn("请选择结束时间");
         return;
       }
       if (Number(this.starts) > Number(this.endtime)) {
-        this.$message({
-          message: "开始时间应小于结束时间",
-          type: "warning"
-        });
+        onWarn("开始时间应小于结束时间");
         return;
       }
       let opts = {
@@ -120,13 +114,7 @@ export default {
         .then(res => {
           console.log(res);
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
             let result = res.data.data;
@@ -149,32 +137,35 @@ export default {
                 pathSimplifierIns.setData();
                 this.track();
               }
+              if (this.active) {
+                heatmap.show();
+              }
             } else {
               if (pathSimplifierIns) {
                 pathSimplifierIns.setData();
                 this.track();
               }
-              this.$message({
-                message: "此设备暂无历史数据",
-                type: "warning"
-              });
+              onWarn("此设备暂无历史数据");
+              heatmap.hide();
             }
           }
           if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
+            onError(res.data.msg);
           }
         })
-        .catch(() => {
-          this.$message.error("服务器请求超时，请稍后重试");
+        .catch(err => {
+          console.log(err);
+          onError("服务器请求超时，请稍后重试");
         });
     },
     heatmapFirst() {
       if (this.markerArr.length > 0) {
         map.remove(this.markerArr);
       }
-      this.selectByTime();
+      // this.selectByTime();
       this.trajectory = false;
       this.active = true;
+      heatmap.show();
       pathSimplifierIns.hide();
     },
     init() {
@@ -204,13 +195,7 @@ export default {
       GetDeviceList(pageObj)
         .then(res => {
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
             let result = res.data.data;
@@ -235,39 +220,28 @@ export default {
                 this.getData(params);
               }
             } else {
-              this.$message({
-                message: "暂无设备, 请先注册设备",
-                type: "warning"
-              });
+              onWarn("暂无设备, 请先注册设备");
             }
           }
           if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
+            onError(res.data.msg);
           }
         })
         .catch(() => {
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     // 历史轨迹
     historyTrajectory() {
       this.trajectory = true;
       this.active = false;
-      // map = new AMap.Map("mapcontainer", {
-      //   // center: [121.52710487067272, 31.22889232359548],
-      //   resizeEnable: false,
-      //   zoom: 15
-      // });
-      // AMap.plugin(["AMap.Geolocation"], () => {});
       this.track();
     },
     track() {
+      heatmap.hide();
       if (this.markerArr.length > 0) {
         map.remove(this.markerArr);
       }
-      // if (this.gridData.length < 1) {
-      //   return;
-      // }
       let lineArr = [];
       this.alldistance = 0;
       for (var i = 0; i < this.gridData.length; i++) {
@@ -279,6 +253,9 @@ export default {
         }
         lineArr.push([lngX, latY, timer]);
       }
+      if (lineArr.length < 1) {
+        return;
+      }
       AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
         if (!PathSimplifier.supportCanvas) {
           alert("当前环境不支持 Canvas！");
@@ -287,9 +264,13 @@ export default {
         AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
           let positionPicker = new PositionPicker({
             mode: "dragMarker",
-            map: map
+            map: map,
+            iconStyle: {
+              url: "../../static/img/iocna.png",
+              size: [1, 1],
+              ancher: [1, 1]
+            }
           });
-          console.log(positionPicker);
           pathSimplifierIns = new PathSimplifier({
             zIndex: 100,
             map: map,
@@ -402,13 +383,6 @@ export default {
     pauseOnclick() {
       this.historyShow();
       navg.pause();
-      console.log(
-        "当前为止走过的距离" +
-          parseInt(navg.getMovedDistance() / 1000) +
-          "KM,回放速度为:" +
-          parseInt(navg.getSpeed()) +
-          "Km/h"
-      );
     },
     resumeOnclick() {
       this.historyShow();
@@ -441,7 +415,7 @@ export default {
 .all {
   position: relative;
   height: 100%;
-  padding-right: 220px;
+  padding-right: 270px;
 }
 .info {
   position: absolute;
@@ -466,7 +440,7 @@ export default {
 .control {
   position: absolute;
   top: 5px;
-  right: 225px;
+  right: 276px;
   padding: 5px 10px;
   border-radius: 3px;
   box-shadow: 0 0 15px #000000;
@@ -497,7 +471,7 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
-  width: 220px;
+  width: 270px;
   box-sizing: border-box;
   padding: 10px 0;
   height: calc(100vh - 110px);
@@ -538,7 +512,7 @@ export default {
   top: 70px;
   right: 220px;
   z-index: 1000;
-  padding: 5px 2px 15px;
+  padding: 5px 4px 15px;
   box-shadow: 0 0 15px #000000;
   background: #ffffff;
   text-align: center;

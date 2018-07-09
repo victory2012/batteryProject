@@ -4,18 +4,21 @@
     <div id="panel">
       <div class="panelTop">
         <div id="intro" class="intro">
-          <h3>设备列表</h3>
+          <h3>
+            <span>{{titles}}</span>
+            <el-button @click="showAllPionter" type="text" mini>查看全部</el-button>
+          </h3>
         </div>
         <ul class="list_warp">
-          <li v-for="item in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item.deviceId)">
-            <span style="margin-right:5px;">{{item.deviceId}}</span>
+          <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item.deviceId, index)">
+            <span style="margin-right:5px;">{{index + 1}}、{{deviceShow? item.deviceId : item.batteryId}}</span>
             <el-button @click="HistoryTrack(item.deviceId)" size="mini">历史轨迹</el-button>
           </li>
         </ul>
       </div>
-      <div>
-        <!-- <el-pagination small layout="prev, pager, next" :total="500">
-        </el-pagination> -->
+      <div class="page">
+        <el-pagination small layout="prev, pager, next" :total="10">
+        </el-pagination>
       </div>
     </div>
   </div>
@@ -25,6 +28,7 @@
   border-top: 1px solid #f0f0f0;
 }
 .list_warp li {
+  position: relative;
   height: 50px;
   border-bottom: 1px solid #f0f0f0;
   line-height: 50px;
@@ -32,6 +36,11 @@
   color: #303133;
   cursor: pointer;
   padding-left: 10px;
+}
+.list_warp li button {
+  position: absolute;
+  top: 12px;
+  right: 5px;
 }
 .list_warp .selected {
   background: green;
@@ -48,20 +57,28 @@
 }
 
 .intro h3 {
+  position: relative;
   padding-left: 8px;
   font-weight: normal;
   font-size: 16px;
   margin-bottom: 10px;
+  height: 30px;
+  line-height: 30px;
+}
+.intro h3 button {
+  position: absolute;
+  top: 0;
+  right: 20px;
 }
 #outer-box {
   height: 100%;
-  padding-right: 220px;
+  padding-right: 270px;
 }
 #panel {
   position: absolute;
   top: 20px;
   right: 20px;
-  width: 220px;
+  width: 270px;
   box-sizing: border-box;
   padding: 10px 0;
   height: calc(100vh - 110px);
@@ -75,8 +92,11 @@
   overflow-x: hidden;
   background: #ffffff;
 }
+.page {
+  padding-top: 20px;
+  text-align: right;
+}
 </style>
-
 <script>
 import AMap from "AMap";
 import AMapUI from "AMapUI";
@@ -85,7 +105,9 @@ import { timeFormats } from "../utils/transition.js";
 import { onError, onTimeOut } from "../utils/callback";
 let map;
 let infoWindow;
-// let marker;
+let ponterIndex;
+let batteryIdArr = {};
+let pathParams; // url 中设备id 参数
 let pointerObj = {};
 export default {
   data() {
@@ -95,7 +117,9 @@ export default {
       devicelabel: "",
       active: true,
       activeName: 1,
-      markers: []
+      markers: [],
+      titles: "在线电池列表",
+      deviceShow: false
     };
   },
   methods: {
@@ -106,7 +130,7 @@ export default {
         zoom: 15
       });
       this.sockets();
-      // map.setFitView();
+      // console.log(this.$router);
     },
     narmleHttp(ws) {
       let pageObj = {
@@ -125,23 +149,35 @@ export default {
               api: "bind",
               param: []
             };
-            this.pointerArr = result;
-            let pathParams = this.$route.query.deviceId;
             if (result.length > 0) {
               result.forEach(key => {
-                if (key.longitude && key.latitude) {
+                if (key.longitude && key.latitude && key.onlineStatus === 1) {
+                  // let batt = key.batteryId ? key.batteryId : "未绑定";
                   sendData.param.push(key.deviceId);
-                  pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+                  // batteryIdArr[key.deviceId] = batt;
+                  if (key.batteryId) {
+                    this.pointerArr.push(key);
+                    pointerObj[key.deviceId] = `${key.longitude},${
+                      key.latitude
+                    },${new Date()},${key.batteryId}`;
+                    batteryIdArr[key.deviceId] = key.batteryId;
+                  }
                 }
               });
               if (pathParams) {
-                this.checkItem(pathParams);
+                this.pointerArr.forEach((key, index) => {
+                  if (key.deviceId === pathParams) {
+                    this.checkItem(pathParams, index);
+                  }
+                });
               } else {
                 this.mapInit(result);
               }
               setTimeout(() => {
-                ws.send(JSON.stringify(sendData));
-              }, 1200);
+                if (ws && ws.readyState === 1) {
+                  ws.send(JSON.stringify(sendData));
+                }
+              }, 1000);
             } else {
               onError("暂无设备, 请先注册设备");
             }
@@ -158,7 +194,7 @@ export default {
     /*
       websockets 请求
      */
-    sockets(item) {
+    sockets() {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
@@ -167,17 +203,17 @@ export default {
         ws.onmessage = evt => {
           let data = JSON.parse(evt.data);
           console.log(data);
-          if (data.code === 1) {
-            this.onLine = data.data;
-          }
           if (data.code === 2) {
             // code 为 1时 既绑定成功，2时为 收到了数据
             if (this.markers.length > 0) {
               map.remove(this.markers);
             }
             let obj = data.data.split(",");
+            let battery = batteryIdArr[obj[0]];
             obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[2]},${obj[1]},${new Date()}`;
+              pointerObj[obj[0]] = `${obj[2]},${
+                obj[1]
+              },${new Date()},${battery}`;
             });
             if (this.deviceId && this.deviceId.toString().length > 5) {
               let keys = Object.keys(pointerObj);
@@ -187,7 +223,7 @@ export default {
                   nextObj[this.deviceId] = pointerObj[item];
                 }
               });
-              this.mapInit(nextObj, "fromWs");
+              this.mapInit(nextObj, "fromClick");
             } else {
               this.mapInit(pointerObj, "fromWs");
             }
@@ -207,9 +243,13 @@ export default {
       let allmarkerArr;
       let markerkeys;
       if (!fromWs) {
+        let battObj;
         data.forEach(key => {
-          if (key.longitude && key.latitude) {
-            pointerObj[key.deviceId] = `${key.longitude},${key.latitude},${new Date()}`;
+          battObj = key.batteryId ? key.batteryId : "未绑定";
+          if (key.longitude && key.latitude && key.batteryId) {
+            pointerObj[key.deviceId] = `${key.longitude},${
+              key.latitude
+            },${new Date()},${battObj}`;
           }
         });
         allmarkerArr = Object.values(pointerObj);
@@ -221,7 +261,8 @@ export default {
       for (let i = 0; i < allmarkerArr.length; i++) {
         var lngs = allmarkerArr[i].toString().split(",");
         var marker = new AMap.Marker({
-          icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+          icon: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b${i +
+            1}.png`,
           position: [lngs[0], lngs[1]],
           offset: new AMap.Pixel(-12, -12),
           zIndex: 101,
@@ -229,14 +270,18 @@ export default {
             position: `${lngs[0]},${lngs[1]}`,
             times: lngs[2]
           },
-          clickable: true,
           map: map
         });
+        if (fromWs === "fromClick") {
+          marker.setIcon(
+            `http://webapi.amap.com/theme/v1.3/markers/n/mark_r${ponterIndex}.png`
+          );
+        }
         marker.setLabel({
           offset: new AMap.Pixel(15, 20),
-          content: `设备编号：${markerkeys[i]}`
+          content: `电池编号：${lngs[3]}<br/>设备编号：${markerkeys[i]}`
         });
-        marker.setPosition([lngs[0], lngs[1]]);
+        // marker.setPosition([lngs[0], lngs[1]]);
         this.markers.push(marker);
       }
       AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
@@ -250,18 +295,8 @@ export default {
           }
         });
         if (this.markers.length > 0) {
-          this.markers.forEach(key => {
+          this.markers.forEach((key, index) => {
             key.on("click", e => {
-              this.markers.forEach(item => {
-                item.setIcon(
-                  "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png"
-                );
-              });
-              key.setIcon(
-                "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png"
-              );
-              let label = key.getLabel().content.split("：")[1];
-              this.devicelabel = label;
               let pointerData = key.getExtData();
               let point = pointerData.position.split(",");
               let position = new AMap.LngLat(point[0], point[1]);
@@ -297,9 +332,11 @@ export default {
       });
       // map.setFitView(); // 自适应地图
     },
-    checkItem(deviceId) {
+    checkItem(deviceId, index) {
       this.devicelabel = deviceId;
       this.deviceId = deviceId;
+      ponterIndex = index + 1;
+      infoWindow && infoWindow.close();
       if (this.deviceId && this.deviceId.toString().length > 5 && pointerObj) {
         let keys = Object.keys(pointerObj);
         let nextObj = {};
@@ -311,8 +348,13 @@ export default {
             nextObj[this.deviceId] = pointerObj[item];
           }
         });
-        this.mapInit(nextObj, "fromWs");
+        this.mapInit(nextObj, "fromClick");
       }
+    },
+    showAllPionter() {
+      this.devicelabel = null;
+      this.deviceId = null;
+      this.mapInit(pointerObj, "fromWs");
     },
     HistoryTrack(deviceId) {
       console.log(deviceId);
@@ -322,8 +364,23 @@ export default {
       });
     }
   },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      if (from.name === "device") {
+        vm.titles = "设备列表";
+        vm.deviceShow = true;
+      }
+      if (from.name === "batteryList") {
+        vm.titles = "在线电池列表";
+        vm.deviceShow = false;
+      }
+    });
+  },
   mounted() {
     this.init();
+  },
+  created() {
+    pathParams = this.$route.query.deviceId;
   },
   beforeDestroy() {
     this.over();

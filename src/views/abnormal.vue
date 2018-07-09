@@ -12,6 +12,7 @@
 <script>
 import AMap from "AMap";
 import { getFence, websockets, singleDeviceId } from "../api/index.js";
+import { onTimeOut, onWarn, onError } from "../utils/callback.js";
 let map;
 let grid;
 let polygonArr = [];
@@ -84,13 +85,7 @@ export default {
     getData() {
       getFence().then(res => {
         if (res.data.code === 1) {
-          this.$message({
-            message: "登录超时，请重新登录",
-            type: "warning"
-          });
-          this.$router.push({
-            path: "/login"
-          });
+          onTimeOut(this.$router);
         }
         if (res.data.code === 0) {
           if (res.data.data.length > 0) {
@@ -104,7 +99,7 @@ export default {
           }
         }
         if (res.data.code === -1) {
-          this.$message.error(res.data.msg);
+          onError(res.data.msg);
         }
       });
     },
@@ -178,10 +173,7 @@ export default {
         };
         ws.onerror = () => {
           console.log("onerror...");
-          this.$message({
-            message: "服务器繁忙，请稍后重试。",
-            type: "error"
-          });
+          onError("服务器繁忙，请稍后重试。");
           this.over();
         };
         this.over = () => {
@@ -194,13 +186,7 @@ export default {
       singleDeviceId(NowDeviceId)
         .then(res => {
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
             let result = res.data.data;
@@ -215,18 +201,15 @@ export default {
                 ws.send(JSON.stringify(this.sendData));
               }, 1000);
             } else {
-              this.$message({
-                message: "暂无设备, 请先注册设备",
-                type: "warning"
-              });
+              onWarn("暂无设备, 请先注册设备");
             }
           }
           if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
+            onError(res.data.msg);
           }
         })
         .catch(() => {
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     }
   },

@@ -42,9 +42,11 @@
         </el-table-column>
         <el-table-column prop="bindingName" align="center" label="绑定状态">
         </el-table-column>
+        <el-table-column prop="online" align="center" label="在线状态">
+        </el-table-column>
         <el-table-column align="center" label="运行状态">
           <template slot-scope="scope">
-            <el-button @click.native.prevent="examine(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+            <el-button @click.native.prevent="examine(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].OLS" size="small">
               查看
             </el-button>
           </template>
@@ -156,6 +158,7 @@ import {
   GetList,
   deleteBattery
 } from "../api/index.js";
+import { onTimeOut, onError, onSuccess } from "../utils/callback.js";
 export default {
   data() {
     return {
@@ -211,9 +214,6 @@ export default {
     this.getData();
   },
   methods: {
-    handleExceed(files, fileList) {
-      console.log(files);
-    },
     batteryReg() {
       this.regForm = true;
     },
@@ -246,26 +246,19 @@ export default {
           this.BatteryForm.manufacturerName = loginData.enterpriseName;
           this.BatteryForm.manufacturerId = loginData.enterpriseId;
           console.log(this.BatteryForm);
-          addBattery(this.BatteryForm)
-            .then(res => {
-              console.log(res);
-              if (res.data.code === 0) {
-                this.$message({
-                  message: "创建成功",
-                  type: "success"
-                });
-                this.creatBattery = false;
-                this.resetBatteryForm(form);
-                this.getData();
-              } else {
-                this.$message.error("创建失败");
-              }
-            })
-            .catch();
+          addBattery(this.BatteryForm).then(res => {
+            console.log(res);
+            if (res.data.code === 0) {
+              onSuccess("创建成功");
+              this.creatBattery = false;
+              this.resetBatteryForm(form);
+              this.getData();
+            } else {
+              onError("创建失败");
+            }
+          });
         } else {
-          console.log("error submit!!");
           return false;
-          // addBattery();
         }
       });
     },
@@ -273,23 +266,13 @@ export default {
       this.$refs[form].resetFields();
     },
     getDeviceListOnly() {
-      deviceListOnly()
-        .then(res => {
-          console.log(res);
-          if (res.data.code === 0) {
-            this.deviceIdList = res.data.data;
-          }
-        })
-        .catch();
+      deviceListOnly().then(res => {
+        console.log(res);
+        if (res.data.code === 0) {
+          this.deviceIdList = res.data.data;
+        }
+      });
     },
-    // getCustomerList() {
-    //   enterpriseCustomer().then(res => {
-    //     console.log(res);
-    //     if (res.data.code === 0) {
-    //       this.customerList = res.data.data;
-    //     }
-    //   });
-    // },
     /* 获取电池列表数据 */
     getData() {
       let pageObj = {
@@ -302,26 +285,22 @@ export default {
           console.log(res);
           let result = res.data;
           if (result.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router);
           }
           if (result.code === 0) {
             if (result.data.data) {
               let tableObj = result.data.data;
               this.tableData = [];
               tableObj.forEach(key => {
-                if (key.bindingStatus === 0) {
-                  key.bindingName = "未绑定";
-                  key.bindingStatus = false;
+                if (key.onlineStatus === 1) {
+                  key.online = "在线";
+                  key.OLS = true;
                 } else {
-                  key.bindingName = "已绑定";
-                  key.bindingStatus = true;
+                  key.online = "离线";
+                  key.OLS = false;
                 }
+                key.bindingName = key.bindingStatus === 0 ? "未绑定" : "已绑定";
+                // key.online = key.onlineStatus === 1 ? "离线" : "在线";
                 key.status = key.status === 0 ? false : true;
                 this.tableData.push(key);
               });
@@ -331,7 +310,7 @@ export default {
         .catch(err => {
           this.loading = false;
           console.log(err);
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     /*
@@ -350,26 +329,17 @@ export default {
         .then(res => {
           this.loading = false;
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
-            this.$message({
-              message: "删除成功",
-              type: "success"
-            });
+            onSuccess("删除成功");
             this.getData();
           }
         })
         .catch(err => {
           this.loading = false;
           console.log(err);
-          this.$message.error("服务器请求超时，请稍后重试");
+          onError("服务器请求超时，请稍后重试");
         });
     },
     /*
@@ -394,7 +364,6 @@ export default {
     * 显示第几页
     */
     handleCurrentChange() {
-      console.log("handleCurrentChange", this.currentPage);
       this.getData();
     }
   }

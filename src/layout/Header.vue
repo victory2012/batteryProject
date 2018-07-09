@@ -4,7 +4,7 @@
     <div class="collapse-btn" @click="collapseChage">
       <i class="el-icon-menu"></i>
     </div>
-    <div class="logo">{{$t('projectTit')}}</div>
+    <div class="logo">{{projectTit}}</div>
     <div class="header-right">
       <div class="header-user-con">
         <!-- 全屏显示 -->

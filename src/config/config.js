@@ -3,7 +3,7 @@ export function menuList() {
     {
       icon: "el-icon-view",
       index: "home",
-      title: "设备总览"
+      title: "电池总览"
     },
     {
       icon: "el-icon-location",

@@ -1,23 +1,9 @@
 <template>
   <div class="login_page fillcontain">
-    <div class="login-head">
-      <el-dropdown class="user-name" @command="handleCommand">
-          <span class="el-dropdown-link">
-            {{localLanguge}}
-            <i class="el-icon-caret-bottom"></i>
-          </span>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="cn">
-            <i class="iconfont icon-user"></i>中文</el-dropdown-item>
-          <el-dropdown-item divided command="en">
-            <i class="el-icon-setting"></i>English</el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
-    </div>
     <transition name="form-fade" mode="in-out">
       <section class="form_contianer" v-show="showLogin">
         <div class="manage_tip">
-          <p>{{$t("projectName")}}</p>
+          <p>{{projectName}}</p>
         </div>
         <el-form :model="loginForm" :rules="rules" ref="loginForm">
           <el-form-item prop="userName">
@@ -28,11 +14,11 @@
             <el-input type="password" placeholder="密码" size="small" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')"></el-input>
           </el-form-item>
           <el-form-item prop="checkBox">
-            <el-checkbox style="float:left" v-model="account">{{$t("account")}}</el-checkbox>
-            <el-checkbox style="float:right" v-model="pwd">{{$t("password")}}</el-checkbox>
+            <el-checkbox style="float:left" v-model="account">{{RMaccount}}</el-checkbox>
+            <el-checkbox style="float:right" v-model="pwd">{{RMpassword}}</el-checkbox>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">{{$t("login")}}</el-button>
+            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">{{login}}</el-button>
           </el-form-item>
         </el-form>
       </section>
@@ -42,15 +28,16 @@
 
 <script>
 import { getAdminInfo } from "../api/index.js";
-let currentLang;
 export default {
   data() {
     return {
       account: false,
       pwd: false,
       isLogin: false,
-      localLanguge: "",
-      // projectName: "",
+      projectName: "电池后台管理系统",
+      RMaccount: "记住账户",
+      RMpassword: "记住密码",
+      login: "登录",
       loginForm: {
         userName: "",
         password: ""
@@ -64,41 +51,7 @@ export default {
       showLogin: false
     };
   },
-  created() {
-    currentLang = navigator.language; // 判断除IE外其他浏览器使用语言
-    if (!currentLang) { // 判断IE浏览器使用语言
-      currentLang = navigator.browserLanguage;
-    }
-    // 自动设置语言
-    // const navLang = navigator.language;
-    // const localLang = (navLang === 'zh-CN' || navLang === 'en-US') ? navLang : false;
-    // const lang = window.localStorage.getItem('language') || localLang || 'zh-CN';
-    this.localLanguge = currentLang === "zh-CN" ? "语言" : "languge";
-    // // this.$i18n.locale = currentLang === "zh-CN" ? "CN" : "EN"
-    // console.log(lang)
-    // const locales = Locales;
-    // const mergeZH = Object.assign(zhLocale, locales['zh-CN']);
-    // const mergeEN = Object.assign(enLocale, locales['en-US']);
-    // Vue.locale = () => {};
-    // const i18n = new VueI18n({
-    //   locale: 'en-US',    // 语言标识
-    //   messages: {
-    //     'zh-CN': mergeZH,   // 中文语言包
-    //     'en-US': mergeEN    // 英文语言包
-    //   },
-    // })
-  },
   methods: {
-    handleCommand(cammand) {
-      if (cammand === "cn") {
-        this.localLanguge = "中文";
-        this.$i18n.locale = "CN";
-      }
-      if (cammand === "en") {
-        this.localLanguge = "English";
-        this.$i18n.locale = "EN";
-      }
-    },
     submitForm(params) {
       this.$refs[params].validate(valid => {
         if (valid) {

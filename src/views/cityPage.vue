@@ -63,6 +63,7 @@
 <script>
 import AMap from "AMap";
 import { websockets, GetDeviceList } from "../api/index.js";
+import { onTimeOut, onError, onWarn } from "../utils/callback.js";
 let map;
 let polygons = [];
 let district;
@@ -177,13 +178,7 @@ export default {
         .then(res => {
           console.log(res);
           if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
+            onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
             let result = res.data.data;
@@ -191,30 +186,26 @@ export default {
             if (result.length > 0) {
               result.forEach(key => {
                 this.sendData.param.push(key.deviceId);
-                if (key.longitude && key.latitude) {
+                if (key.longitude && key.latitude && key.onlineStatus === 1) {
                   pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
                 }
               });
               this.mapInit(pointerObj);
               setTimeout(() => {
-                if (ws) {
+                if (ws && ws.readyState === 1) {
                   ws.send(JSON.stringify(this.sendData));
                 }
               }, 1000);
             } else {
-              this.$message({
-                message: "暂无设备, 请先注册设备",
-                type: "warning"
-              });
+              onWarn("暂无设备, 请先注册设备");
             }
           }
           if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
+            onError(res.data.msg);
           }
         })
-        .catch(err => {
-          console.log(err);
-          this.$message.error("服务器请求超时，请稍后重试");
+        .catch(() => {
+          onError("服务器请求超时，请稍后重试");
         });
     },
     /*
@@ -249,11 +240,7 @@ export default {
           }
         };
         ws.onerror = () => {
-          console.log("onerror...");
-          this.$message({
-            message: "服务器繁忙，请稍后重试。",
-            type: "error"
-          });
+          onError("服务器繁忙，请稍后重试");
           this.over();
         };
         this.over = () => {

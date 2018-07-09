@@ -28,9 +28,11 @@
         </el-table-column>
         <el-table-column prop="bindingName" align="center" label="电池绑定状态">
         </el-table-column>
+        <el-table-column prop="online" align="center" label="在线状态">
+        </el-table-column>
         <el-table-column align="center" label="监测设备">
           <template slot-scope="scope">
-            <el-button @click.native.prevent="MonitorDevice(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
+            <el-button @click.native.prevent="MonitorDevice(scope.$index, tableData)" type="text" size="small">
               查看
             </el-button>
           </template>
@@ -99,6 +101,7 @@ import {
   enterpriseCustomer
 } from "../api/index.js";
 import { timeFormats } from "../utils/transition.js";
+import { onTimeOut, onError } from "../utils/callback.js";
 export default {
   data() {
     return {
@@ -112,13 +115,7 @@ export default {
       handleSizeData: [10, 20, 30, 40, 50],
       loading: false,
       search: false,
-      ruleForm: {
-        deviceId: "",
-        customerId: "",
-        manufacturerId: "",
-        manufacturerName: "",
-        customerName: ""
-      },
+      ruleForm: {},
       rules: {
         deviceId: [
           { required: true, message: "请输入生产商id", trigger: "blur" }
@@ -138,16 +135,9 @@ export default {
       };
       deviceList(pageObj).then(res => {
         this.loading = false;
-        console.log(res);
         let result = res.data;
         if (result.code === 1) {
-          this.$message({
-            message: "登录超时，请重新登录",
-            type: "warning"
-          });
-          this.$router.push({
-            path: "/login"
-          });
+          onTimeOut(this.$router);
         }
         if (result.code === 0) {
           if (result.data.data) {
@@ -157,16 +147,18 @@ export default {
             tableObj.forEach(key => {
               if (key.bindingStatus === 0) {
                 key.bindingName = "未绑定";
-                key.bindingStatus = false;
               } else {
                 key.bindingName = "已绑定";
-                key.bindingStatus = true;
               }
+              key.online = key.onlineStatus === 0 ? "离线" : "在线";
               key.createTime = timeFormats(key.createTime);
               key.status = key.status === 0 ? true : false;
               this.tableData.push(key);
             });
           }
+        }
+        if (result.code === -1) {
+          onError(result.msg);
         }
       });
     },

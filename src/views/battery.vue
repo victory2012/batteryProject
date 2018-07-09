@@ -57,6 +57,7 @@
 <script>
 import AMap from "AMap";
 import { websockets } from "../api/index.js";
+import { onError } from "../utils/callback.js";
 let map;
 export default {
   name: "battery",
@@ -92,11 +93,7 @@ export default {
           this.mapInit(data.data);
         };
         ws.onerror = () => {
-          console.log("onerror...");
-          this.$message({
-            message: "服务器繁忙，请稍后重试。",
-            type: "error"
-          });
+          onError("服务器繁忙，请稍后重试。");
         };
         this.over = () => {
           ws.close();
