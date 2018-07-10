@@ -26,13 +26,17 @@
     <div id="panel">
       <div class="panelTop">
         <div id="intro" class="intro">
-          <h3>设备列表</h3>
+          <h3>电池列表</h3>
         </div>
         <ul class="list_warp">
-          <li v-for="item in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item.deviceId)">
-            <span style="margin-right:5px;">{{item.deviceId}}</span>
+          <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item)">
+            <span style="margin-right:5px;">{{index+1}}、{{item.batteryId}}</span>
           </li>
         </ul>
+      </div>
+      <div class="page">
+        <el-pagination @current-change="pageChange" :current-page.sync="pageNum" small layout="prev, pager, next" :total="total">
+        </el-pagination>
       </div>
     </div>
     <div class="timeRange" v-show="trajectory">
@@ -45,7 +49,7 @@
 <script>
 import AMap from "AMap";
 import AMapUI from "AMapUI";
-import { trajectory, GetDeviceList } from "../api/index.js";
+import { GetTrajectory, GetDeviceList } from "../api/index.js";
 import {
   timeFormatSort,
   trakTimeformat,
@@ -69,13 +73,22 @@ export default {
       gridData: [],
       markerArr: [],
       alldistance: 0,
-      timeSeconds: 50
+      timeSeconds: 50,
+      pageNum: 1,
+      total: 10
     };
   },
   mounted() {
     this.init();
   },
   methods: {
+    pageChange() {
+      let pageObj = {
+        pageNum: this.pageNum,
+        pageSize: 10
+      };
+      this.getHisData(pageObj)
+    },
     speedChange() {
       if (this.timeSeconds < 1) {
         this.timeSeconds = 1;
@@ -83,7 +96,6 @@ export default {
       let distance = Number(this.alldistance) / 1000;
       let times = Number(this.timeSeconds) / 3600;
       let speeds = Math.ceil(distance / times);
-      console.log(speeds);
       navg.setSpeed(speeds);
     },
     /* 时间确认按钮 */
@@ -110,7 +122,7 @@ export default {
     },
     /* 获取数据 */
     getData(params) {
-      trajectory(params)
+      GetTrajectory(params)
         .then(res => {
           console.log(res);
           if (res.data.code === 1) {
@@ -183,14 +195,12 @@ export default {
           opacity: [0, 1] // 透明度
         });
       });
-      this.narmleHttp();
+      this.getHisData();
     },
-    narmleHttp() {
-      let loginData = JSON.parse(localStorage.getItem("loginData"));
+    getHisData() {
       let pageObj = {
-        pageNum: 1,
-        pageSize: 999999999,
-        manufacturerId: loginData.enterpriseId
+        pageNum: this.pageNum,
+        pageSize: 10
       };
       GetDeviceList(pageObj)
         .then(res => {
@@ -198,25 +208,27 @@ export default {
             onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
-            let result = res.data.data;
+            let result = res.data.data.data;
+            this.pointerArr = [];
             if (result.length > 0) {
-              this.pointerArr = result;
-              console.log(result);
+              result.forEach(key => {
+                if (key.batteryId) {
+                  this.pointerArr.push(key);
+                }
+              });
+              this.total = res.data.data.total;
               let deviceId = this.$route.query.deviceId;
               let params = {
                 pushDateStart: timeFormatSort(this.starts),
                 pushDateEnd: timeFormatSort(this.endtime)
               };
-              if (deviceId) {
+              if (deviceId && this.pageNum === 1) {
                 this.devicelabel = deviceId;
                 params.deviceId = deviceId;
                 this.getData(params);
-              } else if (this.devicelabel) {
-                params.deviceId = this.devicelabel;
-                this.getData(params);
               } else {
-                this.devicelabel = result[0].deviceId;
-                params.deviceId = result[0].deviceId;
+                this.devicelabel = result[0].batteryId;
+                params.batteryId = result[0].batteryId;
                 this.getData(params);
               }
             } else {
@@ -332,7 +344,10 @@ export default {
               path: lineArr
             }
           ]);
-          let speeds = Number(this.alldistance) / this.timeSeconds;
+          let distance = Number(this.alldistance) / 1000;
+          let times = Number(this.timeSeconds) / 3600;
+          let speeds = Math.ceil(distance / times);
+          // let speeds = Number(this.alldistance) / this.timeSeconds;
           navg = pathSimplifierIns.createPathNavigator(0, {
             loop: true,
             speed: speeds,
@@ -366,14 +381,13 @@ export default {
         this.markerArr.push(end);
       });
     },
-    checkItem(deviceId) {
-      if (!deviceId) return;
+    checkItem(item) {
       let params = {
         pushDateStart: timeFormatSort(this.starts),
         pushDateEnd: timeFormatSort(this.endtime),
-        deviceId: deviceId
+        batteryId: item.batteryId
       };
-      this.devicelabel = deviceId;
+      this.devicelabel = item.batteryId;
       this.getData(params);
     },
     startOnclick() {
@@ -510,7 +524,7 @@ export default {
 .timeRange {
   position: absolute;
   top: 70px;
-  right: 220px;
+  right: 276px;
   z-index: 1000;
   padding: 5px 4px 15px;
   box-shadow: 0 0 15px #000000;
@@ -520,5 +534,9 @@ export default {
 }
 .timeRange span {
   font-size: 12px;
+}
+.page {
+  padding-top: 20px;
+  text-align: right;
 }
 </style>

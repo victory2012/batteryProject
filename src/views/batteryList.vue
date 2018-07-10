@@ -30,6 +30,7 @@
     </div>
     <div class="table">
       <el-table v-loading="loading" :data="tableData" style="width: 100%" max-height="750">
+        <el-table-column type="index" width="50" align="center" label="序号"></el-table-column>
         <el-table-column prop="batteryId" align="center" label="电池编号">
         </el-table-column>
         <el-table-column prop="model" align="center" label="电池型号">
@@ -162,7 +163,7 @@ import { onTimeOut, onError, onSuccess } from "../utils/callback.js";
 export default {
   data() {
     return {
-      totalPage: 1, // 总页数
+      totalPage: 1, // 总数
       currentPage: 1, // 当前页
       handleSize: 10, // 每页显示条数
       handleSizeData: [10, 20, 30, 40, 50],
@@ -290,6 +291,7 @@ export default {
           if (result.code === 0) {
             if (result.data.data) {
               let tableObj = result.data.data;
+              this.totalPage = result.data.total;
               this.tableData = [];
               tableObj.forEach(key => {
                 if (key.onlineStatus === 1) {

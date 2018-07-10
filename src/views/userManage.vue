@@ -188,6 +188,7 @@
     </div>
     <div>
       <el-table v-loading="loading" :data="tableData" max-height="750">
+        <el-table-column type="index" width="50" align="center" label="序号"></el-table-column>
         <el-table-column prop="userName" align="center" label="用户名">
         </el-table-column>
         <el-table-column prop="accountRole" align="center" label="账户身份">

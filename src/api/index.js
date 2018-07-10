@@ -175,7 +175,7 @@ export function createDeviceList(params) {
 /*
  * 获取历史轨迹
  */
-export function trajectory(params) {
+export function GetTrajectory(params) {
   return instance.post(`/device/gps/history/list`, params)
 };
 

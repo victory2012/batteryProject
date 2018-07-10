@@ -164,6 +164,8 @@ export function userRole(str) {
       return "管理员";
     case "customer_super_admin":
       return "管理员";
+    case "manufacturer_super_admin":
+      return "管理员";
     default:
       return "";
   }

@@ -20,6 +20,7 @@
     </div>
     <div class="table">
       <el-table v-loading="loading" :data="tableData" style="width: 100%" max-height="750">
+        <el-table-column type="index" width="50" align="center" label="序号"></el-table-column>
         <el-table-column prop="deviceId" align="center" label="设备编号">
         </el-table-column>
         <el-table-column prop="manufacturerName" align="center" label="企业名称">

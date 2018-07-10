@@ -8,7 +8,7 @@
               <i class="grid-con-icon iconfont">&#xe644;</i>
               <div class="grid-cont-right">
                 <div class="grid-num">{{allDevice}}</div>
-                <div>电池总数</div>
+                <div>总数</div>
               </div>
             </div>
           </el-card>
@@ -19,7 +19,7 @@
               <i class="grid-con-icon iconfont">&#xe656;</i>
               <div class="grid-cont-right">
                 <div class="grid-num">{{onLine}}</div>
-                <div>在线电池</div>
+                <div>在线数</div>
               </div>
             </div>
           </el-card>
@@ -30,7 +30,7 @@
               <i class="grid-con-icon iconfont">&#xe6a8;</i>
               <div class="grid-cont-right">
                 <div class="grid-num">{{offLine}}</div>
-                <div>离线电池</div>
+                <div>离线数</div>
               </div>
             </div>
           </el-card>
@@ -41,7 +41,7 @@
               <i class="grid-con-icon iconfont">&#xe6f5;</i>
               <div class="grid-cont-right">
                 <div class="grid-num">0</div>
-                <div>无效电池</div>
+                <div>无效数</div>
               </div>
             </div>
           </el-card>
@@ -181,13 +181,14 @@ export default {
             onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
-            let result = res.data.data;
+            let result = res.data.data.data;
             this.allDevice = result.length;
+            pointerObj = {};
             if (result.length > 0) {
               result.forEach(key => {
-                this.sendData.param.push(key.deviceId);
                 if (key.longitude && key.latitude && key.onlineStatus === 1) {
                   pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+                  this.sendData.param.push(key.deviceId);
                 }
               });
               this.mapInit(pointerObj);
