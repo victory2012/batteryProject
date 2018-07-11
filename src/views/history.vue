@@ -16,8 +16,8 @@
         <el-button v-show="trajectory" size="mini" plain @click="stopOnclick" title="停止">
           <i class="iconfont icon-stop"></i>
         </el-button>
-        <el-button v-show="trajectory" type="danger" size="small" @click="heatmapFirst">活动热区</el-button>
-        <el-button v-show="active" type="primary" size="mini" @click="historyTrajectory">轨迹回放</el-button>
+        <el-button v-show="trajectory" type="danger" size="small" @click="heatmap">活动热区</el-button>
+        <el-button v-show="active" type="primary" size="mini" @click="track">轨迹回放</el-button>
       </div>
     </div>
     <div class="">
@@ -87,7 +87,7 @@ export default {
         pageNum: this.pageNum,
         pageSize: 10
       };
-      this.getHisData(pageObj)
+      this.getHisData(pageObj);
     },
     speedChange() {
       if (this.timeSeconds < 1) {
@@ -114,50 +114,64 @@ export default {
       }
       let opts = {
         pushDateStart: timeFormatSort(this.starts),
-        pushDateEnd: timeFormatSort(this.endtime),
-        deviceId: this.devicelabel
+        pushDateEnd: timeFormatSort(this.endtime)
       };
-      console.log(opts);
+      opts.batteryId = this.devicelabel;
       this.getData(opts);
+      // if (this.deviceId && this.pageNum === 1) {
+      //   opts.deviceId = this.devicelabel;
+      //   this.getData(opts);
+      // } else {
+      //   opts.batteryId = this.devicelabel;
+      //   this.getData(opts);
+      // }
     },
     /* 获取数据 */
     getData(params) {
       GetTrajectory(params)
         .then(res => {
-          console.log(res);
+          // console.log(res);
           if (res.data.code === 1) {
             onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
             let result = res.data.data;
             this.gridData = [];
+            this.lineArr = [];
+            this.alldistance = 0; // 运动的总距离（米）
             if (result.length > 0) {
-              result.forEach(key => {
+              for (let i = 0; i < result.length; i++) {
+                var key = result[i];
+                var distance, p1, p2;
+                if (i < result.length - 1) {
+                  p1 = new AMap.LngLat(key.longitude, key.latitude);
+                  p2 = new AMap.LngLat(result[i + 1].longitude, result[i + 1].latitude);
+                  distance = Math.round(p1.distance(p2))
+                }
+                this.alldistance += distance;
                 var obj = {};
                 obj.lng = key.longitude;
                 obj.lat = key.latitude;
                 obj.pushTime = key.pushTime;
-                obj.distance = key.distance;
+                // obj.distance = key.distance;
+                // obj.distance = distance;
                 obj.count = 150;
+                this.lineArr.push([obj.lng, obj.lat, obj.pushTime]);
                 this.gridData.push(obj);
-              });
-              map.setCenter([this.gridData[0].lng, this.gridData[0].lat]);
-              heatmap.setDataSet({
-                data: this.gridData // 热力图数据
-              });
+              }
               if (this.trajectory && pathSimplifierIns) {
                 pathSimplifierIns.setData();
                 this.track();
               }
               if (this.active) {
-                heatmap.show();
+                this.heatmap();
               }
             } else {
               if (pathSimplifierIns) {
                 pathSimplifierIns.setData();
                 this.track();
               }
-              onWarn("此设备暂无历史数据");
+              onWarn("此设备当前时间段内，暂无数据");
               heatmap.hide();
             }
           }
@@ -170,24 +184,25 @@ export default {
           onError("服务器请求超时，请稍后重试");
         });
     },
-    heatmapFirst() {
+    heatmap() {
       if (this.markerArr.length > 0) {
         map.remove(this.markerArr);
       }
-      // this.selectByTime();
       this.trajectory = false;
       this.active = true;
+      map.setCenter([this.gridData[0].lng, this.gridData[0].lat]);
+      heatmap.setDataSet({
+        data: this.gridData // 热力图数据
+      });
       heatmap.show();
-      pathSimplifierIns.hide();
+      pathSimplifierIns && pathSimplifierIns.hide();
     },
     init() {
       map = new AMap.Map("mapcontainer", {
         resizeEnable: true,
+        // mapStyle: 'amap://styles/macaron',
         zoom: 15
       });
-      this.selectByTime();
-    },
-    selectByTime() {
       AMap.plugin(["AMap.Heatmap"], () => {
         // 初始化heatmap对象
         heatmap = new AMap.Heatmap(map, {
@@ -197,6 +212,7 @@ export default {
       });
       this.getHisData();
     },
+    // 获取列表数据
     getHisData() {
       let pageObj = {
         pageNum: this.pageNum,
@@ -217,14 +233,14 @@ export default {
                 }
               });
               this.total = res.data.data.total;
-              let deviceId = this.$route.query.deviceId;
+              this.batteryId = this.$route.query.batteryId;
               let params = {
                 pushDateStart: timeFormatSort(this.starts),
                 pushDateEnd: timeFormatSort(this.endtime)
               };
-              if (deviceId && this.pageNum === 1) {
-                this.devicelabel = deviceId;
-                params.deviceId = deviceId;
+              if (this.batteryId && this.pageNum === 1) {
+                this.devicelabel = this.batteryId;
+                params.batteryId = this.batteryId;
                 this.getData(params);
               } else {
                 this.devicelabel = result[0].batteryId;
@@ -243,29 +259,26 @@ export default {
           onError("服务器请求超时，请稍后重试");
         });
     },
-    // 历史轨迹
-    historyTrajectory() {
+    // 历史轨迹 轨迹配置
+    track() {
       this.trajectory = true;
       this.active = false;
-      this.track();
-    },
-    track() {
-      heatmap.hide();
+      heatmap && heatmap.hide();
       if (this.markerArr.length > 0) {
         map.remove(this.markerArr);
       }
-      let lineArr = [];
-      this.alldistance = 0;
-      for (var i = 0; i < this.gridData.length; i++) {
-        var lngX = this.gridData[i].lng;
-        var latY = this.gridData[i].lat;
-        var timer = this.gridData[i].pushTime;
-        if (this.gridData[i].distance) {
-          this.alldistance += this.gridData[i].distance;
-        }
-        lineArr.push([lngX, latY, timer]);
-      }
-      if (lineArr.length < 1) {
+      // let lineArr = [];
+      // for (var i = 0; i < this.gridData.length; i++) {
+      //   var lngX = this.gridData[i].lng;
+      //   var latY = this.gridData[i].lat;
+      //   var timer = this.gridData[i].pushTime;
+      //   if (this.gridData[i].distance) {
+      //     this.alldistance += this.gridData[i].distance;
+      //   }
+      //   lineArr.push([lngX, latY, timer]);
+      // }
+      console.log('总距离', this.alldistance)
+      if (this.lineArr.length < 1) {
         return;
       }
       AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
@@ -292,8 +305,6 @@ export default {
               }
             },
             getPath: function(pathData, pathIndex) {
-              console.log("pathData", pathData);
-              console.log("pathIndex", pathIndex);
               return pathData.path;
             },
             renderOptions: {
@@ -341,13 +352,12 @@ export default {
           pathSimplifierIns.setData([
             {
               name: "轨迹",
-              path: lineArr
+              path: this.lineArr
             }
           ]);
-          let distance = Number(this.alldistance) / 1000;
-          let times = Number(this.timeSeconds) / 3600;
-          let speeds = Math.ceil(distance / times);
-          // let speeds = Number(this.alldistance) / this.timeSeconds;
+          let distance = Number(this.alldistance) / 1000; // 米转成千米
+          let times = Number(this.timeSeconds) / 3600; // 秒转成小时
+          let speeds = Math.ceil(distance / times); // 最终得到的速度是 km/h
           navg = pathSimplifierIns.createPathNavigator(0, {
             loop: true,
             speed: speeds,
@@ -363,8 +373,8 @@ export default {
             }
           });
         });
-        let startPot = lineArr[0];
-        let endPot = lineArr[lineArr.length - 1];
+        let startPot = this.lineArr[0];
+        let endPot = this.lineArr[this.lineArr.length - 1];
         let start = new AMap.Marker({
           map: map,
           position: [startPot[0], startPot[1]], // 基点位置  开始位置
@@ -381,31 +391,40 @@ export default {
         this.markerArr.push(end);
       });
     },
+    // 列表点击事件
     checkItem(item) {
       let params = {
         pushDateStart: timeFormatSort(this.starts),
-        pushDateEnd: timeFormatSort(this.endtime),
-        batteryId: item.batteryId
+        pushDateEnd: timeFormatSort(this.endtime)
       };
+      params.batteryId = item.batteryId;
       this.devicelabel = item.batteryId;
       this.getData(params);
+      // if (this.deviceId && this.pageNum === 1) {
+      //   this.devicelabel = item.deviceId;
+      //   params.deviceId = item.deviceId;
+      //   this.getData(params);
+      // } else {
+      //   params.batteryId = item.batteryId;
+      //   this.devicelabel = item.batteryId;
+      //   this.getData(params);
+      // }
     },
+    // 开始运动
     startOnclick() {
-      this.historyShow();
-      navg.start();
+      navg && navg.start();
     },
+    // 暂停运动
     pauseOnclick() {
-      this.historyShow();
-      navg.pause();
+      navg && navg.pause();
     },
+    // 继续运动
     resumeOnclick() {
-      this.historyShow();
-      navg.resume();
+      navg && navg.resume();
     },
-
+    // 停止运动
     stopOnclick() {
-      this.historyShow();
-      navg.stop();
+      navg && navg.stop();
       // map.clearMap();
     },
     /*
@@ -422,6 +441,9 @@ export default {
       pathSimplifierIns.hide();
       heatmap.show();
     }
+  },
+  beforeDestroy() {
+    map.destroy();
   }
 };
 </script>

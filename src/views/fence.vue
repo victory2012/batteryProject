@@ -243,6 +243,9 @@ export default {
   },
   mounted() {
     this.init();
+  },
+  beforeDestroy() {
+    map.destroy();
   }
 };
 </script>

@@ -11,9 +11,9 @@
         </div>
         <ul class="list_warp">
           <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '', item.onlineStatus === 0? 'off': '', devicelabel == item.batteryId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item, index)">
-            <span style="margin-right:5px;">{{index + 1}}、{{deviceShow? item.deviceId : item.batteryId}}</span>
+            <p>{{index + 1}}、{{deviceShow? item.deviceId : item.batteryId}}</p>
             <el-badge :value="item.onLine" class="item">
-              <el-button @click.prevent.stop="HistoryTrack(item.deviceId)" size="mini">历史轨迹</el-button>
+              <el-button @click.prevent.stop="HistoryTrack(item.batteryId)" size="mini">历史轨迹</el-button>
             </el-badge>
           </li>
         </ul>
@@ -54,6 +54,12 @@
   position: absolute;
   top: 0;
   right: 34px;
+}
+.list_warp li p {
+  width: 130px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
 }
 .list_warp .selected {
   background: green;
@@ -388,10 +394,10 @@ export default {
       this.GaoDeMap(pointerObj, "fromWs");
     },
     // 查看历史轨迹。路由传参 设备id
-    HistoryTrack(deviceId) {
+    HistoryTrack(batteryId) {
       this.$router.push({
         path: "history",
-        query: { deviceId: deviceId }
+        query: { batteryId: batteryId }
       });
     }
   },
@@ -418,6 +424,7 @@ export default {
     this.pathParams = this.$route.query.deviceId;
   },
   beforeDestroy() {
+    map.destroy();
     this.over();
   }
 };

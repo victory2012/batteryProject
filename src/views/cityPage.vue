@@ -274,6 +274,7 @@ export default {
     this.init();
   },
   beforeDestroy() {
+    map.destroy();
     this.over();
   }
 };
