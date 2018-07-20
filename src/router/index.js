@@ -71,6 +71,26 @@ export default new Router({
         name: "device",
         component: resolve => require(['../views/device.vue'], resolve),
         meta: { title: '设备管理' }
+      }, {
+        path: '/googleAll',
+        name: "googleAll",
+        component: resolve => require(['../views/google/allBattery.vue'], resolve)
+      }, {
+        path: '/googlePos',
+        name: "googlePos",
+        component: resolve => require(['../views/google/googlePsition.vue'], resolve)
+      }, {
+        path: '/googleAbno',
+        name: "googleAbno",
+        component: resolve => require(['../views/google/googleAbno.vue'], resolve)
+      }, {
+        path: '/googleFence',
+        name: "googleFence",
+        component: resolve => require(['../views/google/googleFence.vue'], resolve)
+      }, {
+        path: '/googleHis',
+        name: "googleHis",
+        component: resolve => require(['../views/google/googleHistory.vue'], resolve)
       }
     ]
   }, {

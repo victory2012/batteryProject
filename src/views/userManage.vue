@@ -55,6 +55,14 @@
                 <el-input v-model="adminForm.enterpriseName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
+            <el-col :span="12">
+              <el-form-item label="企业性质" prop="nature">
+                <el-select v-model="adminForm.nature" placeholder="企业性质" style="width:240px;">
+                  <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -94,6 +102,14 @@
             <el-col :span="12">
               <el-form-item label="邮箱（选填）" prop="email">
                 <el-input v-model="customerForm.email" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="企业性质" prop="nature">
+                <el-select v-model="customerForm.nature" placeholder="企业性质" style="width:240px;">
+                  <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -137,6 +153,14 @@
                 <el-input v-model="manAdminForm.email" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
+            <el-col :span="12">
+              <el-form-item label="企业性质" prop="nature">
+                <el-select v-model="manAdminForm.nature" placeholder="企业性质" style="width:240px;">
+                  <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -176,6 +200,14 @@
             <el-col :span="12">
               <el-form-item label="邮箱（选填）" prop="email">
                 <el-input v-model="CustormAdminForm.email" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="企业性质" prop="nature">
+                <el-select v-model="CustormAdminForm.nature" placeholder="企业性质" style="width:240px;">
+                  <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -282,6 +314,16 @@ export default {
       customerForm: {},
       manAdminForm: {},
       CustormAdminForm: {},
+      natureOptions: [
+        {
+          label: '国内',
+          value: '0'
+        },
+        {
+          label: '国际',
+          value: '1'
+        }
+      ],
       customerRules: {
         userName: [
           { required: true, message: "请输入用户名", trigger: "change" },
@@ -301,6 +343,9 @@ export default {
         ],
         enterpriseName: [
           { required: true, message: "请输入企业名称", trigger: "change" }
+        ],
+        nature: [
+          { required: true, message: "请选择企业性质", trigger: "change" }
         ]
       },
       creatAdmin: false,
@@ -344,8 +389,10 @@ export default {
             password: this.customerForm.password,
             phoneNumber: this.customerForm.phoneNumber,
             email: this.customerForm.email || "",
-            enterpriseName: this.customerForm.enterpriseName
+            enterpriseName: this.customerForm.enterpriseName,
+            mapType: this.customerForm.nature
           };
+          console.log(paramsAdmin);
           addCustomer(paramsAdmin)
             .then(res => {
               console.log(res.data);
@@ -376,14 +423,15 @@ export default {
     submitAdmin(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          console.log(this.adminForm);
           let paramsAdmin = {
             userName: this.adminForm.userName,
             password: this.adminForm.password,
             phoneNumber: this.adminForm.phoneNumber,
             enterpriseName: this.adminForm.enterpriseName,
-            email: this.adminForm.email || ""
+            email: this.adminForm.email || "",
+            mapType: this.adminForm.nature
           };
+          console.log(paramsAdmin);
           // 添加生产企业超级管理员
           addManufacturer(paramsAdmin)
             .then(res => {
@@ -418,8 +466,10 @@ export default {
             password: this.manAdminForm.password,
             phoneNumber: this.manAdminForm.phoneNumber,
             enterpriseName: this.manAdminForm.enterpriseName,
-            email: this.manAdminForm.email || ""
+            email: this.manAdminForm.email || "",
+            mapType: this.manAdminForm.nature
           };
+          console.log(paramsAdmin);
           // 添加生产企业普通管理员
           addManufacturerAdmin(paramsAdmin)
             .then(res => {
@@ -453,8 +503,10 @@ export default {
             password: this.CustormAdminForm.password,
             phoneNumber: this.CustormAdminForm.phoneNumber,
             enterpriseName: this.CustormAdminForm.enterpriseName,
-            email: this.CustormAdminForm.email || ""
+            email: this.CustormAdminForm.email || "",
+            mapType: this.CustormAdminForm.nature
           };
+          console.log(paramsAdmin);
           addCustomerAdmin(paramsAdmin)
             .then(res => {
               console.log(res.data);

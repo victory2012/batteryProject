@@ -57,7 +57,7 @@ export default {
     username() {
       let userData = JSON.parse(localStorage.getItem("loginData"));
       return userData
-        ? userData.enterpriseName + "-" + userData.userName
+        ? `${userData.enterpriseName}-${userData.userName}`
         : "";
     }
   },

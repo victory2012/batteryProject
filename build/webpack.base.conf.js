@@ -95,6 +95,7 @@ module.exports = {
   },
   externals: {
     'AMap': 'window.AMap',
-    'AMapUI': 'window.AMapUI'
+    'AMapUI': 'window.AMapUI',
+    'google': 'window.google'
   }
 }

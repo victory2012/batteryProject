@@ -57,9 +57,9 @@
 }
 .list_warp li p {
   width: 130px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .list_warp .selected {
   background: green;
@@ -117,11 +117,10 @@
 }
 </style>
 <script>
-import AMap from "AMap";
-import AMapUI from "AMapUI";
-import { websockets, GetDeviceList } from "../api/index.js";
-import { timeFormats, trakTimeformat } from "../utils/transition.js";
-import { onError, onTimeOut } from "../utils/callback";
+import google from "google";
+import { websockets, GetDeviceList } from "../../api/index.js";
+import { trakTimeformat, timeFormat } from "../../utils/transition.js";
+import { onError, onTimeOut } from "../../utils/callback";
 let map;
 let infoWindow;
 let ponterIndex;
@@ -138,37 +137,47 @@ export default {
       pageNum: 1,
       total: 10,
       markers: [],
+      markerTime: [],
       onLineData: [],
       titles: "电池列表",
       deviceShow: false,
+      hasGet: false,
+      bindingStatus: "",
       pathParams: "" // url 中设备id 参数
     };
   },
   methods: {
     pageChange() {
       this.over();
-      this.markers && map.remove(this.markers);
+      if (this.markers.length > 0) {
+        this.markers.forEach(key => {
+          key.setMap(null);
+        });
+        this.markers = [];
+      }
       this.getListData();
     },
     init() {
-      map = new AMap.Map("positions", {
-        resizeEnable: true,
-        center: [121.533669, 31.225885],
-        zoom: 15
-      });
-      this.getListData();
-      // console.log(this.$router);
+      try {
+        map = new google.maps.Map(document.getElementById("positions"), {
+          center: {
+            lat: 31.232803,
+            lng: 121.475101
+          },
+          zoom: 15
+        });
+        this.hasGet = false;
+        this.getListData();
+      } catch (err) {
+        onError("地图加载失败，请检查网络连接");
+      }
     },
     getListData() {
       let pageObj = {
         pageNum: this.pageNum,
-        pageSize: 10
+        pageSize: 10,
+        bindingStatus: this.bindingStatus
       };
-      if (this.pathParams) {
-        pageObj.bindingStatus = 0;
-      } else {
-        pageObj.bindingStatus = 1;
-      }
       GetDeviceList(pageObj).then(res => {
         console.log(res.data);
         if (res.data.code === 1) {
@@ -176,22 +185,33 @@ export default {
         }
         if (res.data.code === 0) {
           this.pointerArr = [];
-          let result = res.data.data.data;
-          this.total = res.data.data.total;
+          let center = res.data.data;
+          let result = center.data;
+          this.total = center.total;
           let sendData = { api: "bind", param: [] };
           pointerObj = {};
           if (result.length > 0) {
             if (this.pathParams) {
               result.forEach((key, index) => {
-                pointerObj[key.deviceId] = `${key.longitude},${key.latitude},${timeFormats(new Date())},${key.batteryId},${key.onlineStatus}`;
+                pointerObj[key.deviceId] = `${key.latitude},${
+                  key.longitude
+                },${trakTimeformat(key.pushTime)},${key.batteryId},${
+                  key.onlineStatus
+                }`;
                 if (key.onlineStatus === 1) {
                   key.onLine = "在线";
+                  if (!this.hasGet) {
+                    map.setCenter(
+                      new google.maps.LatLng(key.latitude, key.longitude)
+                    );
+                  } else {
+                    this.hasGet = true;
+                  }
                   if (key.deviceId) {
                     sendData.param.push(key.deviceId);
                   }
                   // pathParams 路由传参。为设备id
                   if (this.pathParams === key.deviceId) {
-                    console.log("pathParams", this.pathParams);
                     this.checkItem({ deviceId: this.pathParams }, index);
                   }
                 } else {
@@ -199,6 +219,9 @@ export default {
                 }
                 this.pointerArr.push(key);
               });
+              // map.setCenter(
+              //   new google.maps.LatLng(result[0].latitude, result[0].longitude)
+              // );
               this.sockets(JSON.stringify(sendData));
             } else {
               this.mapInit(result);
@@ -221,19 +244,21 @@ export default {
         };
         ws.onmessage = evt => {
           let data = JSON.parse(evt.data);
-          console.log(data);
           if (data.code === 2) {
             // code 为 1时 既绑定成功，2时为 收到了数据
             if (this.markers.length > 0) {
               // 收到websocket推送过来的数据时，如果地图上有mark点 就先清除掉。
-              map.remove(this.markers);
+              this.markers.forEach(key => {
+                key.setMap(null);
+              });
+              this.markers = [];
             }
             let obj = data.data.split(",");
             let battery = batteryIdArr[obj[0]]; // 从电池id 字典中获取电池id，obj[0] 为设备id。
             obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[2]},${
-                obj[1]
-              },${new Date()},${battery},1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id。以逗号隔开
+              pointerObj[obj[0]] = `${obj[1]},${obj[2]},${timeFormat(
+                new Date()
+              )},${battery},1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id。以逗号隔开
             });
             if (this.deviceId && this.deviceId.toString().length > 5) {
               let keys = Object.keys(pointerObj);
@@ -269,14 +294,20 @@ export default {
     mapInit(data) {
       pointerObj = {};
       let sendData = { api: "bind", param: [] };
+      console.log(data);
       data.forEach((key, index) => {
-        pointerObj[key.deviceId] = `${key.longitude},${
-          key.latitude
+        pointerObj[key.deviceId] = `${key.latitude},${
+          key.longitude
         },${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus}`;
         if (key.onlineStatus === 1) {
+          // onlineStatus 判断是否在线的标识。1 在线。0 离线；
           key.onLine = "在线";
+          if (!this.hasGet) {
+            map.setCenter(new google.maps.LatLng(key.latitude, key.longitude));
+          } else {
+            this.hasGet = true;
+          }
           if (key.batteryId) {
-            // onlineStatus 判断是否在线的标识。1 在线。0 离线；
             sendData.param.push(key.deviceId);
             batteryIdArr[key.deviceId] = key.batteryId; // 制作电池id 字典。以设备id作为key，电池id作为value。
           }
@@ -289,90 +320,81 @@ export default {
       this.GaoDeMap(pointerObj);
     },
     GaoDeMap(data, fromWs) {
-      this.markers && map.remove(this.markers);
+      if (this.markers.length > 0) {
+        this.markers.forEach(key => {
+          key.setMap(null);
+        });
+        this.markers = [];
+      }
       let allmarkerArr = Object.values(data);
       let markerkeys = Object.keys(data);
+      this.markerTime = [];
       for (let i = 0; i < allmarkerArr.length; i++) {
         var lngs = allmarkerArr[i].toString().split(",");
         if (lngs[0].length > 6 && lngs[1].length > 6 && lngs[4] === "1") {
-          var marker = new AMap.Marker({
-            icon: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b${i +
-              1}.png`,
-            position: [lngs[0], lngs[1]],
-            offset: new AMap.Pixel(-12, -12),
-            zIndex: 101,
-            extData: {
-              position: `${lngs[0]},${lngs[1]}`,
-              times: lngs[2]
-            },
+          let obj = {};
+          var latLng = new google.maps.LatLng(lngs[0], lngs[1]);
+          var marker = new google.maps.Marker({
+            position: latLng,
+            label: `${i + 1}`,
+            title: `电池编号：${lngs[3]}\n设备编号：${markerkeys[i]}`,
             map: map
           });
           if (fromWs === "fromClick") {
-            marker.setIcon(
-              `http://webapi.amap.com/theme/v1.3/markers/n/mark_r${ponterIndex}.png`
-            );
+            marker.setLabel({
+              text: `${ponterIndex}`
+            });
           }
-          marker.setLabel({
-            offset: new AMap.Pixel(15, 20),
-            content: `电池编号：${lngs[3]}<br/>设备编号：${markerkeys[i]}`
-          });
+          obj.pointer = marker;
+          obj.times = lngs[2];
+          this.markerTime.push(obj);
           this.markers.push(marker);
         }
       }
-      if (this.markers.length > 0) {
-        AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
-          let positionPicker = new PositionPicker({
-            mode: "dragMarker",
-            map: map,
-            iconStyle: {
-              url: "../../static/img/iocna.png",
-              size: [1, 1],
-              ancher: [1, 1]
+      this.markerTime.forEach(key => {
+        key.pointer.addListener("click", e => {
+          var latLngData =
+            e.latLng.lat().toFixed(6) + "," + e.latLng.lng().toFixed(6);
+          this.$.ajax({
+            type: "post",
+            url:
+              "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
+              latLngData +
+              "&location_type=ROOFTOP&result_type=street_address&key=AIzaSyC8IXpNgfA7uD-Xb0jEqhkEdB7j3gbgOiE",
+            async: true,
+            success: function(data) {
+              let address;
+              if (data.status === "OK") {
+                address = data.results[0].formatted_address;
+              } else {
+                address = "地址获取失败";
+              }
+              var site =
+                "时间：" +
+                key.times +
+                "<br />" +
+                "坐标：" +
+                latLngData +
+                "<br />" +
+                "地址：" +
+                address;
+              this.infowindow = new google.maps.InfoWindow({
+                content: site
+              });
+              this.infowindow.open(map, key.pointer); // 弹出信息提示窗口
+              map.addListener("click", () => {
+                this.infowindow.close();
+              });
             }
           });
-          this.markers.forEach((key, index) => {
-            key.on("click", e => {
-              let pointerData = key.getExtData();
-              let point = pointerData.position.split(",");
-              let position = new AMap.LngLat(point[0], point[1]);
-              positionPicker.start(position);
-              positionPicker.on("success", result => {
-                var info = [];
-                info.push(
-                  `<div><div>更新时间：${timeFormats(pointerData.times)}</div>`
-                );
-                info.push(
-                  `<div style="font-size:14px;">路口 :${
-                    result.nearestJunction
-                  }</div>`
-                );
-                info.push(
-                  `<div style="font-size:14px;">地址 :${
-                    result.address
-                  }</div></div>`
-                );
-                infoWindow = new AMap.InfoWindow({
-                  content: info.join("<br/>"), // 使用默认信息窗体框样式，显示信息内容
-                  autoMove: false,
-                  offset: new AMap.Pixel(0, -10)
-                });
-                infoWindow.open(map, position);
-              });
-            });
-            map.on("click", () => {
-              infoWindow && infoWindow.close();
-            });
-          });
         });
-      }
-      // map.setFitView(); // 自适应地图
+      });
     },
     /*
     * @params deviceId 电池列表 获取的设备id。
     * @params index 为列表的索引。这里取这个索引是为了让地图的mark点 显示点的是第几个。
      */
     checkItem(item, index) {
-      if (item.onlineStatus === 0) return;
       this.devicelabel = item.deviceId;
       this.deviceId = item.deviceId;
       ponterIndex = index + 1;
@@ -381,14 +403,18 @@ export default {
         let keys = Object.keys(pointerObj);
         // let nextObj = {};
         if (this.markers.length > 0) {
-          map.remove(this.markers);
+          this.markers.forEach(key => {
+            key.setMap(null);
+          });
+          this.markers = [];
         }
         let selectObj = {};
-        keys.forEach((item, index) => {
-          if (item === this.deviceId) {
-            selectObj[this.deviceId] = pointerObj[item];
+        keys.forEach(items => {
+          if (items === this.deviceId) {
+            selectObj[this.deviceId] = pointerObj[items];
           }
         });
+        console.log(selectObj);
         this.GaoDeMap(selectObj, "fromClick");
       }
     },
@@ -415,22 +441,23 @@ export default {
       if (from.name === "device" && vm.pathParams) {
         vm.titles = "设备列表";
         vm.deviceShow = true;
+        vm.bindingStatus = "";
       }
       if (from.name === "batteryList" && vm.pathParams) {
-        vm.titles = "在线电池列表";
+        vm.titles = "电池列表";
         vm.deviceShow = false;
+        vm.bindingStatus = 1;
       }
     });
   },
   mounted() {
+    this.pathParams = this.$route.query.deviceId;
     this.init();
   },
-  created() {
-    this.pathParams = this.$route.query.deviceId; // 路由参数
-  },
   beforeDestroy() {
-    map.destroy();
-    this.over();
+    if (typeof this.over === "function") {
+      this.over();
+    }
   }
 };
 </script>

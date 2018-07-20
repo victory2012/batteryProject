@@ -48,7 +48,7 @@
         </el-col>
       </el-row>
     </div>
-    <div class="warrp">
+    <!-- <div class="warrp">
       <div id="tip">
         选择省：
         <el-select v-model="defaultOption" id='province' placeholder="请选择" @change="selectChange">
@@ -57,17 +57,15 @@
         </el-select>
       </div>
       <div id="container" class="mapWarrp"></div>
-    </div>
+    </div> -->
+    <div id="container" class="mapWarrp"></div>
   </div>
 </template>
 <script>
-import AMap from "AMap";
-import { websockets, GetDeviceList } from "../api/index.js";
-import { onTimeOut, onError, onWarn } from "../utils/callback.js";
+import google from "google";
+import { websockets, GetDeviceList } from "../../api/index.js";
+import { onTimeOut, onError, onWarn } from "../../utils/callback.js";
 let map;
-let polygons = [];
-let district;
-// let markerArr = {};
 let pointerObj = {};
 export default {
   name: "battery",
@@ -79,123 +77,97 @@ export default {
       limit: false,
       offLine: 0,
       markers: [],
-      sendData: { api: "bind", param: [] },
-      selectArr: [
-        {
-          adcode: "all",
-          name: "全国"
-        }
-      ],
-      defaultOption: "全国"
+      hasSet: false,
+      sendData: { api: "bind", param: [] }
     };
   },
   methods: {
-    getCityData(data) {
-      let bounds = data.boundaries;
-      if (bounds) {
-        for (let i = 0, l = bounds.length; i < l; i++) {
-          let polygon = new AMap.Polygon({
-            map: map,
-            strokeWeight: 1,
-            strokeColor: "#0048ff",
-            fillColor: "#99fbd2",
-            fillOpacity: 0.5,
-            path: bounds[i]
-          });
-          polygons.push(polygon);
-        }
-        map.setFitView(); // 地图自适应
-      }
-      let subList = data.districtList;
-      if (data.level === "country") {
-        // this.selectArr = subList;
-        subList.forEach(key => {
-          this.selectArr.push(key);
-        });
-      }
-      if (this.limit) {
-        setTimeout(() => {
-          map.setLimitBounds(map.getBounds());
-        }, 300);
-      }
-      // map.setFitView(); // 地图自适应
-    },
-    // 检查是否已经设置了区域设置
-    getLimitBounds() {
-      let limitBounds = map.getLimitBounds();
-      if (limitBounds) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-    selectChange() {
-      this.limit = true;
-      // 先获取一下是否已经设置了区域限制，如果设置了 就先清除掉
-      if (this.getLimitBounds()) {
-        map.clearLimitBounds();
-      }
-      for (var i = 0, l = polygons.length; i < l; i++) {
-        polygons[i].setMap(null);
-      }
-      district.setLevel("province");
-      district.setExtensions("all");
-      district.search(this.defaultOption, (status, result) => {
-        if (status === "complete") {
-          this.getCityData(result.districtList[0]);
-        }
-      });
-    },
     mapInit(obj) {
       let allmarkerArr = Object.values(obj);
+      let labelIndex = 1;
       allmarkerArr.forEach(key => {
         var lngs = key.toString().split(",");
-        var marker = new AMap.Marker({
-          icon: new AMap.Icon({
-            image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
-            size: new AMap.Size(20, 35)
-          }),
-          position: [lngs[0], lngs[1]],
-          offset: new AMap.Pixel(-12, -12),
-          zIndex: 101,
-          clickable: true,
+        var marker = new google.maps.Marker({
+          position: new google.maps.LatLng(lngs[0], lngs[1]),
+          label: `${labelIndex++}`,
           map: map
         });
         this.markers.push(marker);
+        marker.addListener("click", e => {
+          var latLngData =
+            e.latLng.lat().toFixed(6) + "," + e.latLng.lng().toFixed(6);
+          this.$.ajax({
+            type: "post",
+            url:
+              "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
+              latLngData +
+              "&key=AIzaSyC8IXpNgfA7uD-Xb0jEqhkEdB7j3gbgOiE",
+            async: true,
+            success: function(data) {
+              console.log(data);
+              var site =
+                "坐标：" +
+                latLngData +
+                "<br />" +
+                "地址：" +
+                data.results[0].formatted_address;
+              var infowindow = new google.maps.InfoWindow({
+                content: site
+              });
+              infowindow.open(map, marker); // 弹出信息提示窗口
+              map.addListener("click", () => {
+                infowindow.close();
+              });
+            }
+          });
+        });
       });
+
+      // var bounds = new google.maps.LatLngBounds();
+      // for (var i = 0; i < this.markers.length; i++) {
+      //   bounds.extend(this.markers[i].getPosition());
+      // }
+      // map.fitBounds(bounds);
     },
     /*
       http请求 获取全部电池设备
      */
-    narmleHttp(ws) {
+    narmleHttp() {
+      // let loginData = JSON.parse(localStorage.getItem("loginData"));
       let pageObj = {
         pageNum: 1,
         pageSize: 999999999,
-        bindingStatus: ''
+        bindingStatus: ""
       };
       GetDeviceList(pageObj)
         .then(res => {
-          console.log(res);
+          // console.log(res);
           if (res.data.code === 1) {
             onTimeOut(this.$router);
           }
           if (res.data.code === 0) {
             let result = res.data.data.data;
             this.allDevice = result.length;
+            this.sendData = { api: "bind", param: [] };
             pointerObj = {};
             if (result.length > 0) {
               result.forEach(key => {
                 if (key.longitude && key.latitude && key.onlineStatus === 1) {
-                  pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+                  pointerObj[key.deviceId] = `${key.latitude},${key.longitude}`;
+                  if (!this.hasSet) {
+                    this.hasSet = true;
+                    map.setCenter(
+                      new google.maps.LatLng(key.latitude, key.longitude)
+                    );
+                  }
                   this.sendData.param.push(key.deviceId);
                 }
+                // if (key.longitude && key.latitude) {
+                //   pointerObj[key.deviceId] = `${key.latitude},${key.longitude}`;
+                // }
               });
               this.mapInit(pointerObj);
-              setTimeout(() => {
-                if (ws && ws.readyState === 1) {
-                  ws.send(JSON.stringify(this.sendData));
-                }
-              }, 1000);
+              this.sockets(); // websocket 请求
             } else {
               onWarn("暂无设备, 请先注册设备");
             }
@@ -215,11 +187,11 @@ export default {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
-          this.narmleHttp(ws);
+          ws.send(JSON.stringify(this.sendData));
         };
         ws.onmessage = evt => {
           let data = JSON.parse(evt.data);
-          console.log(data);
+          // console.log(data);
           if (data.code === 1) {
             this.onLine = data.data;
             if (Number(this.allDevice) < Number(this.onLine)) {
@@ -229,12 +201,15 @@ export default {
           }
           if (data.code === 2) {
             if (this.markers.length > 0) {
-              map.remove(this.markers);
+              this.markers.forEach(key => {
+                key.setMap(null);
+              });
+              this.markers = [];
             }
             // code 为 1时 既绑定成功，2时为 收到了数据
             let obj = data.data.split(",");
             obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+              pointerObj[obj[0]] = `${obj[1]},${obj[2]}`;
             });
             this.mapInit(pointerObj);
           }
@@ -243,38 +218,37 @@ export default {
           onError("服务器繁忙，请稍后重试");
           this.over();
         };
+        ws.onclose = () => {
+          console.log("closed......");
+        };
         this.over = () => {
           ws.close();
         };
       });
     },
-    init() {
-      map = new AMap.Map("container", {
-        resizeEnable: true,
-        zoom: 10
-      });
-      AMap.service("AMap.DistrictSearch", () => {
-        district = new AMap.DistrictSearch({
-          subdistrict: 1,
-          showbiz: false,
-          level: "province"
+    initMap() {
+      try {
+        map = new google.maps.Map(document.getElementById("container"), {
+          center: {
+            lat: 0,
+            lng: 0
+          },
+          zoom: 15
         });
-        district.search("中国", (status, result) => {
-          if (status === "complete") {
-            let data = result.districtList[0];
-            this.getCityData(data);
-          }
-        });
-      });
-      this.sockets();
+        this.hasSet = false;
+        this.narmleHttp();
+      } catch (err) {
+        onError("地图加载失败，请检查网络连接")
+      }
     }
   },
   mounted() {
-    this.init();
+    this.initMap();
   },
   beforeDestroy() {
-    map.destroy();
-    this.over();
+    if (typeof this.over === "function") {
+      this.over();
+    }
   }
 };
 </script>
