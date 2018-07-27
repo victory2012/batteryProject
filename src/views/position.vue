@@ -57,9 +57,9 @@
 }
 .list_warp li p {
   width: 130px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .list_warp .selected {
   background: green;
@@ -164,8 +164,8 @@ export default {
         pageNum: this.pageNum,
         pageSize: 10
       };
-      if (this.pathParams) {
-        pageObj.bindingStatus = 0;
+      if (this.deviceShow) {
+        pageObj.bindingStatus = "";
       } else {
         pageObj.bindingStatus = 1;
       }
@@ -183,11 +183,18 @@ export default {
           if (result.length > 0) {
             if (this.pathParams) {
               result.forEach((key, index) => {
-                pointerObj[key.deviceId] = `${key.longitude},${key.latitude},${timeFormats(new Date())},${key.batteryId},${key.onlineStatus}`;
+                pointerObj[key.deviceId] = `${key.longitude},${
+                  key.latitude
+                },${timeFormats(new Date())},${key.batteryId},${
+                  key.onlineStatus
+                }`;
                 if (key.onlineStatus === 1) {
                   key.onLine = "在线";
                   if (key.deviceId) {
                     sendData.param.push(key.deviceId);
+                  }
+                  if (key.batteryId) {
+                    batteryIdArr[key.deviceId] = key.batteryId; // 制作电池id 字典。以设备id作为key，电池id作为value。
                   }
                   // pathParams 路由传参。为设备id
                   if (this.pathParams === key.deviceId) {
@@ -235,12 +242,12 @@ export default {
                 obj[1]
               },${new Date()},${battery},1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id。以逗号隔开
             });
-            if (this.deviceId && this.deviceId.toString().length > 5) {
+            if (this.deviceId || this.pathParams) {
               let keys = Object.keys(pointerObj);
               let nextObj = {};
               keys.forEach((item, index) => {
-                if (item === this.deviceId) {
-                  nextObj[this.deviceId] = pointerObj[item];
+                if (item === this.deviceId || item === this.pathParams) {
+                  nextObj[item] = pointerObj[item];
                 }
               });
               this.GaoDeMap(nextObj, "fromClick");
@@ -384,9 +391,9 @@ export default {
           map.remove(this.markers);
         }
         let selectObj = {};
-        keys.forEach((item, index) => {
-          if (item === this.deviceId) {
-            selectObj[this.deviceId] = pointerObj[item];
+        keys.forEach(items => {
+          if (items === this.deviceId) {
+            selectObj[this.deviceId] = pointerObj[items];
           }
         });
         this.GaoDeMap(selectObj, "fromClick");

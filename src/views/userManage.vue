@@ -392,7 +392,6 @@ export default {
             enterpriseName: this.customerForm.enterpriseName,
             mapType: this.customerForm.nature
           };
-          console.log(paramsAdmin);
           addCustomer(paramsAdmin)
             .then(res => {
               console.log(res.data);

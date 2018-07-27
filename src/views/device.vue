@@ -258,10 +258,19 @@ export default {
     },
     MonitorDevice(index, data) {
       let deviceId = data[index];
-      this.$router.push({
-        path: "position",
-        query: { deviceId: deviceId.deviceId }
-      });
+      let userData = JSON.parse(localStorage.getItem("loginData"));
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "position",
+          query: { deviceId: deviceId.deviceId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googlePos",
+          query: { deviceId: deviceId.deviceId }
+        });
+      }
     }
   },
   mounted() {

@@ -348,11 +348,20 @@ export default {
      * 查看运行状态
      */
     examine(index, tableData) {
+      let userData = JSON.parse(localStorage.getItem("loginData"));
       let deviceId = tableData[index];
-      this.$router.push({
-        path: "position",
-        query: { deviceId: deviceId.deviceId }
-      });
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "position",
+          query: { deviceId: deviceId.deviceId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googlePos",
+          query: { deviceId: deviceId.deviceId }
+        });
+      }
     },
     /*
     * 改变每页显示的条数

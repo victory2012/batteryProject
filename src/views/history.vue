@@ -24,20 +24,31 @@
       <div id="mapcontainer"></div>
     </div>
     <div id="panel">
-      <div class="panelTop">
-        <div id="intro" class="intro">
-          <h3>电池列表</h3>
-        </div>
-        <ul class="list_warp">
-          <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item)">
-            <span style="margin-right:5px;">{{index+1}}、{{item.batteryId}}</span>
-          </li>
-        </ul>
-      </div>
-      <div class="page">
-        <el-pagination @current-change="pageChange" :current-page.sync="pageNum" small layout="prev, pager, next" :total="total">
-        </el-pagination>
-      </div>
+      <el-tabs :stretch="true" v-model="activeName">
+        <el-tab-pane label="电池列表" name="list">
+          <div class="panelTop">
+            <ul class="list_warp">
+              <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item)">
+                <span style="margin-right:5px;">{{index+1}}、{{item.batteryId}}</span>
+              </li>
+            </ul>
+          </div>
+          <div class="page">
+            <el-pagination @current-change="pageChange" :current-page.sync="pageNum" small layout="prev, pager, next" :total="total">
+            </el-pagination>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="电池状态" name="block">
+          <div class="checkTime">
+            <ul>
+              <li v-for="(key, index) in blockArr" :class="[{'yollew': key.bgColor === 'yellow'},{'gray': key.bgColor === 'gray'},{'green': key.bgColor === 'green'}]" :key="key.id">{{index}}</li>
+            </ul>
+            <!-- <div class="blockInfo">
+              data is here
+            </div> -->
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </div>
     <div class="timeRange" v-show="trajectory">
       <span>时间(s)</span>
@@ -49,11 +60,12 @@
 <script>
 import AMap from "AMap";
 import AMapUI from "AMapUI";
-import { GetTrajectory, GetDeviceList } from "../api/index.js";
+import { GetTrajectory, GetDeviceList, timeList } from "../api/index.js";
 import {
   timeFormatSort,
   trakTimeformat,
-  yesTody
+  yesTody,
+  getTime
 } from "../utils/transition.js";
 import { onWarn, onTimeOut, onError } from "../utils/callback.js";
 var map, navg, heatmap, pathSimplifierIns;
@@ -61,6 +73,7 @@ let infoWindow;
 export default {
   data() {
     return {
+      activeName: "list",
       trajectory: false,
       active: true,
       navg: null,
@@ -75,13 +88,123 @@ export default {
       alldistance: 0,
       timeSeconds: 50,
       pageNum: 1,
-      total: 10
+      total: 10,
+      queryDevice: null,
+      blockArr: []
     };
   },
   mounted() {
     this.init();
   },
   methods: {
+    // handleClick(tab) {
+    //   console.log(tab.name);
+    //   if (tab.name === 'block') {
+    //     this.getTimeList(id)
+    //   }
+    // },
+    // mouseOverFun(key, event) {
+    //   console.log(key);
+    //   console.log(event);
+    //   let pageX = event.pageX;
+    //   let pageY = event.pageY;
+    // },
+    getTimeList(id) {
+      let param = {
+        deviceId: id,
+        startTime: new Date(this.starts),
+        endTime: new Date(this.endtime)
+      };
+      timeList(param).then(res => {
+        const result = res.data;
+        console.log(result);
+        if (result.code === 0) {
+          /* getTime
+            // 返回开始时间到结束时间的毫秒数 getTime第一个参数:开始时间  第二个:结束时间；
+            // {100000} 是毫秒数1000 * 100个格子。代表每个小格子代表的时间区间,单位是 秒；向上取整；
+            最终返回的是 每个格子所代表的时间段；
+          */
+          let perBlock = getTime(this.starts, this.endtime);
+          // console.log(perBlock);
+          let arrs = [];
+          let pointArr = [];
+          // let pointObj = [];
+          if (result.data.length > 0) {
+            result.data.forEach(key => {
+              key.createTime = new Date(key.createTime).getTime();
+              key.pre = new Date(key.createTime) - new Date(this.starts);
+              key.index = Math.ceil(key.pre / perBlock);
+              pointArr.push(key);
+            });
+            console.log(pointArr);
+            let pointArrindex = 0;
+            let bgColor = pointArr[0].status === 0 ? "green" : "gray";
+            let len = pointArr.length;
+            this.onlineStatus = null;
+            for (let i = 0; i < 100; i++) {
+              let obj = {};
+              obj.bgColor = bgColor;
+              obj.startTime = new Date(this.starts).getTime() + perBlock * i;
+              obj.endTime =
+                new Date(this.starts).getTime() + perBlock * (i + 1);
+              obj.id = i;
+
+              arrs.push(obj);
+              if (this.onlineStatus && this.onlineStatus != null) {
+                arrs[i].bgColor = this.onlineStatus === "0" ? "gray" : "green";
+              }
+              let diff = arrs[i].endTime - pointArr[pointArrindex].createTime;
+              if (diff >= 0 && pointArrindex < len) {
+                pointArrindex++;
+                console.log(pointArrindex);
+                // if (pointArrindex === 2) {
+                //   this.onlineStatus = pointArr[pointArrindex + 1].status;
+                // } else {
+                //   this.onlineStatus = pointArr[pointArrindex].status;
+                // }
+                this.onlineStatus = pointArr[pointArrindex].status;
+                arrs[i].bgColor = "yellow";
+                // console.log(this.onlineStatus);
+              }
+            }
+            this.blockArr = arrs;
+            // console.log(this.arrs);
+            // for (let i = 0; i < result.data.length; i++) {
+            //   let key = result.data[i];
+            //   let obj = {};
+            //   let aroseTime =
+            //     (new Date(key.createTime) - new Date(this.starts)) / 1000; // 发生时间距离开始时间的 秒数
+            //   let aroseBlock = Math.ceil(aroseTime / perBlock); // 得出发生上下线时间 属于第几个格子；
+            // obj.index = aroseBlock;
+            // obj.status = key.status;
+            // pointObj[aroseBlock] = key.status;
+            // pointArr.push(obj);
+            // this.arrs[aroseBlock - 1].bgColor = "yellow";
+            // this.arrs[aroseBlock].bgColor = "green";
+            // }
+            // let len = result.data.length - 1;
+            // let lastPointerTime = result.data[len].createTime;
+            // let lastProbTime =
+            //   (new Date(lastPointerTime) - new Date(this.starts)) / 1000; // 得到数组中最后一项中的时间是属于第几个格子；
+            // let lastProbIndex = Math.ceil(lastProbTime / perBlock);
+            // let upDown = result.data[len].status;
+            // let keys = Object.keys(pointObj);
+            // let values = Object.values(pointObj);
+            // let firstPointer = values[0];
+            // this.arrs.forEach((item, index) => {
+            //   if (firstPointer === 0) {
+            //     item.bgColor = "green";
+            //   } else {
+            //     item.bgColor = "gray";
+            //   }
+            //   if (index >= lastProbIndex) {
+            //     this.arrs[index].bgColor = upDown === 0 ? "gray" : "green";
+            //   }
+            // });
+          }
+        }
+      });
+    },
     pageChange() {
       let pageObj = {
         pageNum: this.pageNum,
@@ -117,14 +240,8 @@ export default {
         pushDateEnd: timeFormatSort(this.endtime)
       };
       opts.batteryId = this.devicelabel;
+      this.getTimeList(this.queryDevice);
       this.getData(opts);
-      // if (this.deviceId && this.pageNum === 1) {
-      //   opts.deviceId = this.devicelabel;
-      //   this.getData(opts);
-      // } else {
-      //   opts.batteryId = this.devicelabel;
-      //   this.getData(opts);
-      // }
     },
     /* 获取数据 */
     getData(params) {
@@ -145,8 +262,11 @@ export default {
                 var distance, p1, p2;
                 if (i < result.length - 1) {
                   p1 = new AMap.LngLat(key.longitude, key.latitude);
-                  p2 = new AMap.LngLat(result[i + 1].longitude, result[i + 1].latitude);
-                  distance = Math.round(p1.distance(p2))
+                  p2 = new AMap.LngLat(
+                    result[i + 1].longitude,
+                    result[i + 1].latitude
+                  );
+                  distance = Math.round(p1.distance(p2));
                 }
                 this.alldistance += distance;
                 var obj = {};
@@ -225,15 +345,18 @@ export default {
           }
           if (res.data.code === 0) {
             let result = res.data.data.data;
+            this.total = res.data.data.total;
             this.pointerArr = [];
             if (result.length > 0) {
+              this.batteryId = this.$route.query.batteryId; // 路由参数
               result.forEach(key => {
                 if (key.batteryId) {
+                  if (this.batteryId && this.batteryId === key.batteryId) {
+                    this.queryDevice = key.deviceId; // 根据路由参数中的电池id 获取对应的设备id；
+                  }
                   this.pointerArr.push(key);
                 }
               });
-              this.total = res.data.data.total;
-              this.batteryId = this.$route.query.batteryId;
               let params = {
                 pushDateStart: timeFormatSort(this.starts),
                 pushDateEnd: timeFormatSort(this.endtime)
@@ -245,8 +368,10 @@ export default {
               } else {
                 this.devicelabel = result[0].batteryId;
                 params.batteryId = result[0].batteryId;
+                this.queryDevice = result[0].deviceId;
                 this.getData(params);
               }
+              this.getTimeList(this.queryDevice);
             } else {
               onWarn("暂无设备, 请先注册设备");
             }
@@ -277,7 +402,7 @@ export default {
       //   }
       //   lineArr.push([lngX, latY, timer]);
       // }
-      console.log('总距离', this.alldistance)
+      console.log("总距离", this.alldistance);
       if (this.lineArr.length < 1) {
         return;
       }
@@ -393,13 +518,16 @@ export default {
     },
     // 列表点击事件
     checkItem(item) {
+      console.log(item);
       let params = {
         pushDateStart: timeFormatSort(this.starts),
         pushDateEnd: timeFormatSort(this.endtime)
       };
       params.batteryId = item.batteryId;
       this.devicelabel = item.batteryId;
+      this.queryDevice = item.deviceId;
       this.getData(params);
+      this.getTimeList(this.queryDevice);
       // if (this.deviceId && this.pageNum === 1) {
       //   this.devicelabel = item.deviceId;
       //   params.deviceId = item.deviceId;
@@ -462,12 +590,12 @@ export default {
 .date {
   font-size: 16px;
 }
-.intro h3 {
+/* .intro h3 {
   padding-left: 8px;
   font-weight: normal;
   font-size: 16px;
   margin-bottom: 10px;
-}
+} */
 #speed {
   vertical-align: middle;
   width: 60px;
@@ -560,5 +688,44 @@ export default {
 .page {
   padding-top: 20px;
   text-align: right;
+}
+.checkTime {
+  position: relative;
+  margin: 0 auto;
+  width: 260px;
+  height: auto;
+}
+.blockInfo {
+  position: absolute;
+  width: 80%;
+  height: auto;
+  top: 10px;
+  left: 10px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+.checkTime ul {
+  display: flex;
+  width: 100%;
+  border-top: 1px solid #f0f0f0;
+  border-left: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+}
+.checkTime ul li {
+  flex: 0 0 25px;
+  height: 25px;
+  border: 1px solid #f0f0f0;
+  border-top: none;
+  border-left: none;
+  list-style: none;
+}
+.checkTime ul li.yollew {
+  background: rgb(226, 213, 26);
+}
+.checkTime ul li.green {
+  background: green;
+}
+.checkTime ul li.gray {
+  background: gray;
 }
 </style>

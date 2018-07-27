@@ -142,6 +142,14 @@ export function trakTimeformat(str) {
   }
 }
 
+export function getTime(start, end) {
+  let startTim = new Date(start);
+  let endTime = new Date(end);
+  let result = endTime - startTim;
+  let perBlock = Math.ceil(result / 100);
+  return perBlock;
+}
+
 export function yesTody() {
   let str = new Date();
   let yy = str.getFullYear();

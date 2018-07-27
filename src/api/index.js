@@ -1,6 +1,6 @@
 import Axios from "axios";
 let BaseUrl = "http://47.98.232.46:8181";
-// let BaseUrl = "http://192.168.1.122:8181";
+// let BaseUrl = "http://192.168.1.183:8181";
 let socketUrl = 'ws://47.98.232.46:8081/gps';
 Axios.defaults.withCredentials = true; // 让ajax携带cookie
 
@@ -9,7 +9,7 @@ let instance = Axios.create({
     "Content-Type": "application/json"
   },
   baseURL: BaseUrl,
-  timeout: 100000,
+  timeout: 30000,
   withCredentials: true
 });
 
@@ -233,4 +233,10 @@ export function enterpriseCustomer() {
  */
 export function singleDeviceId(deviceId) {
   return instance.post(`/device/${deviceId}/gps/get`)
+};
+/*
+ * 获取客户企业列表
+ */
+export function timeList(param) {
+  return instance.post(`/device_login/list`, param)
 };

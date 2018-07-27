@@ -200,6 +200,9 @@ export default {
                 }`;
                 if (key.onlineStatus === 1) {
                   key.onLine = "在线";
+                  if (key.batteryId) {
+                    batteryIdArr[key.deviceId] = key.batteryId; // 制作电池id 字典。以设备id作为key，电池id作为value。
+                  }
                   if (!this.hasGet) {
                     map.setCenter(
                       new google.maps.LatLng(key.latitude, key.longitude)
@@ -260,12 +263,12 @@ export default {
                 new Date()
               )},${battery},1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id。以逗号隔开
             });
-            if (this.deviceId && this.deviceId.toString().length > 5) {
+            if (this.deviceId || this.pathParams) {
               let keys = Object.keys(pointerObj);
               let nextObj = {};
               keys.forEach((item, index) => {
-                if (item === this.deviceId) {
-                  nextObj[this.deviceId] = pointerObj[item];
+                if (item === this.deviceId || item === this.pathParams) {
+                  nextObj[item] = pointerObj[item];
                 }
               });
               this.GaoDeMap(nextObj, "fromClick");

@@ -39,11 +39,11 @@
         </el-pagination>
       </div>
     </div>
-    <!-- <div class="timeRange" v-show="trajectory">
+    <div class="timeRange" v-show="trajectory">
       <span>时间(s)</span>
-      <el-slider v-model="timeSeconds" @change="speedChange" vertical height="200px">
+      <el-slider :max='max' :min="min" v-model="timeSeconds" @change="speedChange" vertical height="200px">
       </el-slider>
-    </div> -->
+    </div>
   </div>
 </template>
 <script>
@@ -75,6 +75,8 @@ export default {
       markerArr: [],
       alldistance: 0,
       timeSeconds: 50,
+      max: 100,
+      min: 1,
       pageNum: 1,
       total: 10,
       localMakerArr: [],
@@ -88,6 +90,12 @@ export default {
     this.init();
   },
   methods: {
+    speedChange() {
+      let speed = this.gridData.length / this.timeSeconds;
+      let haomiao = 1000 / speed;
+      console.log(haomiao)
+      this.animateCircle(haomiao);
+    },
     pageChange() {
       let pageObj = {
         pageNum: this.pageNum,
@@ -116,13 +124,6 @@ export default {
       opts.batteryId = this.devicelabel;
       this.clearMap();
       this.getData(opts);
-      // if (this.deviceId && this.pageNum === 1) {
-      //   opts.deviceId = this.devicelabel;
-      //   this.getData(opts);
-      // } else {
-      //   opts.batteryId = this.devicelabel;
-      //   this.getData(opts);
-      // }
     },
     /* 获取数据 */
     getData(params) {
@@ -304,20 +305,22 @@ export default {
           onError("服务器请求超时，请稍后重试");
         });
     },
-    animateCircle() {
+    animateCircle(times) {
+      let seconds = times || 10;
       var count = 0;
       animate1 && clearInterval(animate1);
       animate1 = window.setInterval(() => {
-        count = count + 1;
+        count = count + 5;
+        // console.log(count)
         var icons = line.get("icons");
         icons[0].offset = count / this.gridData.length * 100 + "%";
         line.set("icons", icons);
         console.log(count, icons[0].offset);
-        // //终点停车
-        if (count === this.gridData.length) {
+        // // //终点停车
+        if (count >= this.gridData.length) {
           clearInterval(animate1);
         }
-      }, 100);
+      }, seconds);
     },
     // 历史轨迹 轨迹配置
     track() {
@@ -339,56 +342,12 @@ export default {
         map: map
       });
       line.setPath(this.gridData);
-      // this.lineArr.forEach(pointer => {
-      //   let mapPointer = new google.maps.Marker({
-      //     position: pointer.ponter,
-      //     icon: {
-      //       path: google.maps.SymbolPath.CIRCLE,
-      //       scale: 3,
-      //       strokeColor: "red"
-      //     },
-      //     map: map
-      //   });
-      //   this.markerPointer.mapPointer.push(mapPointer);
-      //   mapPointer.addListener("click", e => {
-      //     this.infowindow && this.infowindow.close();
-      //     var latLngData =
-      //       e.latLng.lat().toFixed(6) + "," + e.latLng.lng().toFixed(6);
-      //     this.$.ajax({
-      //       type: "post",
-      //       url:
-      //         "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
-      //         latLngData +
-      //         "&location_type=ROOFTOP&result_type=street_address&key=AIzaSyC8IXpNgfA7uD-Xb0jEqhkEdB7j3gbgOiE",
-      //       async: true,
-      //       success: function(data) {
-      //         console.log(data);
-      //         let address;
-      //         if (data.status === "OK") {
-      //           address = data.results[0].formatted_address;
-      //         } else {
-      //           address = "地址获取失败";
-      //         }
-      //         var site =
-      //           "时间：" +
-      //           trakTimeformat(pointer.pushTime) +
-      //           "<br />" +
-      //           "坐标：" +
-      //           latLngData +
-      //           "<br />" +
-      //           "地址：" +
-      //           address;
-      //         this.infowindow = new google.maps.InfoWindow({
-      //           content: site
-      //         });
-      //         this.infowindow.open(map, mapPointer); // 弹出信息提示窗口
-      //         map.addListener("click", () => {
-      //           this.infowindow.close();
-      //         });
-      //       }
-      //     });
-      //   });
-      // });
+      let TimerMax = Math.ceil(this.gridData.length * 0.01);
+      if (TimerMax > this.max) {
+        this.max = Math.ceil(TimerMax * 2);
+      }
+      this.min = TimerMax;
+      this.timeSeconds = TimerMax;
       let start = new google.maps.Marker({
         position: this.gridData[0],
         label: {
@@ -410,6 +369,7 @@ export default {
     },
     // 清除地图上的覆盖物
     clearMap() {
+      animate1 && clearInterval(animate1);
       heatmapData && heatmapData.setMap(null);
       line && line.setMap(null);
       if (this.markerPointer.sdPointer.length > 0) {
@@ -432,6 +392,7 @@ export default {
     },
     // 列表点击事件
     checkItem(item) {
+      animate1 && clearInterval(animate1);
       this.clearMap();
       let params = {
         pushDateStart: timeFormatSort(this.starts),
@@ -441,6 +402,9 @@ export default {
       this.devicelabel = item.batteryId;
       this.getData(params);
     }
+  },
+  beforeDestroy() {
+    animate1 && clearInterval(animate1);
   }
 };
 </script>
