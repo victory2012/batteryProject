@@ -158,8 +158,8 @@ import {
   deviceListOnly,
   GetList,
   deleteBattery
-} from "../api/index.js";
-import { onTimeOut, onError, onSuccess } from "../utils/callback.js";
+} from "../../api/index.js";
+import { onTimeOut, onError, onSuccess } from "../../utils/callback.js";
 export default {
   data() {
     return {

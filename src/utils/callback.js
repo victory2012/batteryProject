@@ -6,7 +6,8 @@ export function onTimeOut (route) {
   route.push({
     path: "/login"
   });
-  localStorage.removeItem('loginData');
+  sessionStorage.removeItem('loginData');
+  sessionStorage.removeItem('projectTit');
 }
 export function onError(msg) {
   return Message.error({

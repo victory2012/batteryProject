@@ -60,6 +60,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 12px;
 }
 .list_warp .selected {
   background: green;
@@ -119,7 +120,7 @@
 <script>
 import google from "google";
 import { websockets, GetDeviceList } from "../../api/index.js";
-import { trakTimeformat, timeFormat } from "../../utils/transition.js";
+import { trakTimeformat, nowDate } from "../../utils/transition.js";
 import { onError, onTimeOut } from "../../utils/callback";
 let map;
 let infoWindow;
@@ -161,8 +162,8 @@ export default {
       try {
         map = new google.maps.Map(document.getElementById("positions"), {
           center: {
-            lat: 31.232803,
-            lng: 121.475101
+            lat: 0,
+            lng: 0
           },
           zoom: 15
         });
@@ -193,11 +194,7 @@ export default {
           if (result.length > 0) {
             if (this.pathParams) {
               result.forEach((key, index) => {
-                pointerObj[key.deviceId] = `${key.latitude},${
-                  key.longitude
-                },${trakTimeformat(key.pushTime)},${key.batteryId},${
-                  key.onlineStatus
-                }`;
+                pointerObj[key.deviceId] = `${key.latitude},${key.longitude},${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus}`;
                 if (key.onlineStatus === 1) {
                   key.onLine = "在线";
                   if (key.batteryId) {
@@ -214,17 +211,20 @@ export default {
                     sendData.param.push(key.deviceId);
                   }
                   // pathParams 路由传参。为设备id
-                  if (this.pathParams === key.deviceId) {
-                    this.checkItem({ deviceId: this.pathParams }, index);
-                  }
                 } else {
                   key.onLine = "离线";
                 }
+                if (this.pathParams === key.deviceId) {
+                  let opts = {
+                    deviceId: this.pathParams,
+                    longitude: key.longitude,
+                    latitude: key.latitude
+                  }
+                  this.checkItem(opts, index);
+                }
                 this.pointerArr.push(key);
               });
-              // map.setCenter(
-              //   new google.maps.LatLng(result[0].latitude, result[0].longitude)
-              // );
+
               this.sockets(JSON.stringify(sendData));
             } else {
               this.mapInit(result);
@@ -259,9 +259,9 @@ export default {
             let obj = data.data.split(",");
             let battery = batteryIdArr[obj[0]]; // 从电池id 字典中获取电池id，obj[0] 为设备id。
             obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[1]},${obj[2]},${timeFormat(
-                new Date()
-              )},${battery},1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id。以逗号隔开
+              pointerObj[obj[0]] = `${obj[1]},${
+                obj[2]
+              },${nowDate()},${battery},1,1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
             });
             if (this.deviceId || this.pathParams) {
               let keys = Object.keys(pointerObj);
@@ -301,7 +301,7 @@ export default {
       data.forEach((key, index) => {
         pointerObj[key.deviceId] = `${key.latitude},${
           key.longitude
-        },${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus}`;
+        },${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus},0`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
         if (key.onlineStatus === 1) {
           // onlineStatus 判断是否在线的标识。1 在线。0 离线；
           key.onLine = "在线";
@@ -392,12 +392,23 @@ export default {
           });
         });
       });
+      // 只有从概览中获取marker点的时候 才需要自适应显示；
+      if (!fromWs) {
+        // 地图自适应显示所有点
+        let bounds = new google.maps.LatLngBounds();
+        for (var i = 0; i < this.markers.length; i++) {
+          bounds.extend(this.markers[i].getPosition());
+        }
+        map.fitBounds(bounds);
+      }
     },
     /*
     * @params deviceId 电池列表 获取的设备id。
     * @params index 为列表的索引。这里取这个索引是为了让地图的mark点 显示点的是第几个。
      */
     checkItem(item, index) {
+      if (item.onlineStatus === 0) return;
+      map.setCenter(new google.maps.LatLng(item.latitude, item.longitude));
       this.devicelabel = item.deviceId;
       this.deviceId = item.deviceId;
       ponterIndex = index + 1;
@@ -429,10 +440,19 @@ export default {
     },
     // 查看历史轨迹。路由传参 设备id
     HistoryTrack(batteryId) {
-      this.$router.push({
-        path: "history",
-        query: { batteryId: batteryId }
-      });
+      let userData = JSON.parse(localStorage.getItem("loginData"));
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "history",
+          query: { batteryId: batteryId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googleHis",
+          query: { batteryId: batteryId }
+        });
+      }
     }
   },
   /*

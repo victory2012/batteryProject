@@ -96,8 +96,8 @@
   </div>
 </template>
 <script>
-import { getUserInfo, changeUserInfo } from "../api/index.js";
-import { onTimeOut, onSuccess, onError } from "../utils/callback"
+import { getUserInfo, changeUserInfo } from "../../api/index.js";
+import { onTimeOut, onSuccess, onError } from "../../utils/callback"
 export default {
   data() {
     return {

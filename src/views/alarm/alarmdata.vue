@@ -51,9 +51,9 @@
 }
 </style>
 <script>
-import { alarmList } from "../api/index.js";
-import { timeFormat, sortGps } from "../utils/transition.js";
-import { onTimeOut, onError } from "../utils/callback.js";
+import { alarmList } from "../../api/index.js";
+import { timeFormat, sortGps } from "../../utils/transition.js";
+import { onTimeOut, onError } from "../../utils/callback.js";
 export default {
   data() {
     return {
@@ -111,10 +111,19 @@ export default {
     },
     checkPosition(index, data) {
       // 查看位置
-      this.$router.push({
-        path: "abnormal",
-        query: { grid: data[index].grid, deviceId: data[index].deviceId }
-      });
+      let userData = JSON.parse(localStorage.getItem("loginData"));
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "abnormal",
+          query: { grid: data[index].grid, deviceId: data[index].deviceId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googleAbno",
+          query: { grid: data[index].grid, deviceId: data[index].deviceId }
+        });
+      }
     },
     handleSizeChange(index) {
       // index为选中的页数

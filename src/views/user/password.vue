@@ -13,8 +13,8 @@
   </div>
 </template>
 <script>
-import { changePassword } from "../api/index.js";
-import { onTimeOut, onError, onSuccess } from "../utils/callback";
+import { changePassword } from "../../api/index.js";
+import { onTimeOut, onError, onSuccess } from "../../utils/callback";
 
 export default {
   name: "Password",

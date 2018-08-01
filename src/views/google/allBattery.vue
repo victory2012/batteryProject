@@ -82,7 +82,7 @@ export default {
     };
   },
   methods: {
-    mapInit(obj) {
+    mapInit(obj, type) {
       let allmarkerArr = Object.values(obj);
       let labelIndex = 1;
       allmarkerArr.forEach(key => {
@@ -122,12 +122,13 @@ export default {
           });
         });
       });
-
-      // var bounds = new google.maps.LatLngBounds();
-      // for (var i = 0; i < this.markers.length; i++) {
-      //   bounds.extend(this.markers[i].getPosition());
-      // }
-      // map.fitBounds(bounds);
+      if (type) {
+        var bounds = new google.maps.LatLngBounds();
+        for (var i = 0; i < this.markers.length; i++) {
+          bounds.extend(this.markers[i].getPosition());
+        }
+        map.fitBounds(bounds);
+      }
     },
     /*
       http请求 获取全部电池设备
@@ -166,7 +167,7 @@ export default {
                 //   pointerObj[key.deviceId] = `${key.latitude},${key.longitude}`;
                 // }
               });
-              this.mapInit(pointerObj);
+              this.mapInit(pointerObj, 'http');
               this.sockets(); // websocket 请求
             } else {
               onWarn("暂无设备, 请先注册设备");

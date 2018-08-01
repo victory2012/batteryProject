@@ -5,14 +5,14 @@
       <el-button @click="goBack" type="primary">返回</el-button>
     </div>
     <div class="localPosition" @click="localPosition" title="查看设备当前位置">
-      <img src="../../static/img/local_normal.png" alt="">
+      <img src="../../../static/img/local_normal.png" alt="">
     </div>
   </div>
 </template>
 <script>
 import AMap from "AMap";
-import { getFence, websockets, singleDeviceId } from "../api/index.js";
-import { onTimeOut, onWarn, onError } from "../utils/callback.js";
+import { getFence, websockets, singleDeviceId } from "../../api/index.js";
+import { onTimeOut, onWarn, onError } from "../../utils/callback.js";
 let map;
 let grid;
 let polygonArr = [];

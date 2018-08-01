@@ -62,8 +62,8 @@
 </template>
 <script>
 import AMap from "AMap";
-import { websockets, GetDeviceList } from "../api/index.js";
-import { onTimeOut, onError, onWarn } from "../utils/callback.js";
+import { websockets, GetDeviceList } from "../../api/index.js";
+import { onTimeOut, onError, onWarn } from "../../utils/callback.js";
 let map;
 let polygons = [];
 let district;
@@ -146,7 +146,7 @@ export default {
         }
       });
     },
-    mapInit(obj) {
+    mapInit(obj, type) {
       let allmarkerArr = Object.values(obj);
       allmarkerArr.forEach(key => {
         var lngs = key.toString().split(",");
@@ -163,15 +163,18 @@ export default {
         });
         this.markers.push(marker);
       });
+      if (type) {
+        map.setFitView(); // 地图自适应
+      }
     },
     /*
       http请求 获取全部电池设备
      */
-    narmleHttp(ws) {
+    narmleHttp() {
       let pageObj = {
         pageNum: 1,
         pageSize: 999999999,
-        bindingStatus: ''
+        bindingStatus: ""
       };
       GetDeviceList(pageObj)
         .then(res => {
@@ -191,11 +194,7 @@ export default {
                 }
               });
               this.mapInit(pointerObj);
-              setTimeout(() => {
-                if (ws && ws.readyState === 1) {
-                  ws.send(JSON.stringify(this.sendData));
-                }
-              }, 1000);
+              this.sockets(this.sendData);
             } else {
               onWarn("暂无设备, 请先注册设备");
             }
@@ -211,11 +210,11 @@ export default {
     /*
       websockets 请求
      */
-    sockets() {
+    sockets(result) {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
-          this.narmleHttp(ws);
+          ws.send(JSON.stringify(result));
         };
         ws.onmessage = evt => {
           let data = JSON.parse(evt.data);
@@ -266,7 +265,7 @@ export default {
           }
         });
       });
-      this.sockets();
+      this.narmleHttp();
     }
   },
   mounted() {
@@ -274,7 +273,9 @@ export default {
   },
   beforeDestroy() {
     map.destroy();
-    this.over();
+    if (typeof this.over === 'object') {
+      this.over();
+    }
   }
 };
 </script>

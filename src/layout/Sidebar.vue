@@ -40,20 +40,20 @@ export default {
   methods: {
     sideBarData() {
       const loginData = JSON.parse(localStorage.getItem("loginData"));
-      if (loginData.mapType === 0) {
+      if (loginData && loginData.mapType === 0) {
         this.items = menuList();
       } else {
         this.items = GoogleList();
       }
       console.log(this.items);
-      if (loginData.userRole === "plat_super_admin") {
+      if (loginData && loginData.userRole === "plat_super_admin") {
         this.items.push({
           icon: "el-icon-setting",
           index: "device",
           title: "设备管理"
         });
       }
-      if (loginData.mapType === 1) {
+      if (loginData && loginData.mapType === 1) {
         this.$router.push({
           path: "googleAll"
         });

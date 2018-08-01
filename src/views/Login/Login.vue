@@ -28,7 +28,7 @@
 
 <script>
 // import {mapState, mapGetters, mapActions, mapMutations} from "vuex"
-import { getAdminInfo } from "../api/index.js";
+import { getAdminInfo } from "../../api/index.js";
 export default {
   data() {
     return {

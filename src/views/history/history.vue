@@ -58,15 +58,15 @@
 <script>
 import AMap from "AMap";
 import AMapUI from "AMapUI";
-import { GetTrajectory, GetDeviceList, timeList } from "../api/index.js";
+import { GetTrajectory, GetDeviceList, timeList } from "../../api/index.js";
 import {
   timeFormatSort,
   trakTimeformat,
   timeFormats,
   yesTody,
   getTime
-} from "../utils/transition.js";
-import { onWarn, onTimeOut, onError } from "../utils/callback.js";
+} from "../../utils/transition.js";
+import { onWarn, onTimeOut, onError } from "../../utils/callback.js";
 var map, navg, heatmap, pathSimplifierIns;
 let infoWindow;
 let pointArr = [];
@@ -106,14 +106,7 @@ export default {
       pointArr.forEach(key => {
         if (key.index === index + 1) {
           this.showTimeDetail = true;
-          // this.position = {
-          //   pagex: 10,
-          //   pagey: event.pageY
-          // };
-          // this.pagey = Math.floor(key.index / 10) * 2;
           this.activePointer.push(key);
-        } else {
-          // this.showTimeDetail = false;
         }
       });
     },
@@ -143,10 +136,16 @@ export default {
               key.dateFormat = timeFormats(key.createTime);
               key.pre = new Date(key.createTime) - new Date(this.starts);
               key.index = Math.ceil(key.pre / perBlock); // 得出此时间是处于第几个格子； 向上取整；
-              key.onlineStatus = key.status === 0 ? "下线" : "上线";
+              if (key.status === 0) {
+                key.onlineStatus = "下线";
+              } else {
+                key.onlineStatus = "上线";
+              }
+              // key.onlineStatus = key.status === 0 ? "下线" : "上线";
               pointArr.push(key);
             });
-            let bgColor = pointArr[0].status === 0 ? "green" : "gray";
+            let bgColor = this.swichFun(pointArr[0].status);
+            // let bgColor = pointArr[0].status === 0 ? 'green' : 'gray'
             this.onlineStatus = null;
             /* {100} 是要循环100个小格子  */
             for (let i = 0; i < 100; i++) {
@@ -157,15 +156,14 @@ export default {
                 new Date(this.starts).getTime() + perBlock * (i + 1);
               obj.id = i;
               arrs.push(obj);
-              if (this.onlineStatus && this.onlineStatus != null) {
-                arrs[i].bgColor = this.onlineStatus === "0" ? "gray" : "green";
+              if (this.onlineStatus !== null && this.onlineStatus !== undefined) {
+                console.log(this.onlineStatus);
+                arrs[i].bgColor = Number(this.onlineStatus) === 0 ? "gray" : "green";
               }
               pointArr.forEach(key => {
-                if (
-                  arrs[i].endTime - key.createTime > 0 &&
-                  key.createTime - arrs[i].startTime > 0
-                ) {
+                if (arrs[i].endTime - key.createTime > 0 && key.createTime - arrs[i].startTime > 0) {
                   arrs[i].bgColor = "yellow";
+                  // console.log(key.status);
                   this.onlineStatus = key.status;
                 }
               });
@@ -186,7 +184,21 @@ export default {
         }
       });
     },
+    // switch color
+    swichFun(key) {
+      switch (key) {
+        case 0:
+          return 'green'
+        case 1:
+          return 'gray'
+        case 2:
+          return 'green'
+        default:
+          break;
+      }
+    },
     pageChange() {
+      this.blockArr = [];
       let pageObj = {
         pageNum: this.pageNum,
         pageSize: 10
@@ -463,7 +475,7 @@ export default {
               fillStyle: null,
               // 使用图片
               content: PathSimplifier.Render.Canvas.getImageContent(
-                "../../../static/img/car.png"
+                "../../../../static/img/car.png"
               )
             }
           });
@@ -600,7 +612,7 @@ export default {
       border-bottom: 1px solid #409eff;
     }
     .panelTop {
-      height: auto;
+      min-height: 412px;
       padding: 0 5px;
       overflow-x: hidden;
       background: #ffffff;

@@ -14,62 +14,62 @@ export default new Router({
       {
         path: '/position',
         name: 'position',
-        component: resolve => require(['../views/position.vue'], resolve),
+        component: resolve => require(['../views/position/position.vue'], resolve),
         meta: { title: '实时位置' }
       },
       {
         path: '/history',
         name: 'history',
-        component: resolve => require(['../views/history.vue'], resolve),
+        component: resolve => require(['../views/history/history.vue'], resolve),
         meta: { title: '历史轨迹' }
       },
       {
         path: '/alarmdata',
         name: 'alarmdata',
-        component: resolve => require(['../views/alarmdata.vue'], resolve),
+        component: resolve => require(['../views/alarm/alarmdata.vue'], resolve),
         meta: { title: '告警数据' }
       },
       {
         path: '/home',
         name: 'home',
-        component: resolve => require(['../views/cityPage.vue'], resolve),
+        component: resolve => require(['../views/allBattery/batterys.vue'], resolve),
         meta: { title: '省份' }
       },
       {
         path: '/fence',
         name: "fence",
-        component: resolve => require(['../views/fence.vue'], resolve),
+        component: resolve => require(['../views/fence/fence.vue'], resolve),
         meta: { title: '地理围栏' }
       },
       {
         path: '/user',
-        component: resolve => require(['../views/user.vue'], resolve),
+        component: resolve => require(['../views/user/user.vue'], resolve),
         meta: { title: '用户信息' }
       },
       {
         path: '/password',
-        component: resolve => require(['../views/password.vue'], resolve),
+        component: resolve => require(['../views/user/password.vue'], resolve),
         meta: { title: '修改密码' }
       },
       {
         path: '/abnormal',
         name: 'abnormal',
-        component: resolve => require(['../views/abnormal.vue'], resolve),
+        component: resolve => require(['../views/abnormal/abnormal.vue'], resolve),
         meta: { title: '报警数据' }
       },
       {
         path: '/batteryList',
         name: 'batteryList',
-        component: resolve => require(['../views/batteryList.vue'], resolve),
+        component: resolve => require(['../views/batteryList/batteryList.vue'], resolve),
         meta: { title: '电池列表' }
       }, {
         path: '/userManage',
-        component: resolve => require(['../views/userManage.vue'], resolve),
+        component: resolve => require(['../views/userManage/userManage.vue'], resolve),
         meta: { title: '用户管理' }
       }, {
         path: '/device',
         name: "device",
-        component: resolve => require(['../views/device.vue'], resolve),
+        component: resolve => require(['../views/device/device.vue'], resolve),
         meta: { title: '设备管理' }
       }, {
         path: '/googleAll',
@@ -95,6 +95,6 @@ export default new Router({
     ]
   }, {
     path: '/login',
-    component: resolve => require(['../views/Login.vue'], resolve)
+    component: resolve => require(['../views/Login/Login.vue'], resolve)
   }]
 })

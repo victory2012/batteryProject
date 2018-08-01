@@ -6,19 +6,19 @@
         <p>创建企业用户</p>
       </div> -->
       <div v-if="manufacturer" @click="creatAdmin = true">
-        <img src="../../static/img/add-admin.png" alt="">
+        <img src="../../../static/img/add-admin.png" alt="">
         <p>添加生产企业管理员</p>
       </div>
       <div v-else-if="customer" @click="creatCustorm = true">
-        <img src="../../static/img/add-user.png" alt="">
+        <img src="../../../static/img/add-user.png" alt="">
         <p>添加客户企业管理员</p>
       </div>
       <div v-if="manufacturerAdmin" @click="manAdmin = true">
-        <img src="../../static/img/add-user.png" alt="">
+        <img src="../../../static/img/add-user.png" alt="">
         <p>添加生产企业普通管理员</p>
       </div>
       <div v-if="customerAdmin" @click="creatCustormAdmin = true">
-        <img src="../../static/img/add-user.png" alt="">
+        <img src="../../../static/img/add-user.png" alt="">
         <p>添加普通管理员</p>
       </div>
     </div>
@@ -291,9 +291,9 @@ import {
   manufacturerList, // 用户列表
   addCustomerAdmin, // 添加生产企业普通管理员
   addCustomer // 添加客户超级管理员
-} from "../api/index.js";
-import { userRole, companyRole } from "../utils/transition.js";
-import { onTimeOut, onSuccess, onError } from "../utils/callback"
+} from "../../api/index.js";
+import { userRole, companyRole } from "../../utils/transition.js";
+import { onTimeOut, onSuccess, onError } from "../../utils/callback"
 export default {
   name: "userTable",
   data() {

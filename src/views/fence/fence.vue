@@ -16,8 +16,8 @@
 </template>
 <script>
 import AMap from "AMap";
-import { getFence, addFence, delFence } from "../api/index.js";
-import { onTimeOut, onError, onWarn, onSuccess } from "../utils/callback.js";
+import { getFence, addFence, delFence } from "../../api/index.js";
+import { onTimeOut, onError, onWarn, onSuccess } from "../../utils/callback.js";
 let map;
 let marker;
 let markers = [];

@@ -119,6 +119,23 @@ export function timeFormats(time) {
   second = second < 10 ? "0" + second : second;
   return year + "-" + mounth + "-" + day + "  " + hours + ":" + minute + ":" + second;
 }
+
+export function nowDate() {
+  let timeDate = new Date();
+  let year = timeDate.getFullYear()
+  let mounth = timeDate.getMonth() + 1;
+  let day = timeDate.getDate();
+  let hours = timeDate.getHours();
+  let minute = timeDate.getMinutes();
+  let second = timeDate.getSeconds();
+  mounth = mounth < 10 ? "0" + mounth : mounth;
+  day = day < 10 ? "0" + day : day;
+  hours = hours < 10 ? "0" + hours : hours;
+  minute = minute < 10 ? "0" + minute : minute;
+  second = second < 10 ? "0" + second : second;
+  return year + "-" + mounth + "-" + day + "  " + hours + ":" + minute + ":" + second;
+}
+
 export function userData() {
   let data = JSON.parse(localStorage.getItem("loginData"));
   if (data.userRole === "palt_super_admin") {
@@ -151,10 +168,12 @@ export function getTime(start, end) {
 }
 
 export function yesTody() {
-  let str = new Date();
+  let yesDate = new Date(new Date().toLocaleDateString()).getTime();
+  let result = yesDate - 86400000;
+  let str = new Date(result);
   let yy = str.getFullYear();
   let mm = str.getMonth() + 1;
-  let day = str.getDate() - 1;
+  let day = str.getDate();
   // let hours = str.getHours();
   // let minute = str.getMinutes();
   // let second = str.getSeconds();

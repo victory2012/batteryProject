@@ -104,14 +104,7 @@ export default {
       pointArr.forEach(key => {
         if (key.index === index + 1) {
           this.showTimeDetail = true;
-          // this.position = {
-          //   pagex: 10,
-          //   pagey: event.pageY
-          // };
-          // this.pagey = Math.floor(key.index / 10) * 2;
           this.activePointer.push(key);
-        } else {
-          // this.showTimeDetail = false;
         }
       });
     },
@@ -190,6 +183,7 @@ export default {
       this.animateCircle(this.haomiao);
     },
     pageChange() {
+      this.blockArr = [];
       let pageObj = {
         pageNum: this.pageNum,
         pageSize: 10
@@ -365,6 +359,8 @@ export default {
           }
           if (res.data.code === 0) {
             let result = res.data.data.data;
+            this.total = res.data.data.total;
+            this.batteryId = this.$route.query.batteryId;
             this.pointerArr = [];
             if (result.length > 0) {
               result.forEach(key => {
@@ -375,8 +371,6 @@ export default {
                   this.pointerArr.push(key);
                 }
               });
-              this.total = res.data.data.total;
-              this.batteryId = this.$route.query.batteryId;
               let params = {
                 pushDateStart: timeFormatSort(this.starts),
                 pushDateEnd: timeFormatSort(this.endtime)
@@ -577,7 +571,7 @@ export default {
       border-bottom: 1px solid #409eff;
     }
     .panelTop {
-      height: auto;
+      min-height: 412px;
       padding: 0 5px;
       overflow-x: hidden;
       background: #ffffff;
