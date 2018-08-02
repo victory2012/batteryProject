@@ -393,7 +393,10 @@ export default {
      */
     checkItem(item, index) {
       if (item.onlineStatus === 0) return;
-      map.setCenter(new AMap.LngLat(item.longitude, item.latitude));
+      console.log(item);
+      if (item.longitude && item.latitude) {
+        map.setCenter(new AMap.LngLat(item.longitude, item.latitude));
+      }
       this.devicelabel = item.deviceId;
       this.deviceId = item.deviceId;
       ponterIndex = index + 1;
