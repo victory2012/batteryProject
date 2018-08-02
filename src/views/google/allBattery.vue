@@ -87,6 +87,7 @@ export default {
       let labelIndex = 1;
       allmarkerArr.forEach(key => {
         var lngs = key.toString().split(",");
+        console.log(lngs);
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(lngs[0], lngs[1]),
           label: `${labelIndex++}`,
@@ -155,17 +156,14 @@ export default {
               result.forEach(key => {
                 if (key.longitude && key.latitude && key.onlineStatus === 1) {
                   pointerObj[key.deviceId] = `${key.latitude},${key.longitude}`;
-                  if (!this.hasSet) {
-                    this.hasSet = true;
-                    map.setCenter(
-                      new google.maps.LatLng(key.latitude, key.longitude)
-                    );
-                  }
+                  // if (!this.hasSet) {
+                  //   this.hasSet = true;
+                  //   map.setCenter(
+                  //     new google.maps.LatLng(key.latitude, key.longitude)
+                  //   );
+                  // }
                   this.sendData.param.push(key.deviceId);
                 }
-                // if (key.longitude && key.latitude) {
-                //   pointerObj[key.deviceId] = `${key.latitude},${key.longitude}`;
-                // }
               });
               this.mapInit(pointerObj, 'http');
               this.sockets(); // websocket 请求

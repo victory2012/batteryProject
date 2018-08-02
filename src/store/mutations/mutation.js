@@ -1,5 +1,5 @@
 export default {
-  updateCount(state, num) {
-    state.count = num
+  GET_MAP_DATA(state, data) {
+    state.mapData = data
   }
 }
