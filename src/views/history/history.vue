@@ -156,12 +156,19 @@ export default {
                 new Date(this.starts).getTime() + perBlock * (i + 1);
               obj.id = i;
               arrs.push(obj);
-              if (this.onlineStatus !== null && this.onlineStatus !== undefined) {
+              if (
+                this.onlineStatus !== null &&
+                this.onlineStatus !== undefined
+              ) {
                 console.log(this.onlineStatus);
-                arrs[i].bgColor = Number(this.onlineStatus) === 0 ? "gray" : "green";
+                arrs[i].bgColor =
+                  Number(this.onlineStatus) === 0 ? "gray" : "green";
               }
               pointArr.forEach(key => {
-                if (arrs[i].endTime - key.createTime > 0 && key.createTime - arrs[i].startTime > 0) {
+                if (
+                  arrs[i].endTime - key.createTime > 0 &&
+                  key.createTime - arrs[i].startTime > 0
+                ) {
                   arrs[i].bgColor = "yellow";
                   // console.log(key.status);
                   this.onlineStatus = key.status;
@@ -188,11 +195,11 @@ export default {
     swichFun(key) {
       switch (key) {
         case 0:
-          return 'green'
+          return "green";
         case 1:
-          return 'gray'
+          return "gray";
         case 2:
-          return 'green'
+          return "green";
         default:
           break;
       }
@@ -462,6 +469,7 @@ export default {
               path: this.lineArr
             }
           ]);
+          console.log("this.lineArr", this.lineArr);
           let distance = Number(this.alldistance) / 1000; // 米转成千米
           let times = Number(this.timeSeconds) / 3600; // 秒转成小时
           let speeds = Math.ceil(distance / times); // 最终得到的速度是 km/h

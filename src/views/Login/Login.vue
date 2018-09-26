@@ -27,7 +27,6 @@
 </template>
 
 <script>
-// import {mapState, mapGetters, mapActions, mapMutations} from "vuex"
 import { getAdminInfo } from "../../api/index.js";
 export default {
   data() {
@@ -54,7 +53,6 @@ export default {
   },
   methods: {
     // ...mapActions(['updateCountAsync']),
-    // ...mapMutations(['updateCount']),
     submitForm(params) {
       this.$refs[params].validate(valid => {
         if (valid) {
@@ -68,6 +66,9 @@ export default {
                   "loginData",
                   JSON.stringify(res.data.data)
                 );
+                this.$store.commit('SET_USER_DATA', JSON.stringify(res.data.data));
+                this.$store.commit('SET_MAP_TYPE', res.data.data.mapType);
+                localStorage.setItem("mapType", res.data.data.mapType);
                 localStorage.setItem("account", this.loginForm.userName);
                 localStorage.setItem("password", this.loginForm.password);
                 this.$router.push("/home");
@@ -106,20 +107,6 @@ export default {
   mounted() {
     this.init();
   }
-  // computed: {
-  //   ...mapState({
-  //     counter: (state) => state.count
-  //   }),
-  //   // count() {
-  //   //   return this.$store.state.count;
-  //   // },
-  //   ...mapGetters({
-  //     names: 'fullName'
-  //   })
-  //   // fullName() {
-  //   //   return this.$store.getters.fullName
-  //   // }
-  // }
 };
 </script>
 

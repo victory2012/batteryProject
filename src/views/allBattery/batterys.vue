@@ -48,15 +48,13 @@
         </el-col>
       </el-row>
     </div>
-    <v-amap v-if="mapType" :propData="propData"></v-amap>
+    <v-amap v-if="mapType == '0'" :propData="propData"></v-amap>
     <v-google v-else :propData="propData"></v-google>
   </div>
 </template>
 <script>
 // import AMap from "AMap";
-// import {
-//   mapState
-// } from 'vuex'
+import { mapState } from "vuex";
 import { websockets, GetDeviceList } from "../../api/index.js";
 import { onTimeOut, onError, onWarn } from "../../utils/callback.js";
 import GaodeMap from "./gaode-map";
@@ -198,10 +196,6 @@ export default {
               // this.mapInit(pointerObj);
               this.propData.type = "http";
               this.sockets(this.sendData);
-              // this.$store.commit("GET_MAP_DATA", {
-              //   data: pointerObj,
-              //   type: "http"
-              // });
             } else {
               onWarn("暂无设备, 请先注册设备");
             }
@@ -288,13 +282,13 @@ export default {
     }
   },
   mounted() {
+    this.$store.commit('SET_USER_DATA', localStorage.loginData);
+    this.$store.commit('SET_MAP_TYPE', localStorage.mapType);
     this.init();
   },
   computed: {
-    mapType: () => {
-      let userData = JSON.parse(localStorage.getItem("loginData"));
-      return userData.mapType === 0 ? true : false;
-    }
+    ...mapState(["mapType"]),
+    ...mapState(['loginData'])
   },
   beforeDestroy() {
     // map.destroy();

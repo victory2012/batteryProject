@@ -174,6 +174,8 @@ export function yesTody() {
   let yy = str.getFullYear();
   let mm = str.getMonth() + 1;
   let day = str.getDate();
+  mm = mm < 10 ? "0" + mm : mm;
+  day = day < 10 ? "0" + day : day;
   // let hours = str.getHours();
   // let minute = str.getMinutes();
   // let second = str.getSeconds();
