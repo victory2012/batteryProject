@@ -400,10 +400,12 @@ export default {
      */
     checkItem(item, index) {
       if (item.onlineStatus === 0) return;
-      // map.setCenter(new AMap.LngLat(item.longitude, item.latitude));
-      ponterIndex = 0;
-      this.devicelabel = item;
-      this.deviceId = item;
+      console.log(item);
+      if (item.longitude && item.latitude) {
+        map.setCenter(new AMap.LngLat(item.longitude, item.latitude));
+      }
+      this.devicelabel = item.deviceId;
+      this.deviceId = item.deviceId;
       ponterIndex = index + 1;
       // infoWindow && infoWindow.close(); // infoWindow 高德地图 数据展示框。
       if (this.deviceId && this.deviceId.toString().length && pointerObj) {
