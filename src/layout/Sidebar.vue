@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { menuList } from "../config/config.js";
+import { menuList, GoogleList } from "../config/config.js";
 import bus from "../utils/bus";
 export default {
   data() {
@@ -39,19 +39,33 @@ export default {
   },
   methods: {
     sideBarData() {
-      this.items = menuList();
       const loginData = JSON.parse(localStorage.getItem("loginData"));
-      if (loginData.userRole === "plat_super_admin") {
+      if (loginData && loginData.mapType === 0) {
+        this.items = menuList();
+      } else {
+        this.items = GoogleList();
+      }
+      console.log(this.items);
+      this.items.forEach(key => {
+        key.title = this.$t(key.title);
+        if (key.subs && key.subs.length > 0) {
+          key.subs.forEach(sub => {
+            sub.title = this.$t(sub.title);
+          });
+        }
+      });
+      console.log("this.items", this.items);
+      if (loginData && loginData.userRole === "plat_super_admin") {
         this.items.push({
           icon: "el-icon-setting",
           index: "device",
           title: "设备管理"
         });
-        // this.items.push({
-        //   icon: "el-icon-tickets",
-        //   index: "userManage",
-        //   title: "用户管理"
-        // });
+      }
+      if (loginData && loginData.mapType === 1) {
+        this.$router.push({
+          path: "googleAll"
+        });
       }
     }
   },

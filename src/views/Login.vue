@@ -2,10 +2,10 @@
   <div class="login_page fillcontain">
     <div class="login-head">
       <el-dropdown class="user-name" @command="handleCommand">
-          <span class="el-dropdown-link">
-            {{localLanguge}}
-            <i class="el-icon-caret-bottom"></i>
-          </span>
+        <span class="el-dropdown-link">
+          {{localLanguge}}
+          <i class="el-icon-caret-bottom"></i>
+        </span>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="cn">
             <i class="iconfont icon-user"></i>中文</el-dropdown-item>
@@ -57,47 +57,66 @@ export default {
       },
       rules: {
         userName: [
-          { required: true, message: "请输入用户名", trigger: "blur" }
+          {
+            required: true,
+            message: this.$t("loginMsg.userNameMsg"),
+            trigger: "blur"
+          }
         ],
-        password: [{ required: true, message: "请输入密码", trigger: "blur" }]
+        password: [
+          {
+            required: true,
+            message: this.$t("loginMsg.password"),
+            trigger: "blur"
+          }
+        ]
       },
       showLogin: false
     };
   },
   created() {
     currentLang = navigator.language; // 判断除IE外其他浏览器使用语言
-    if (!currentLang) { // 判断IE浏览器使用语言
+    if (!currentLang) {
+      // 判断浏览器使用语言
       currentLang = navigator.browserLanguage;
     }
-    // 自动设置语言
-    // const navLang = navigator.language;
-    // const localLang = (navLang === 'zh-CN' || navLang === 'en-US') ? navLang : false;
-    // const lang = window.localStorage.getItem('language') || localLang || 'zh-CN';
-    this.localLanguge = currentLang === "zh-CN" ? "语言" : "languge";
-    // // this.$i18n.locale = currentLang === "zh-CN" ? "CN" : "EN"
-    // console.log(lang)
-    // const locales = Locales;
-    // const mergeZH = Object.assign(zhLocale, locales['zh-CN']);
-    // const mergeEN = Object.assign(enLocale, locales['en-US']);
-    // Vue.locale = () => {};
-    // const i18n = new VueI18n({
-    //   locale: 'en-US',    // 语言标识
-    //   messages: {
-    //     'zh-CN': mergeZH,   // 中文语言包
-    //     'en-US': mergeEN    // 英文语言包
-    //   },
-    // })
+    if (currentLang === "zh-CN") {
+      this.localLanguge = "中文";
+      localStorage.setItem("locale", "CN");
+    } else {
+      this.localLanguge = "English";
+      localStorage.setItem("locale", "EN");
+    }
   },
   methods: {
     handleCommand(cammand) {
       if (cammand === "cn") {
         this.localLanguge = "中文";
         this.$i18n.locale = "CN";
+        localStorage.setItem("locale", "CN");
       }
       if (cammand === "en") {
         this.localLanguge = "English";
         this.$i18n.locale = "EN";
+        localStorage.setItem("locale", "EN");
       }
+
+      this.rules = {
+        userName: [
+          {
+            required: true,
+            message: this.$t("loginMsg.userNameMsg"),
+            trigger: "blur"
+          }
+        ],
+        password: [
+          {
+            required: true,
+            message: this.$t("loginMsg.password"),
+            trigger: "blur"
+          }
+        ]
+      };
     },
     submitForm(params) {
       this.$refs[params].validate(valid => {
@@ -170,6 +189,9 @@ export default {
     line-height: 70px;
     text-align: right;
     padding-right: 70px;
+    .user-name {
+      margin-right: 50px;
+    }
   }
 }
 .el-dropdown {
