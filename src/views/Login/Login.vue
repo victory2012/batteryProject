@@ -112,8 +112,7 @@ export default {
   },
   mounted() {
     this.langs = this.$i18n.locale;
-    // console.log(this.$i18n.locale);
-    console.log(this.$t("message.showMore"));
+    // console.log(this.$t("message.showMore"));
 
     this.init();
   }
