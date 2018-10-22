@@ -9,15 +9,15 @@ import AMapUI from "AMapUI";
 let map;
 let infoWindow;
 export default {
-  props: ['mapData'],
+  props: ["mapData"],
   data() {
     return {
       markers: []
-    }
+    };
   },
   watch: {
     mapData: {
-      handler: function (val, oldVal) {
+      handler: function(val, oldVal) {
         this.MapInit(val.data, val.type);
       },
       deep: true
@@ -25,9 +25,11 @@ export default {
   },
   methods: {
     init() {
+      const lang = localStorage.getItem("locale") === "EN" ? "en" : "zh_cn";
       map = new AMap.Map("positions", {
         resizeEnable: true,
-        zoom: 15
+        zoom: 15,
+        lang: lang
       });
     },
     MapInit(data, type) {
@@ -49,7 +51,7 @@ export default {
             map: map
           });
           if (lngs[5] === "0") {
-            marker.setIcon('../../../static/img/gray.png');
+            marker.setIcon("../../../static/img/gray.png");
           } else {
             marker.setIcon(
               `http://webapi.amap.com/theme/v1.3/markers/n/mark_b${i + 1}.png`
@@ -63,12 +65,14 @@ export default {
           }
           marker.setLabel({
             offset: new AMap.Pixel(15, 20),
-            content: `电池编号：${lngs[3]}<br/>设备编号：${markerkeys[i]}`
+            content: `${this.$t("positions.batteryCode")}：${
+              lngs[3]
+            }<br/>${this.$t("positions.deviceCode")}：${markerkeys[i]}`
           });
           this.markers.push(marker);
         }
       }
-      if (type === 'http') {
+      if (type === "http") {
         map.setFitView(); // 自适应地图
       }
       if (this.markers.length > 0) {
@@ -92,17 +96,19 @@ export default {
               positionPicker.on("success", result => {
                 var info = [];
                 info.push(
-                  `<div><div>更新时间：${pointerData.times}</div>`
-                );
-                info.push(
-                  `<div style="font-size:14px;">路口 :${
-                    result.nearestJunction
+                  `<div><div>${this.$t("positions.updateTime")}：${
+                    pointerData.times
                   }</div>`
                 );
                 info.push(
-                  `<div style="font-size:14px;">地址 :${
-                    result.address
-                  }</div></div>`
+                  `<div style="font-size:14px;">${this.$t(
+                    "positions.intersection"
+                  )} :${result.nearestJunction}</div>`
+                );
+                info.push(
+                  `<div style="font-size:14px;">${this.$t(
+                    "positions.address"
+                  )} :${result.address}</div></div>`
                 );
                 infoWindow = new AMap.InfoWindow({
                   content: info.join("<br/>"), // 使用默认信息窗体框样式，显示信息内容
@@ -123,7 +129,7 @@ export default {
   mounted() {
     this.init();
   }
-}
+};
 </script>
 <style lang="less" scoped>
 .positioned {

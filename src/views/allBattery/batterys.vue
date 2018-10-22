@@ -8,7 +8,7 @@
               <i class="grid-con-icon iconfont">&#xe644;</i>
               <div class="grid-cont-right">
                 <div class="grid-num">{{allDevice}}</div>
-                <div>总数</div>
+                <div>{{$t('overview.total')}}</div>
               </div>
             </div>
           </el-card>
@@ -19,7 +19,7 @@
               <i class="grid-con-icon iconfont">&#xe656;</i>
               <div class="grid-cont-right">
                 <div class="grid-num">{{onLine}}</div>
-                <div>在线数</div>
+                <div>{{$t('overview.online')}}</div>
               </div>
             </div>
           </el-card>
@@ -30,7 +30,7 @@
               <i class="grid-con-icon iconfont">&#xe6a8;</i>
               <div class="grid-cont-right">
                 <div class="grid-num">{{offLine}}</div>
-                <div>离线数</div>
+                <div>{{$t('overview.offLine')}}</div>
               </div>
             </div>
           </el-card>
@@ -41,7 +41,7 @@
               <i class="grid-con-icon iconfont">&#xe6f5;</i>
               <div class="grid-cont-right">
                 <div class="grid-num">0</div>
-                <div>无效数</div>
+                <div>{{$t('overview.invalid')}}</div>
               </div>
             </div>
           </el-card>
@@ -79,15 +79,15 @@ export default {
       offLine: 0,
       markers: [],
       sendData: { api: "bind", param: [] },
-      selectArr: [
-        {
-          adcode: "all",
-          name: "全国"
-        }
-      ],
+      // selectArr: [
+      //   {
+      //     adcode: "all",
+      //     name: "全国"
+      //   }
+      // ],
       googlemapsType: false,
       amapsType: false,
-      defaultOption: "全国",
+      // defaultOption: "全国",
       propData: {
         data: "",
         type: ""
@@ -95,83 +95,6 @@ export default {
     };
   },
   methods: {
-    // getCityData(data) {
-    //   let bounds = data.boundaries;
-    //   if (bounds) {
-    //     for (let i = 0, l = bounds.length; i < l; i++) {
-    //       let polygon = new AMap.Polygon({
-    //         map: map,
-    //         strokeWeight: 1,
-    //         strokeColor: "#0048ff",
-    //         fillColor: "#99fbd2",
-    //         fillOpacity: 0.5,
-    //         path: bounds[i]
-    //       });
-    //       polygons.push(polygon);
-    //     }
-    //     map.setFitView(); // 地图自适应
-    //   }
-    //   let subList = data.districtList;
-    //   if (data.level === "country") {
-    //     // this.selectArr = subList;
-    //     subList.forEach(key => {
-    //       this.selectArr.push(key);
-    //     });
-    //   }
-    //   if (this.limit) {
-    //     setTimeout(() => {
-    //       map.setLimitBounds(map.getBounds());
-    //     }, 300);
-    //   }
-    //   // map.setFitView(); // 地图自适应
-    // },
-    // // 检查是否已经设置了区域设置
-    // getLimitBounds() {
-    //   let limitBounds = map.getLimitBounds();
-    //   if (limitBounds) {
-    //     return true;
-    //   } else {
-    //     return false;
-    //   }
-    // },
-    // selectChange() {
-    //   this.limit = true;
-    //   // 先获取一下是否已经设置了区域限制，如果设置了 就先清除掉
-    //   if (this.getLimitBounds()) {
-    //     map.clearLimitBounds();
-    //   }
-    //   for (var i = 0, l = polygons.length; i < l; i++) {
-    //     polygons[i].setMap(null);
-    //   }
-    //   district.setLevel("province");
-    //   district.setExtensions("all");
-    //   district.search(this.defaultOption, (status, result) => {
-    //     if (status === "complete") {
-    //       this.getCityData(result.districtList[0]);
-    //     }
-    //   });
-    // },
-    // mapInit(obj, type) {
-    //   let allmarkerArr = Object.values(obj);
-    //   allmarkerArr.forEach(key => {
-    //     var lngs = key.toString().split(",");
-    //     var marker = new AMap.Marker({
-    //       icon: new AMap.Icon({
-    //         image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
-    //         size: new AMap.Size(20, 35)
-    //       }),
-    //       position: [lngs[0], lngs[1]],
-    //       offset: new AMap.Pixel(-12, -12),
-    //       zIndex: 101,
-    //       clickable: true,
-    //       map: map
-    //     });
-    //     this.markers.push(marker);
-    //   });
-    //   if (type) {
-    //     map.setFitView(); // 地图自适应
-    //   }
-    // },
     /*
       http请求 获取全部电池设备
      */
@@ -226,7 +149,7 @@ export default {
         };
         ws.onmessage = evt => {
           let data = JSON.parse(evt.data);
-          console.log(data);
+          console.log("all-battery-onmessage", data);
           if (data.code === 1) {
             this.onLine = data.data;
             if (Number(this.allDevice) < Number(this.onLine)) {
@@ -307,10 +230,11 @@ export default {
     ...mapState(["loginData"])
   },
   beforeDestroy() {
-    // map.destroy();
-    if (typeof this.over === "object") {
-      this.over();
-    }
+    console.log(this.over);
+    this.over();
+    // if (typeof this.over === "object") {
+    //   this.over();
+    // }
   }
 };
 </script>

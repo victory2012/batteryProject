@@ -7,14 +7,14 @@
         <div id="intro" class="intro">
           <h3>
             <span>{{titles}}</span>
-            <el-button @click="showAllPionter" type="text" mini>查看全部</el-button>
+            <el-button @click="showAllPionter" type="text" mini>{{$t('positions.lookAll')}}</el-button>
           </h3>
         </div>
         <ul class="list_warp">
           <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '', item.onlineStatus === 0? 'off': '', devicelabel == item.batteryId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item.deviceId, index)">
             <p>{{index + 1}}、{{deviceShow? item.deviceId : item.batteryId}}</p>
             <el-badge :value="item.onLine" class="item">
-              <el-button @click.prevent.stop="HistoryTrack(item.batteryId)" size="mini">历史轨迹</el-button>
+              <el-button @click.prevent.stop="HistoryTrack(item.batteryId)" size="mini">{{$t('positions.track')}}</el-button>
             </el-badge>
           </li>
         </ul>
@@ -144,7 +144,7 @@ export default {
       pageNum: 1,
       total: 10,
       onLineData: [],
-      titles: "电池列表",
+      titles: "",
       deviceShow: false,
       pathParams: "", // url 中设备id 参数
       markerData: {
@@ -197,7 +197,7 @@ export default {
                   key.onlineStatus
                 },0`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态
                 if (key.onlineStatus === 1) {
-                  key.onLine = "在线";
+                  key.onLine = this.$t("positions.onLine");
                   if (key.deviceId) {
                     sendData.param.push(key.deviceId);
                   }
@@ -206,7 +206,7 @@ export default {
                   }
                   // pathParams 路由传参。为设备id
                 } else {
-                  key.onLine = "离线";
+                  key.onLine = this.$t("positions.offline");
                 }
                 if (this.pathParams === key.deviceId) {
                   let deviceId = this.pathParams;
@@ -296,13 +296,13 @@ export default {
         },0`;
         if (key.onlineStatus === 1) {
           // onlineStatus 判断是否在线的标识。1 在线。0 离线；
-          key.onLine = "在线";
+          key.onLine = this.$t("positions.onLine");
           if (key.batteryId) {
             sendData.param.push(key.deviceId);
             batteryIdArr[key.deviceId] = key.batteryId; // 制作电池id 字典。以设备id作为key，电池id作为value。
           }
         } else {
-          key.onLine = "离线";
+          key.onLine = this.$t("positions.offline");
         }
         this.pointerArr.push(key);
       });
@@ -465,11 +465,11 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(vm => {
       if (from.name === "device" && vm.pathParams) {
-        vm.titles = "设备列表";
+        vm.titles = vm.$t("positions.title1");
         vm.deviceShow = true;
       }
       if (from.name === "batteryList" && vm.pathParams) {
-        vm.titles = "在线电池列表";
+        vm.titles = vm.$t("positions.title2");
         vm.deviceShow = false;
       }
     });

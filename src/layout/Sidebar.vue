@@ -45,23 +45,23 @@ export default {
       } else {
         this.items = GoogleList();
       }
-      console.log(this.items);
-      // this.items.forEach(key => {
-      //   key.title = this.$t(`message.${key.title}`);
-      //   if (key.subs && key.subs.length > 0) {
-      //     key.subs.forEach(sub => {
-      //       sub.title = this.$t(`message.${sub.title}`);
-      //     });
-      //   }
-      // });
-      console.log("this.items", this.items);
+
       if (loginData && loginData.userRole === "plat_super_admin") {
         this.items.push({
           icon: "el-icon-setting",
           index: "device",
-          title: "设备管理"
+          title: "device"
         });
       }
+      this.items.forEach(key => {
+        key.title = this.$t(`menu.${key.title}`);
+        if (key.subs && key.subs.length > 0) {
+          key.subs.forEach(sub => {
+            sub.title = this.$t(`menu.${sub.title}`);
+          });
+        }
+      });
+      console.log("this.items", this.items);
       if (loginData && loginData.mapType === 1) {
         this.$router.push({
           path: "googleAll"

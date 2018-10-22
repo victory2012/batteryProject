@@ -1,12 +1,12 @@
 <template>
   <div class="warrp">
-    <div id="tip">
+    <!-- <div id="tip">
       选择省：
       <el-select v-model="defaultOption" id='province' placeholder="请选择" @change="selectChange">
         <el-option v-for="item in selectArr" :key="item.adcode" :label="item.name" :value="item.adcode">
         </el-option>
       </el-select>
-    </div>
+    </div> -->
     <div id="container" class="mapWarrp"></div>
   </div>
 </template>
@@ -23,14 +23,14 @@ export default {
   props: ["propData"],
   data() {
     return {
-      markers: [],
-      defaultOption: "全国",
-      selectArr: [
-        {
-          adcode: "all",
-          name: "全国"
-        }
-      ]
+      markers: []
+      // defaultOption: "全国",
+      // selectArr: [
+      //   {
+      //     adcode: "all",
+      //     name: "全国"
+      //   }
+      // ]
     };
   },
   // computed: {
@@ -61,13 +61,13 @@ export default {
         }
         map.setFitView(); // 地图自适应
       }
-      let subList = data.districtList;
-      if (data.level === "country") {
-        // this.selectArr = subList;
-        subList.forEach(key => {
-          this.selectArr.push(key);
-        });
-      }
+      // let subList = data.districtList;
+      // if (data.level === "country") {
+      //   // this.selectArr = subList;
+      //   // subList.forEach(key => {
+      //   //   this.selectArr.push(key);
+      //   // });
+      // }
       if (this.limit) {
         setTimeout(() => {
           map.setLimitBounds(map.getBounds());
@@ -128,9 +128,11 @@ export default {
       }
     },
     init() {
+      const lang = localStorage.getItem("locale") === "EN" ? "en" : "zh_cn";
       map = new AMap.Map("container", {
         resizeEnable: true,
-        zoom: 10
+        zoom: 10,
+        lang: lang
       });
       AMap.service("AMap.DistrictSearch", () => {
         district = new AMap.DistrictSearch({

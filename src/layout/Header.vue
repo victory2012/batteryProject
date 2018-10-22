@@ -4,23 +4,14 @@
     <div class="collapse-btn" @click="collapseChage">
       <i class="el-icon-menu"></i>
     </div>
-    <div class="logo">{{projectTit}}</div>
+    <div class="logo">{{$t('subProjectName')}}</div>
     <div class="header-right">
       <div class="header-user-con">
         <!-- 全屏显示 -->
-        <div class="btn-fullscreen" @click="handleFullScreen">
+        <!-- <div class="btn-fullscreen" @click="handleFullScreen">
           <el-tooltip effect="dark" :content="fullscreen?`取消全屏`:`全屏`" placement="bottom">
             <i class="el-icon-rank"></i>
           </el-tooltip>
-        </div>
-        <!-- 消息中心 -->
-        <!-- <div class="btn-bell">
-          <el-tooltip effect="dark" :content="message?`有${message}条未读消息`:`消息中心`" placement="bottom">
-            <router-link to="/tabs">
-              <i class="el-icon-bell"></i>
-            </router-link>
-          </el-tooltip>
-          <span class="btn-bell-badge" v-if="message"></span>
         </div> -->
         <!-- 用户头像 -->
         <div class="user-avator"><img src="static/img/user.jpg"></div>
@@ -30,13 +21,13 @@
             {{username}}
             <i class="el-icon-caret-bottom"></i>
           </span>
-          <el-dropdown-menu slot="dropdown">
+          <el-dropdown-menu class="dropdown" slot="dropdown">
             <el-dropdown-item command="userMsg">
-              <i class="iconfont icon-user"></i>个人信息</el-dropdown-item>
+              <i class="iconfont icons icon-user"></i>{{$t('userInfo.userMsg')}}</el-dropdown-item>
             <el-dropdown-item divided command="userPwd">
-              <i class="el-icon-setting"></i>修改密码</el-dropdown-item>
+              <i class="icons el-icon-setting"></i>{{$t('userInfo.pasword')}}</el-dropdown-item>
             <el-dropdown-item divided command="loginout">
-              <i class="iconfont icon-logout"></i>退出登录</el-dropdown-item>
+              <i class="iconfont icons icon-logout"></i>{{$t('userInfo.logOut')}}</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -56,9 +47,7 @@ export default {
   computed: {
     username() {
       let userData = JSON.parse(localStorage.getItem("loginData"));
-      return userData
-        ? `${userData.enterpriseName}-${userData.userName}`
-        : "";
+      return userData ? `${userData.enterpriseName}-${userData.userName}` : "";
     }
   },
   methods: {
@@ -117,6 +106,15 @@ export default {
 };
 </script>
 <style scoped>
+.dropdown {
+  width: 150px;
+  text-align: left;
+}
+.dropdown .icons {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+}
 .header {
   position: relative;
   box-sizing: border-box;

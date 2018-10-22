@@ -1,23 +1,37 @@
 <template>
   <div class="login_page fillcontain">
+    <div class="login-head">
+      <el-dropdown class="user-name" @command="handleCommand">
+        <span class="el-dropdown-link">
+          {{localLanguge}}
+          <i class="el-icon-caret-bottom"></i>
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="cn">
+            <i class="iconfont icon-user"></i>中文</el-dropdown-item>
+          <el-dropdown-item divided command="en">
+            <i class="el-icon-setting"></i>English</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+    </div>
     <transition name="form-fade" mode="in-out">
       <section class="form_contianer" v-show="showLogin">
         <div class="manage_tip">
-          <p>电池后台管理系统</p>
+          <p>{{$t("projectName")}}</p>
         </div>
         <el-form :model="loginForm" :rules="rules" ref="loginForm">
           <el-form-item prop="userName">
-            <el-input v-model="loginForm.userName" size="small" placeholder="用户名"></el-input>
+            <el-input v-model="loginForm.userName" size="small" :placeholder="$t('accountPlace')"></el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input type="password" placeholder="密码" size="small" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')"></el-input>
+            <el-input type="password" :placeholder="$t('passwordPlace')" size="small" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')"></el-input>
           </el-form-item>
           <el-form-item prop="checkBox">
-            <el-checkbox style="float:left" v-model="account">记住账户</el-checkbox>
-            <el-checkbox style="float:right" v-model="pwd">记住密码</el-checkbox>
+            <el-checkbox style="float:left" v-model="account">{{$t("RMaccount")}}</el-checkbox>
+            <el-checkbox style="float:right" v-model="pwd">{{$t("RMpassword")}}</el-checkbox>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">登录</el-button>
+            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">{{$t("login")}}</el-button>
           </el-form-item>
         </el-form>
       </section>
@@ -33,11 +47,6 @@ export default {
       account: false,
       pwd: false,
       isLogin: false,
-      // projectName: this.$t("message.projectName"),
-      // RMaccount: this.$t("message.RMaccount"),
-      // RMpassword: this.$t("message.RMpassword"),
-      // login: this.$t("message.login"),
-      // langs: "",
       loginForm: {
         userName: "",
         password: ""
@@ -46,14 +55,14 @@ export default {
         userName: [
           {
             required: true,
-            message: this.$t("message.loginMsg.userNameMsg"),
+            message: this.$t("loginMsg.userNameMsg"),
             trigger: "blur"
           }
         ],
         password: [
           {
             required: true,
-            message: this.$t("message.loginMsg.password"),
+            message: this.$t("loginMsg.password"),
             trigger: "blur"
           }
         ]
@@ -62,7 +71,34 @@ export default {
     };
   },
   methods: {
-    // ...mapActions(['updateCountAsync']),
+    handleCommand(cammand) {
+      if (cammand === "cn") {
+        this.localLanguge = "中文";
+        this.$i18n.locale = "CN";
+        localStorage.setItem("locale", "CN");
+      }
+      if (cammand === "en") {
+        this.localLanguge = "English";
+        this.$i18n.locale = "EN";
+        localStorage.setItem("locale", "EN");
+      }
+      this.rules = {
+        userName: [
+          {
+            required: true,
+            message: this.$t("loginMsg.userNameMsg"),
+            trigger: "blur"
+          }
+        ],
+        password: [
+          {
+            required: true,
+            message: this.$t("loginMsg.password"),
+            trigger: "blur"
+          }
+        ]
+      };
+    },
     submitForm(params) {
       // this.$i18n.locale = "en";
       this.$refs[params].validate(valid => {
@@ -110,10 +146,26 @@ export default {
       }, 300);
     }
   },
+  created() {
+    let locallanguage = localStorage.getItem("locale");
+    if (locallanguage) {
+      this.localLanguge = locallanguage === "CN" ? "中文" : "English";
+    } else {
+      let currentLang = navigator.language; // 判断除IE外其他浏览器使用语言
+      if (!currentLang) {
+        // 判断浏览器使用语言
+        currentLang = navigator.browserLanguage;
+      }
+      if (currentLang === "zh-CN") {
+        this.localLanguge = "中文";
+        localStorage.setItem("locale", "CN");
+      } else {
+        this.localLanguge = "English";
+        localStorage.setItem("locale", "EN");
+      }
+    }
+  },
   mounted() {
-    this.langs = this.$i18n.locale;
-    // console.log(this.$t("message.showMore"));
-
     this.init();
   }
 };
@@ -136,6 +188,9 @@ export default {
     line-height: 70px;
     text-align: right;
     padding-right: 70px;
+    .user-name {
+      margin-right: 50px;
+    }
   }
 }
 .el-dropdown {

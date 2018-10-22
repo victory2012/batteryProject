@@ -3,33 +3,33 @@
     <div class="mapcontainer">
       <div class="control">
         <div class="date">
-          <vue-datepicker-local v-model="starts" clearable placeholder="选择开始时间" format="YYYY-MM-DD HH:mm:ss" show-buttons @confirm="selectedDate" />
-          <vue-datepicker-local v-model="endtime" format="YYYY-MM-DD HH:mm:ss" clearable placeholder="选择结束时间" show-buttons @confirm="selectedDate" />
-          <el-button v-show="trajectory" size="mini" plain @click="startOnclick" title="开始">
+          <vue-datepicker-local v-model="starts" clearable :placeholder="$t('history.startTime')" format="YYYY-MM-DD HH:mm:ss" show-buttons @confirm="selectedDate" />
+          <vue-datepicker-local v-model="endtime" format="YYYY-MM-DD HH:mm:ss" clearable :placeholder="$t('history.endTime')" show-buttons @confirm="selectedDate" />
+          <el-button v-show="trajectory" size="mini" plain @click="startOnclick" :title="$t('history.start')">
             <i class="iconfont icon-ic_song_next"></i>
           </el-button>
-          <el-button v-show="trajectory" size="mini" plain @click="pauseOnclick" title="暂停">
+          <el-button v-show="trajectory" size="mini" plain @click="pauseOnclick" :title="$t('history.pause')">
             <i class="iconfont icon-artboard25copy"></i>
           </el-button>
-          <el-button v-show="trajectory" size="mini" plain @click="resumeOnclick" title="继续">
+          <el-button v-show="trajectory" size="mini" plain @click="resumeOnclick" :title="$t('history.continue')">
             <i class="iconfont icon-icons-resume_button"></i>
           </el-button>
-          <el-button v-show="trajectory" size="mini" plain @click="stopOnclick" title="停止">
+          <el-button v-show="trajectory" size="mini" plain @click="stopOnclick" :title="$t('history.stop')">
             <i class="iconfont icon-stop"></i>
           </el-button>
-          <el-button v-show="trajectory" type="danger" size="small" @click="heatmap">活动热区</el-button>
-          <el-button v-show="active" type="primary" size="mini" @click="track">轨迹回放</el-button>
+          <el-button v-show="trajectory" type="danger" size="small" @click="heatmap">{{$t('history.heatActive')}}</el-button>
+          <el-button v-show="active" type="primary" size="mini" @click="track">{{$t('history.TrackReplay')}}</el-button>
         </div>
       </div>
       <div class="timeRange" v-show="trajectory">
-        <span>时间(s)</span>
+        <span>{{$t('history.times')}}(s)</span>
         <el-slider v-model="timeSeconds" @change="speedChange" vertical height="200px">
         </el-slider>
       </div>
       <div id="mapcontainer" class="map"></div>
     </div>
     <div class="panels">
-      <h2>电池列表</h2>
+      <h2>{{$t('history.batteryList')}}</h2>
       <div class="panelTop">
         <ul class="list_warp">
           <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item)">
