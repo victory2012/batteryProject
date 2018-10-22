@@ -86,7 +86,7 @@
             <el-col :span="12">
               <el-form-item label="客户id" prop="customer">
                 <el-select v-model="BatteryForm.customer" style="width:238px">
-                  <el-option v-for="item in customerList" :key="item" :label="item.customerName" :value="item">
+                  <el-option v-for="item in customerList" :key="item.id" :label="item.name" :value="item.id">
                   </el-option>
                 </el-select>
                 <!-- <el-input v-model="BatteryForm.customerId" auto-complete="off"></el-input> -->

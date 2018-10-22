@@ -48,8 +48,9 @@
         </el-col>
       </el-row>
     </div>
-    <v-amap v-if="mapType == '0'" :propData="propData"></v-amap>
-    <v-google v-else :propData="propData"></v-google>
+    <!-- <component :is="mapType" :propData="propData"></component> -->
+    <amaps v-if="amapsType" :propData="propData"></amaps>
+    <googlemaps v-if="googlemapsType" :propData="propData"></googlemaps>
   </div>
 </template>
 <script>
@@ -61,9 +62,13 @@ import GaodeMap from "./gaode-map";
 import GoogleMap from "./google-map";
 let pointerObj = {};
 export default {
+  // components: {
+  //   amaps: import("./gaode-map"),
+  //   googlemaps: import("./google-map")
+  // },
   components: {
-    "v-amap": GaodeMap,
-    "v-google": GoogleMap
+    amaps: GaodeMap,
+    googlemaps: GoogleMap
   },
   name: "battery",
   data() {
@@ -80,6 +85,8 @@ export default {
           name: "全国"
         }
       ],
+      googlemapsType: false,
+      amapsType: false,
       defaultOption: "全国",
       propData: {
         data: "",
@@ -282,13 +289,22 @@ export default {
     }
   },
   mounted() {
-    this.$store.commit('SET_USER_DATA', localStorage.loginData);
-    this.$store.commit('SET_MAP_TYPE', localStorage.mapType);
+    let batteryMap = localStorage.mapType;
+    console.log(batteryMap);
+    if (batteryMap.toString() === "0") {
+      this.amapsType = true;
+      this.googlemapsType = false;
+    } else {
+      this.amapsType = false;
+      this.googlemapsType = true;
+    }
+    this.$store.commit("SET_USER_DATA", localStorage.loginData);
+    this.$store.commit("SET_MAP_TYPE", localStorage.mapType);
     this.init();
   },
   computed: {
-    ...mapState(["mapType"]),
-    ...mapState(['loginData'])
+    // ...mapState(["mapType"]),
+    ...mapState(["loginData"])
   },
   beforeDestroy() {
     // map.destroy();

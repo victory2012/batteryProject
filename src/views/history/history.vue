@@ -120,7 +120,7 @@ export default {
       timeList(param).then(res => {
         const result = res.data;
         console.log(result);
-        if (result.code === 0) {
+        if (result && result.code === 0) {
           /* getTime
             // 返回开始时间到结束时间的毫秒数 getTime第一个参数:开始时间  第二个:结束时间；
             // {100000} 是毫秒数1000 * 100个格子。代表每个小格子代表的时间区间,单位是 秒；向上取整；
@@ -245,62 +245,57 @@ export default {
     },
     /* 获取数据 */
     getData(params) {
-      GetTrajectory(params)
-        .then(res => {
-          // console.log(res);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data.code === 0) {
-            let result = res.data.data;
-            this.gridData = [];
-            this.lineArr = [];
-            this.alldistance = 0; // 运动的总距离（米）
-            if (result.length > 0) {
-              for (let i = 0; i < result.length; i++) {
-                var key = result[i];
-                var distance, p1, p2;
-                if (i < result.length - 1) {
-                  p1 = new AMap.LngLat(key.longitude, key.latitude);
-                  p2 = new AMap.LngLat(
-                    result[i + 1].longitude,
-                    result[i + 1].latitude
-                  );
-                  distance = Math.round(p1.distance(p2));
-                }
-                this.alldistance += distance;
-                var obj = {};
-                obj.lng = key.longitude;
-                obj.lat = key.latitude;
-                obj.pushTime = key.pushTime;
-                obj.count = 150;
-                this.lineArr.push([obj.lng, obj.lat, obj.pushTime]);
-                this.gridData.push(obj);
+      GetTrajectory(params).then(res => {
+        // console.log(res);
+        // if (res.data.code === 1) {
+        //   onTimeOut(this.$router);
+        // }
+        if (res.data && res.data.code === 0) {
+          let result = res.data.data;
+          this.gridData = [];
+          this.lineArr = [];
+          this.alldistance = 0; // 运动的总距离（米）
+          if (result.length > 0) {
+            for (let i = 0; i < result.length; i++) {
+              var key = result[i];
+              var distance, p1, p2;
+              if (i < result.length - 1) {
+                p1 = new AMap.LngLat(key.longitude, key.latitude);
+                p2 = new AMap.LngLat(
+                  result[i + 1].longitude,
+                  result[i + 1].latitude
+                );
+                distance = Math.round(p1.distance(p2));
               }
-              if (this.trajectory && pathSimplifierIns) {
-                pathSimplifierIns.setData();
-                this.track();
-              }
-              if (this.active) {
-                this.heatmap();
-              }
-            } else {
-              if (pathSimplifierIns) {
-                pathSimplifierIns.setData();
-                this.track();
-              }
-              onWarn("此设备当前时间段内，暂无数据");
-              heatmap.hide();
+              this.alldistance += distance;
+              var obj = {};
+              obj.lng = key.longitude;
+              obj.lat = key.latitude;
+              obj.pushTime = key.pushTime;
+              obj.count = 150;
+              this.lineArr.push([obj.lng, obj.lat, obj.pushTime]);
+              this.gridData.push(obj);
             }
+            if (this.trajectory && pathSimplifierIns) {
+              pathSimplifierIns.setData();
+              this.track();
+            }
+            if (this.active) {
+              this.heatmap();
+            }
+          } else {
+            if (pathSimplifierIns) {
+              pathSimplifierIns.setData();
+              this.track();
+            }
+            onWarn("此设备当前时间段内，暂无数据");
+            heatmap.hide();
           }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+        if (res.data.code === -1) {
+          onError(res.data.msg);
+        }
+      });
     },
     heatmap() {
       if (this.markerArr.length > 0) {
@@ -343,7 +338,7 @@ export default {
           if (res.data.code === 1) {
             onTimeOut(this.$router);
           }
-          if (res.data.code === 0) {
+          if (res.data && res.data.code === 0) {
             let result = res.data.data.data;
             this.total = res.data.data.total;
             this.pointerArr = [];

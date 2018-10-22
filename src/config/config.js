@@ -1,6 +1,6 @@
+/* eslint-disable */
 export function menuList() {
-  return [
-    {
+  return [{
       icon: "el-icon-view",
       index: "home",
       title: "电池总览"
@@ -24,8 +24,7 @@ export function menuList() {
       icon: "el-icon-setting",
       index: "3",
       title: "电池管理",
-      subs: [
-        {
+      subs: [{
           icon: "el-icon-document",
           index: "batteryList",
           title: "电池列表"
@@ -45,8 +44,7 @@ export function menuList() {
   ];
 }
 export function GoogleList() {
-  return [
-    {
+  return [{
       icon: "el-icon-view",
       index: "googleAll",
       title: "电池总览"
@@ -70,8 +68,7 @@ export function GoogleList() {
       icon: "el-icon-setting",
       index: "3",
       title: "电池管理",
-      subs: [
-        {
+      subs: [{
           icon: "el-icon-document",
           index: "batteryList",
           title: "电池列表"

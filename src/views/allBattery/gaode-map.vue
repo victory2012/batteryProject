@@ -38,7 +38,7 @@ export default {
   // },
   watch: {
     propData: {
-      handler: function (val, oldVal) {
+      handler: function(val, oldVal) {
         this.mapInit(val.data, val.type);
       },
       deep: true
@@ -183,5 +183,4 @@ export default {
   width: 100%;
   height: calc(100vh - 232px);
 }
-
 </style>

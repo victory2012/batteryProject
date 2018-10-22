@@ -72,7 +72,7 @@
                 </el-form-item>
                 <el-form-item label="生产商id" prop="manufacturerId">
                   <el-select v-model="ruleForm.manufacturerId" placeholder="生产商id" style="width:200px;">
-                    <el-option v-for="item in manufacturerOptions" :key="item.id" :label="item.name" :value="item">
+                    <el-option v-for="item in manufacturerOptions" :key="item.id" :label="item.name" :value="item.id">
                     </el-option>
                   </el-select>
                 </el-form-item>

@@ -176,9 +176,14 @@ export default {
     getListData() {
       let pageObj = {
         pageNum: this.pageNum,
-        pageSize: 10,
-        bindingStatus: this.bindingStatus
+        pageSize: 10
+        // bindingStatus: this.bindingStatus
       };
+      if (this.deviceShow) {
+        pageObj.bindingStatus = "";
+      } else {
+        pageObj.bindingStatus = 1;
+      }
       GetDeviceList(pageObj).then(res => {
         console.log(res.data);
         if (res.data.code === 1) {
@@ -194,7 +199,11 @@ export default {
           if (result.length > 0) {
             if (this.pathParams) {
               result.forEach((key, index) => {
-                pointerObj[key.deviceId] = `${key.latitude},${key.longitude},${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus}`;
+                pointerObj[key.deviceId] = `${key.latitude},${
+                  key.longitude
+                },${trakTimeformat(key.pushTime)},${key.batteryId},${
+                  key.onlineStatus
+                }`;
                 if (key.onlineStatus === 1) {
                   key.onLine = "在线";
                   if (key.batteryId) {
@@ -219,7 +228,7 @@ export default {
                     deviceId: this.pathParams,
                     longitude: key.longitude,
                     latitude: key.latitude
-                  }
+                  };
                   this.checkItem(opts, index);
                 }
                 this.pointerArr.push(key);
@@ -301,7 +310,9 @@ export default {
       data.forEach((key, index) => {
         pointerObj[key.deviceId] = `${key.latitude},${
           key.longitude
-        },${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus},0`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
+        },${trakTimeformat(key.pushTime)},${key.batteryId},${
+          key.onlineStatus
+        },0`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
         if (key.onlineStatus === 1) {
           // onlineStatus 判断是否在线的标识。1 在线。0 离线；
           key.onLine = "在线";

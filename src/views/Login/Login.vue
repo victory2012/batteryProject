@@ -3,22 +3,21 @@
     <transition name="form-fade" mode="in-out">
       <section class="form_contianer" v-show="showLogin">
         <div class="manage_tip">
-          <p>{{projectName}}</p>
+          <p>电池后台管理系统</p>
         </div>
         <el-form :model="loginForm" :rules="rules" ref="loginForm">
           <el-form-item prop="userName">
             <el-input v-model="loginForm.userName" size="small" placeholder="用户名"></el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <!-- <input type="text" placeholder="密码" v-model="loginForm.password" @keyup.enter="submitForm('loginForm')"> -->
             <el-input type="password" placeholder="密码" size="small" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')"></el-input>
           </el-form-item>
           <el-form-item prop="checkBox">
-            <el-checkbox style="float:left" v-model="account">{{RMaccount}}</el-checkbox>
-            <el-checkbox style="float:right" v-model="pwd">{{RMpassword}}</el-checkbox>
+            <el-checkbox style="float:left" v-model="account">记住账户</el-checkbox>
+            <el-checkbox style="float:right" v-model="pwd">记住密码</el-checkbox>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">{{login}}</el-button>
+            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">登录</el-button>
           </el-form-item>
         </el-form>
       </section>
@@ -34,19 +33,30 @@ export default {
       account: false,
       pwd: false,
       isLogin: false,
-      projectName: "电池后台管理系统",
-      RMaccount: "记住账户",
-      RMpassword: "记住密码",
-      login: "登录",
+      // projectName: this.$t("message.projectName"),
+      // RMaccount: this.$t("message.RMaccount"),
+      // RMpassword: this.$t("message.RMpassword"),
+      // login: this.$t("message.login"),
+      // langs: "",
       loginForm: {
         userName: "",
         password: ""
       },
       rules: {
         userName: [
-          { required: true, message: "请输入用户名", trigger: "blur" }
+          {
+            required: true,
+            message: this.$t("message.loginMsg.userNameMsg"),
+            trigger: "blur"
+          }
         ],
-        password: [{ required: true, message: "请输入密码", trigger: "blur" }]
+        password: [
+          {
+            required: true,
+            message: this.$t("message.loginMsg.password"),
+            trigger: "blur"
+          }
+        ]
       },
       showLogin: false
     };
@@ -54,39 +64,35 @@ export default {
   methods: {
     // ...mapActions(['updateCountAsync']),
     submitForm(params) {
+      // this.$i18n.locale = "en";
       this.$refs[params].validate(valid => {
         if (valid) {
           this.isLogin = true;
-          getAdminInfo(this.loginForm)
-            .then(res => {
-              this.isLogin = false;
-              console.log(res);
-              if (res.data.code === 0) {
-                localStorage.setItem(
-                  "loginData",
-                  JSON.stringify(res.data.data)
-                );
-                this.$store.commit('SET_USER_DATA', JSON.stringify(res.data.data));
-                this.$store.commit('SET_MAP_TYPE', res.data.data.mapType);
-                localStorage.setItem("mapType", res.data.data.mapType);
-                localStorage.setItem("account", this.loginForm.userName);
-                localStorage.setItem("password", this.loginForm.password);
-                this.$router.push("/home");
-              } else {
-                this.$notify.error({
-                  title: "错误",
-                  message: "请输入正确的用户名密码",
-                  offset: 100
-                });
-              }
-            })
-            .catch(error => {
-              console.log(error);
-              this.isLogin = false;
-              this.$message.error("服务器请求超时，请稍后重试");
-            });
+          getAdminInfo(this.loginForm).then(res => {
+            this.isLogin = false;
+            console.log(res);
+            if (res.data && res.data.code === 0) {
+              localStorage.setItem("loginData", JSON.stringify(res.data.data));
+              this.$store.commit(
+                "SET_USER_DATA",
+                JSON.stringify(res.data.data)
+              );
+              this.$store.commit("SET_MAP_TYPE", res.data.data.mapType);
+              localStorage.setItem("mapType", res.data.data.mapType);
+              localStorage.setItem("account", this.loginForm.userName);
+              localStorage.setItem("password", this.loginForm.password);
+              this.$router.push("/home");
+            }
+          });
         }
       });
+    },
+    changLocalLang() {
+      if (this.langs === "en") {
+        this.$i18n.locale = "zhCHS";
+      } else {
+        this.$i18n.locale = "en";
+      }
     },
     init() {
       let account = localStorage.getItem("account");
@@ -105,6 +111,10 @@ export default {
     }
   },
   mounted() {
+    this.langs = this.$i18n.locale;
+    // console.log(this.$i18n.locale);
+    console.log(this.$t("message.showMore"));
+
     this.init();
   }
 };

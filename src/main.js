@@ -6,12 +6,14 @@ import App from './App'
 import jquery from 'jquery'
 import router from './router'
 import ElementUI from 'element-ui';
+import i18n from "./i18n";
 import DatePicker from "./components/datepicker/index";
 import 'element-ui/lib/theme-chalk/index.css'; // 默认主题
 import '../static/icon/iconfont.css'
 import createStore from "./store/store"
 
 Vue.use(Vuex)
+
 Vue.prototype.$ = jquery;
 Vue.use(DatePicker);
 Vue.config.productionTip = false;
@@ -20,11 +22,13 @@ Vue.use(ElementUI, {
 });
 /* eslint-disable no-new */
 
+console.log(i18n);
 const store = createStore()
 new Vue({
   el: '#app',
   router,
   store,
+  i18n,
   components: {
     App
   },

@@ -46,6 +46,15 @@ export default {
         this.items = GoogleList();
       }
       console.log(this.items);
+      // this.items.forEach(key => {
+      //   key.title = this.$t(`message.${key.title}`);
+      //   if (key.subs && key.subs.length > 0) {
+      //     key.subs.forEach(sub => {
+      //       sub.title = this.$t(`message.${sub.title}`);
+      //     });
+      //   }
+      // });
+      console.log("this.items", this.items);
       if (loginData && loginData.userRole === "plat_super_admin") {
         this.items.push({
           icon: "el-icon-setting",

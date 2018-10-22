@@ -119,21 +119,21 @@
 }
 </style>
 <script>
-// import AMap from "AMap";
+import AMap from "AMap";
 // import AMapUI from "AMapUI";
 import { websockets, GetDeviceList } from "../../api/index.js";
 import { trakTimeformat, nowDate } from "../../utils/transition.js";
 import { onError, onTimeOut } from "../../utils/callback";
-import gaodeMap from './gaode-map';
+import gaodeMap from "./gaode-map";
 
-// let map;
+let map;
 // let infoWindow;
 let ponterIndex;
 let batteryIdArr = {};
 let pointerObj = {};
 export default {
   components: {
-    'v-gaode': gaodeMap
+    "v-gaode": gaodeMap
   },
   data() {
     return {
@@ -148,8 +148,8 @@ export default {
       deviceShow: false,
       pathParams: "", // url 中设备id 参数
       markerData: {
-        data: '',
-        type: ''
+        data: "",
+        type: ""
       }
     };
   },
@@ -242,7 +242,9 @@ export default {
             let obj = data.data.split(",");
             let battery = batteryIdArr[obj[0]]; // 从电池id 字典中获取电池id，obj[0] 为设备id。
             obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[2]},${obj[1]},${nowDate()},${battery},1,1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
+              pointerObj[obj[0]] = `${obj[2]},${
+                obj[1]
+              },${nowDate()},${battery},1,1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
             });
             if (this.deviceId || this.pathParams) {
               let keys = Object.keys(pointerObj);
@@ -255,13 +257,13 @@ export default {
               this.markerData = {
                 data: nextObj,
                 type: "fromClick"
-              }
+              };
               // this.GaoDeMap(nextObj, "fromClick");
             } else {
               this.markerData = {
                 data: pointerObj,
                 type: ""
-              }
+              };
               // this.GaoDeMap(pointerObj, "fromWs");
             }
           }
@@ -287,8 +289,13 @@ export default {
       pointerObj = {};
       let sendData = { api: "bind", param: [] };
       data.forEach((key, index) => {
-        pointerObj[key.deviceId] = `${key.longitude},${key.latitude},${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus},0`;
-        if (key.onlineStatus === 1) { // onlineStatus 判断是否在线的标识。1 在线。0 离线；
+        pointerObj[key.deviceId] = `${key.longitude},${
+          key.latitude
+        },${trakTimeformat(key.pushTime)},${key.batteryId},${
+          key.onlineStatus
+        },0`;
+        if (key.onlineStatus === 1) {
+          // onlineStatus 判断是否在线的标识。1 在线。0 离线；
           key.onLine = "在线";
           if (key.batteryId) {
             sendData.param.push(key.deviceId);
@@ -305,7 +312,7 @@ export default {
       this.markerData = {
         data: pointerObj,
         type: "http"
-      }
+      };
     },
     // GaoDeMap(data, fromWs) {
     //   this.markers && map.remove(this.markers);
@@ -421,7 +428,7 @@ export default {
         this.markerData = {
           data: selectObj,
           type: "fromClick"
-        }
+        };
       }
     },
     // 查看所有点
@@ -432,7 +439,7 @@ export default {
       this.markerData = {
         data: pointerObj,
         type: ""
-      }
+      };
     },
     // 查看历史轨迹。路由传参 设备id
     HistoryTrack(batteryId) {
