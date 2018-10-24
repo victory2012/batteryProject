@@ -4,24 +4,24 @@
     <div class="mapcontainer">
       <div class="control">
         <div class="date">
-          <vue-datepicker-local v-model="starts" clearable placeholder="选择开始时间" format="YYYY-MM-DD HH:mm:ss" show-buttons @confirm="selectedDate" />
-          <vue-datepicker-local v-model="endtime" format="YYYY-MM-DD HH:mm:ss" clearable placeholder="选择结束时间" show-buttons @confirm="selectedDate" />
-          <el-button v-show="trajectory" size="mini" plain @click="startMove" title="开始">
+          <vue-datepicker-local v-model="starts" clearable :placeholder="$t('history.startTime')" format="YYYY-MM-DD HH:mm:ss" show-buttons @confirm="selectedDate" />
+          <vue-datepicker-local v-model="endtime" format="YYYY-MM-DD HH:mm:ss" clearable :placeholder="$t('history.endTime')" show-buttons @confirm="selectedDate" />
+          <el-button v-show="trajectory" size="mini" plain @click="startMove" :title="$t('history.start')">
             <i class="iconfont icon-ic_song_next"></i>
           </el-button>
-          <el-button v-show="trajectory" type="danger" size="small" @click="heatmap">活动热区</el-button>
-          <el-button v-show="active" type="primary" size="mini" @click="track">轨迹回放</el-button>
+          <el-button v-show="trajectory" type="danger" size="small" @click="heatmap">{{$t('history.heatActive')}}</el-button>
+          <el-button v-show="active" type="primary" size="mini" @click="track">{{$t('history.TrackReplay')}}</el-button>
         </div>
       </div>
       <div class="timeRange" v-show="trajectory">
-        <span>时间(s)</span>
+        <span>{{$t('history.times')}}(s)</span>
         <el-slider :max='max' :min="min" v-model="timeSeconds" @change="speedChange" vertical height="200px">
         </el-slider>
       </div>
       <div id="mapcontainer" class="map"></div>
     </div>
     <div class="panel">
-      <h2>电池列表</h2>
+      <h2>{{$t('history.batteryList')}}</h2>
       <div class="panelTop">
         <ul class="list_warp">
           <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item)">
@@ -53,6 +53,7 @@ import { GetTrajectory, GetDeviceList, timeList } from "../../api/index.js";
 import {
   timeFormatSort,
   timeFormats,
+  timeFormat,
   getTime,
   yesTody
 } from "../../utils/transition.js";
@@ -81,7 +82,7 @@ export default {
       max: 100,
       min: 1,
       pageNum: 1,
-      total: 10,
+      total: 0,
       localMakerArr: [],
       markerPointer: {
         sdPointer: [],
@@ -112,8 +113,8 @@ export default {
     getTimeList(id) {
       let param = {
         deviceId: id,
-        startTime: new Date(this.starts),
-        endTime: new Date(this.endtime)
+        startTime: timeFormat(this.starts),
+        endTime: timeFormat(this.endtime)
       };
       timeList(param).then(res => {
         const result = res.data;
@@ -134,7 +135,10 @@ export default {
               key.dateFormat = timeFormats(key.createTime);
               key.pre = new Date(key.createTime) - new Date(this.starts);
               key.index = Math.ceil(key.pre / perBlock); // 得出此时间是处于第几个格子； 向上取整；
-              key.onlineStatus = key.status === 0 ? "下线" : "上线";
+              key.onlineStatus =
+                key.status === 0
+                  ? this.$t("history.offLine")
+                  : this.$t("history.online");
               pointArr.push(key);
             });
             let bgColor = pointArr[0].status === 0 ? "green" : "gray";
@@ -193,15 +197,15 @@ export default {
     /* 时间确认按钮 */
     selectedDate(date) {
       if (!this.starts) {
-        onWarn("请选择开始时间");
+        onWarn(`${this.$t("history.startTime")}`);
         return;
       }
       if (!this.endtime) {
-        onWarn("请选择结束时间");
+        onWarn(`${this.$t("history.endTime")}`);
         return;
       }
       if (Number(this.starts) > Number(this.endtime)) {
-        onWarn("开始时间应小于结束时间");
+        onWarn(`${this.$t("history.checkErr")}`);
         return;
       }
       let opts = {
@@ -215,49 +219,41 @@ export default {
     },
     /* 获取数据 */
     getData(params) {
-      GetTrajectory(params)
-        .then(res => {
-          console.log(res);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data.code === 0) {
-            let result = res.data.data;
-            // console.log(result);
-            this.lineArr = [];
-            if (result.length > 0) {
-              this.gridData = [];
-              for (let i = 0; i < result.length; i++) {
-                var key = result[i];
-                var obj = {};
-                obj.pushTime = key.pushTime;
-                obj.ponter = new google.maps.LatLng(
-                  key.latitude,
-                  key.longitude
-                );
-                this.lineArr.push(obj);
-                this.gridData.push(
-                  new google.maps.LatLng(key.latitude, key.longitude)
-                );
-              }
-              map.setCenter(this.gridData[0]);
-              if (this.active) {
-                this.heatmap();
-              } else {
-                this.track();
-              }
-            } else {
-              onWarn("此设备当前时间段内，暂无数据");
+      GetTrajectory(params).then(res => {
+        console.log(res);
+        if (res.data.code === 1) {
+          onTimeOut(this.$router);
+        }
+        if (res.data.code === 0) {
+          let result = res.data.data;
+          // console.log(result);
+          this.lineArr = [];
+          if (result.length > 0) {
+            this.gridData = [];
+            for (let i = 0; i < result.length; i++) {
+              var key = result[i];
+              var obj = {};
+              obj.pushTime = key.pushTime;
+              obj.ponter = new google.maps.LatLng(key.latitude, key.longitude);
+              this.lineArr.push(obj);
+              this.gridData.push(
+                new google.maps.LatLng(key.latitude, key.longitude)
+              );
             }
+            map.setCenter(this.gridData[0]);
+            if (this.active) {
+              this.heatmap();
+            } else {
+              this.track();
+            }
+          } else {
+            onWarn(`${this.$t("history.noData")}`);
           }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+        if (res.data.code === -1) {
+          onError(res.data.msg);
+        }
+      });
     },
     heatmap() {
       this.trajectory = false;
@@ -343,60 +339,58 @@ export default {
           });
         });
       } catch (err) {
-        onError("地图加载失败，请检查网络连接");
+        onError(`${this.$t("mapError")}`);
       }
     },
     // 获取列表数据
     getHisData() {
       let pageObj = {
         pageNum: this.pageNum,
-        pageSize: 10
+        pageSize: 10,
+        bindingStatus: "1"
       };
-      GetDeviceList(pageObj)
-        .then(res => {
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data.code === 0) {
-            let result = res.data.data.data;
-            this.total = res.data.data.total;
-            this.batteryId = this.$route.query.batteryId;
-            this.pointerArr = [];
-            if (result.length > 0) {
-              result.forEach(key => {
-                if (key.batteryId) {
-                  if (this.batteryId && this.batteryId === key.batteryId) {
-                    this.queryDevice = key.deviceId; // 根据路由参数中的电池id 获取对应的设备id；
-                  }
-                  this.pointerArr.push(key);
+      GetDeviceList(pageObj).then(res => {
+        console.log("GetDeviceList", res);
+        if (res.data.code === 1) {
+          onTimeOut(this.$router);
+        }
+        if (res.data && res.data.code === 0) {
+          let result = res.data.data.data;
+          this.total = res.data.data.total;
+          this.pointerArr = [];
+          if (result.length > 0) {
+            this.batteryId = this.$route.query.batteryId; // 路由参数
+            result.forEach(key => {
+              if (key.batteryId) {
+                if (this.batteryId && this.batteryId === key.batteryId) {
+                  this.queryDevice = key.deviceId; // 根据路由参数中的电池id 获取对应的设备id；
                 }
-              });
-              let params = {
-                pushDateStart: timeFormatSort(this.starts),
-                pushDateEnd: timeFormatSort(this.endtime)
-              };
-              if (this.batteryId && this.pageNum === 1) {
-                this.devicelabel = this.batteryId;
-                params.batteryId = this.batteryId;
-                this.getData(params);
-              } else {
-                this.devicelabel = result[0].batteryId;
-                params.batteryId = result[0].batteryId;
-                this.queryDevice = result[0].deviceId;
-                this.getData(params);
+                this.pointerArr.push(key);
               }
-              this.getTimeList(this.queryDevice);
+            });
+            let params = {
+              pushDateStart: timeFormatSort(this.starts),
+              pushDateEnd: timeFormatSort(this.endtime)
+            };
+            if (this.batteryId && this.pageNum === 1) {
+              this.devicelabel = this.batteryId;
+              params.batteryId = this.batteryId;
+              this.getData(params);
             } else {
-              onWarn("暂无设备, 请先注册设备");
+              this.devicelabel = result[0].batteryId;
+              params.batteryId = result[0].batteryId;
+              this.queryDevice = result[0].deviceId;
+              this.getData(params);
             }
+            this.getTimeList(this.queryDevice);
+          } else {
+            onWarn(`${this.$t("history.noDevice")}`);
           }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+        if (res.data.code === -1) {
+          onError(res.data.msg);
+        }
+      });
     },
     startMove() {
       this.animateCircle(this.timeSeconds);
@@ -409,7 +403,7 @@ export default {
         count = count + 5;
         // console.log(count)
         var icons = line.get("icons");
-        icons[0].offset = count / this.gridData.length * 100 + "%";
+        icons[0].offset = (count / this.gridData.length) * 100 + "%";
         line.set("icons", icons);
         console.log(count, icons[0].offset);
         // // //终点停车

@@ -63,6 +63,7 @@ import {
   timeFormatSort,
   trakTimeformat,
   timeFormats,
+  timeFormat,
   yesTody,
   getTime
 } from "../../utils/transition.js";
@@ -114,8 +115,8 @@ export default {
     getTimeList(id) {
       let param = {
         deviceId: id,
-        startTime: new Date(this.starts),
-        endTime: new Date(this.endtime)
+        startTime: timeFormat(this.starts),
+        endTime: timeFormat(this.endtime)
       };
       timeList(param).then(res => {
         const result = res.data;
@@ -246,10 +247,6 @@ export default {
     /* 获取数据 */
     getData(params) {
       GetTrajectory(params).then(res => {
-        // console.log(res);
-        // if (res.data.code === 1) {
-        //   onTimeOut(this.$router);
-        // }
         if (res.data && res.data.code === 0) {
           let result = res.data.data;
           this.gridData = [];
@@ -331,10 +328,12 @@ export default {
     getHisData() {
       let pageObj = {
         pageNum: this.pageNum,
-        pageSize: 10
+        pageSize: 10,
+        bindingStatus: "1"
       };
       GetDeviceList(pageObj)
         .then(res => {
+          console.log("GetDeviceList", res);
           if (res.data.code === 1) {
             onTimeOut(this.$router);
           }

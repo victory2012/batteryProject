@@ -9,6 +9,10 @@ export function GetList(params) {
   return http.post('/battery/list', params)
 };
 
+/* 获取统计数控机 */
+export function GetCount() {
+  return http.post('/device/count');
+}
 /*
  * 添加电池黑名单
  * params.manufacturer
@@ -195,36 +199,25 @@ export function addCustomer(params) {
   return http.post('/user/customer/add', params)
 };
 
-/*
- * 添加客户普通管理员
- */
 export function addCustomerAdmin(params) {
   return http.post(`/user/customer_admin/add`, params)
 };
 
-/*
- * 获取生产企业列表
- */
 export function enterpriseList() {
   return http.post('/enterprise/manufacturer/list')
 };
 
 /*
- * 获取客户企业列表
+ *
  */
 export function enterpriseCustomer() {
   return http.post('/enterprise/manufacturer_customer/list')
 };
 
-/*
- * 获取客户企业列表
- */
 export function singleDeviceId(deviceId) {
   return http.post(`/device/${deviceId}/gps/get`)
 };
-/*
- * 获取客户企业列表
- */
+
 export function timeList(param) {
   return http.post(`/device_login/list`, param)
 };

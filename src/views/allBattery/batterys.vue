@@ -7,7 +7,7 @@
             <div class="grid-content grid-con-1">
               <i class="grid-con-icon iconfont">&#xe644;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">{{allDevice}}</div>
+                <div class="grid-num">{{count.total}}</div>
                 <div>{{$t('overview.total')}}</div>
               </div>
             </div>
@@ -18,7 +18,7 @@
             <div class="grid-content grid-con-2">
               <i class="grid-con-icon iconfont">&#xe656;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">{{onLine}}</div>
+                <div class="grid-num">{{count.monthTotal}}</div>
                 <div>{{$t('overview.online')}}</div>
               </div>
             </div>
@@ -29,7 +29,7 @@
             <div class="grid-content grid-con-3">
               <i class="grid-con-icon iconfont">&#xe6a8;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">{{offLine}}</div>
+                <div class="grid-num">{{count.availableTotal}}</div>
                 <div>{{$t('overview.offLine')}}</div>
               </div>
             </div>
@@ -40,7 +40,7 @@
             <div class="grid-content grid-con-4">
               <i class="grid-con-icon iconfont">&#xe6f5;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">0</div>
+                <div class="grid-num">{{count.invalid}}</div>
                 <div>{{$t('overview.invalid')}}</div>
               </div>
             </div>
@@ -56,7 +56,7 @@
 <script>
 // import AMap from "AMap";
 import { mapState } from "vuex";
-import { websockets, GetDeviceList } from "../../api/index.js";
+import { websockets, GetDeviceList, GetCount } from "../../api/index.js";
 import { onTimeOut, onError, onWarn } from "../../utils/callback.js";
 import GaodeMap from "./gaode-map";
 import GoogleMap from "./google-map";
@@ -73,10 +73,11 @@ export default {
   name: "battery",
   data() {
     return {
-      onLine: 0,
-      allDevice: 0,
+      count: {},
+      // onLine: 0,
+      // allDevice: 0,
       limit: false,
-      offLine: 0,
+      // offLine: 0,
       markers: [],
       sendData: { api: "bind", param: [] },
       // selectArr: [
@@ -95,6 +96,22 @@ export default {
     };
   },
   methods: {
+    init() {
+      this.getTocalsData();
+      this.narmleHttp();
+    },
+    /* 获取统计数据 */
+    getTocalsData() {
+      GetCount().then(res => {
+        console.log("GetCount", res);
+        if (res.data && res.data.code === 0) {
+          let result = res.data.data;
+          this.count = result;
+          this.count.invalid =
+            Number(result.total) - Number(result.availableTotal);
+        }
+      });
+    },
     /*
       http请求 获取全部电池设备
      */
@@ -189,26 +206,6 @@ export default {
           ws.close();
         };
       });
-    },
-    init() {
-      // map = new AMap.Map("container", {
-      //   resizeEnable: true,
-      //   zoom: 10
-      // });
-      // AMap.service("AMap.DistrictSearch", () => {
-      //   district = new AMap.DistrictSearch({
-      //     subdistrict: 1,
-      //     showbiz: false,
-      //     level: "province"
-      //   });
-      //   district.search("中国", (status, result) => {
-      //     if (status === "complete") {
-      //       let data = result.districtList[0];
-      //       this.getCityData(data);
-      //     }
-      //   });
-      // });
-      this.narmleHttp();
     }
   },
   mounted() {
@@ -231,10 +228,9 @@ export default {
   },
   beforeDestroy() {
     console.log(this.over);
-    this.over();
-    // if (typeof this.over === "object") {
-    //   this.over();
-    // }
+    if (typeof this.over === "function") {
+      this.over();
+    }
   }
 };
 </script>

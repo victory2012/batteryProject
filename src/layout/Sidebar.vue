@@ -62,11 +62,11 @@ export default {
         }
       });
       console.log("this.items", this.items);
-      if (loginData && loginData.mapType === 1) {
-        this.$router.push({
-          path: "googleAll"
-        });
-      }
+      // if (loginData && loginData.mapType === 1) {
+      //   this.$router.push({
+      //     path: "googleAll"
+      //   });
+      // }
     }
   },
   mounted() {

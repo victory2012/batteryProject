@@ -46,7 +46,7 @@ export function menuList() {
 export function GoogleList() {
   return [{
       icon: "el-icon-view",
-      index: "googleAll",
+      index: "home",
       title: "overview"
     },
     {

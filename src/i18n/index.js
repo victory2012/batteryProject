@@ -14,8 +14,8 @@ const messages = {
 }
 
 const i18n = new VueI18n({
-  locale: localStorage.getItem('locale') || 'CN',
-  fallbackLocale: 'CN',
+  locale: localStorage.getItem('locale') || 'EN',
+  // fallbackLocale: 'CN',
   messages
 })
 locale.i18n((key, value) => i18n.t(key, value)) // 为了实现element插件的多语言切换

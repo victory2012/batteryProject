@@ -17,21 +17,21 @@
     <transition name="form-fade" mode="in-out">
       <section class="form_contianer" v-show="showLogin">
         <div class="manage_tip">
-          <p>{{$t("projectName")}}</p>
+          <p>{{$t("loginMsg.projectName")}}</p>
         </div>
         <el-form :model="loginForm" :rules="rules" ref="loginForm">
           <el-form-item prop="userName">
-            <el-input v-model="loginForm.userName" size="small" :placeholder="$t('accountPlace')"></el-input>
+            <el-input v-model="loginForm.userName" size="small" :placeholder="$t('loginMsg.accountPlace')"></el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input type="password" :placeholder="$t('passwordPlace')" size="small" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')"></el-input>
+            <el-input type="password" :placeholder="$t('loginMsg.passwordPlace')" size="small" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')"></el-input>
           </el-form-item>
           <el-form-item prop="checkBox">
-            <el-checkbox style="float:left" v-model="account">{{$t("RMaccount")}}</el-checkbox>
-            <el-checkbox style="float:right" v-model="pwd">{{$t("RMpassword")}}</el-checkbox>
+            <el-checkbox style="float:left" v-model="account">{{$t("loginMsg.RMaccount")}}</el-checkbox>
+            <el-checkbox style="float:right" v-model="pwd">{{$t("loginMsg.RMpassword")}}</el-checkbox>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">{{$t("login")}}</el-button>
+            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">{{$t("loginMsg.loginBtn")}}</el-button>
           </el-form-item>
         </el-form>
       </section>
@@ -125,9 +125,9 @@ export default {
     },
     changLocalLang() {
       if (this.langs === "en") {
-        this.$i18n.locale = "zhCHS";
+        this.$i18n.locale = "CN";
       } else {
-        this.$i18n.locale = "en";
+        this.$i18n.locale = "EN";
       }
     },
     init() {

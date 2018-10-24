@@ -3,7 +3,7 @@ import {
   Message
 } from 'element-ui';
 let BaseUrl = "http://47.98.232.46:8181";
-// let BaseUrl = "http://192.168.1.183:8181";
+// let BaseUrl = "http://192.168.1.135:8181";
 
 Axios.defaults.withCredentials = true; // 让ajax携带cookie
 

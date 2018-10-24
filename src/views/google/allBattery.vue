@@ -7,8 +7,8 @@
             <div class="grid-content grid-con-1">
               <i class="grid-con-icon iconfont">&#xe644;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">{{allDevice}}</div>
-                <div>总数</div>
+                <div class="grid-num">{{count.total}}</div>
+                <div>{{$t('overview.total')}}</div>
               </div>
             </div>
           </el-card>
@@ -18,8 +18,8 @@
             <div class="grid-content grid-con-2">
               <i class="grid-con-icon iconfont">&#xe656;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">{{onLine}}</div>
-                <div>在线数</div>
+                <div class="grid-num">{{count.monthTotal}}</div>
+                <div>{{$t('overview.online')}}</div>
               </div>
             </div>
           </el-card>
@@ -29,8 +29,8 @@
             <div class="grid-content grid-con-3">
               <i class="grid-con-icon iconfont">&#xe6a8;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">{{offLine}}</div>
-                <div>离线数</div>
+                <div class="grid-num">{{count.availableTotal}}</div>
+                <div>{{$t('overview.offLine')}}</div>
               </div>
             </div>
           </el-card>
@@ -40,8 +40,8 @@
             <div class="grid-content grid-con-4">
               <i class="grid-con-icon iconfont">&#xe6f5;</i>
               <div class="grid-cont-right">
-                <div class="grid-num">0</div>
-                <div>无效数</div>
+                <div class="grid-num">{{count.invalid}}</div>
+                <div>{{$t('overview.invalid')}}</div>
               </div>
             </div>
           </el-card>
@@ -165,7 +165,7 @@ export default {
                   this.sendData.param.push(key.deviceId);
                 }
               });
-              this.mapInit(pointerObj, 'http');
+              this.mapInit(pointerObj, "http");
               this.sockets(); // websocket 请求
             } else {
               onWarn("暂无设备, 请先注册设备");
@@ -237,7 +237,7 @@ export default {
         this.hasSet = false;
         this.narmleHttp();
       } catch (err) {
-        onError("地图加载失败，请检查网络连接")
+        onError("地图加载失败，请检查网络连接");
       }
     }
   },

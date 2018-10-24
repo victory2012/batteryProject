@@ -2,15 +2,15 @@
   <div class="outer-box">
     <div id="AddContainer" class="fenceContainer"></div>
     <div class="HandleBtn" v-if="addFence">
-      <span class="Tiptext">Tips：最多选区10个点</span>
-      <el-button @click="cancelSetings" type="info">取消设置</el-button>
-      <el-button @click="doAddFence" type="primary">确定设置</el-button>
-      <el-button @click="goBack" type="warning">返回</el-button>
+      <span class="Tiptext">Tips：{{$t('fence.tipMsg.morePointer')}}</span>
+      <el-button @click="cancelSetings" type="info">{{$t('fence.cancelSeting')}}</el-button>
+      <el-button @click="doAddFence" type="primary">{{$t('fence.sureSeting')}}</el-button>
+      <el-button @click="goBack" type="warning">{{$t('fence.back')}}</el-button>
       <p></p>
     </div>
     <div class="HandleBtn" v-else>
-      <el-button @click="ToAddFence" type="primary">添加围栏</el-button>
-      <el-button @click="ToDeleteFence" type="danger">删除围栏</el-button>
+      <el-button @click="ToAddFence" type="primary">{{$t('fence.addBtn')}}</el-button>
+      <el-button @click="ToDeleteFence" type="danger">{{$t('fence.delBtn')}}</el-button>
     </div>
   </div>
 </template>
@@ -89,11 +89,14 @@ export default {
       this.addFence = false;
       let poi = gpsList.substring(0, gpsList.length - 1).split(";");
       let allPointers = [];
-      poi.forEach(res => {
+      let bounds = new google.maps.LatLngBounds();
+      poi.forEach((res, index) => {
         let item = res.split(",");
         let arr = new google.maps.LatLng(item[1], item[0]);
+        bounds.extend(arr);
         allPointers.push(arr);
       });
+      map.fitBounds(bounds); // 自适应显示
       var bermudaTriangle = new google.maps.Polygon({
         paths: [allPointers],
         strokeColor: "blue",
@@ -128,34 +131,29 @@ export default {
           0,
           this.fencePonter.length - 1
         );
-        addFence(gpsObj)
-          .then(res => {
-            console.log(res);
-            if (res.data.code === 1) {
-              onTimeOut(this.$router);
+        addFence(gpsObj).then(res => {
+          console.log(res);
+          if (res.data.code === 1) {
+            onTimeOut(this.$router);
+          }
+          if (res.data.code === 0) {
+            google.maps.event.clearListeners(map, "click");
+            if (markers.length > 0) {
+              markers.forEach(key => {
+                key.setMap(null);
+              });
+              markers = [];
             }
-            if (res.data.code === 0) {
-              google.maps.event.clearListeners(map, "click");
-              if (markers.length > 0) {
-                markers.forEach(key => {
-                  key.setMap(null);
-                });
-                markers = [];
-              }
-              // drawingManager.setDrawingMode(null);
-              onSuccess("添加成功");
-              this.getData();
-            }
-            if (res.data.code === -1) {
-              onError(res.data.msg);
-            }
-          })
-          .catch(err => {
-            console.log(err);
-            onError("服务器请求超时，请稍后重试");
-          });
+            // drawingManager.setDrawingMode(null);
+            onSuccess(`${this.$t("fence.tipMsg.addSuccess")}`);
+            this.getData();
+          }
+          if (res.data.code === -1) {
+            onError(res.data.msg);
+          }
+        });
       } else {
-        onError("请选区围栏点");
+        onError(`${this.$t("fence.tipMsg.addPointer")}`);
       }
     },
     /* 取消设置 */
@@ -173,27 +171,22 @@ export default {
     /* 删除围栏 */
     ToDeleteFence() {
       if (!this.fenceId) {
-        onWarn("请点击要删除的围栏");
+        onWarn(`${this.$t("fence.tipMsg.selectToDel")}`);
         return;
       }
-      delFence(this.fenceId)
-        .then(res => {
-          console.log(res);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data.code === 0) {
-            onSuccess("删除成功");
-            this.getData();
-          }
-          if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          onError("服务器请求超时，请稍后重试");
-        });
+      delFence(this.fenceId).then(res => {
+        console.log(res);
+        if (res.data.code === 1) {
+          onTimeOut(this.$router);
+        }
+        if (res.data.code === 0) {
+          onSuccess(`${this.$t("fence.tipMsg.delSuccess")}`);
+          this.getData();
+        }
+        if (res.data.code === -1) {
+          this.$message.error(res.data.msg);
+        }
+      });
     },
     /* goBack 返回 */
     goBack() {
@@ -244,14 +237,14 @@ export default {
       try {
         map = new google.maps.Map(document.getElementById("AddContainer"), {
           center: {
-            lat: 31.232803,
-            lng: 121.475101
+            lat: 0,
+            lng: 0
           },
           zoom: 15
         });
         this.getData();
       } catch (err) {
-        onError("地图加载失败，请检查网络连接");
+        onError(`${this.$t("mapError")}`);
       }
     }
   },
@@ -260,6 +253,7 @@ export default {
   }
 };
 </script>
+
 <style lang="less" scoped>
 .outer-box {
   position: relative;
