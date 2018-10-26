@@ -1,7 +1,7 @@
 <template>
   <div class="batterylist">
     <div class="headerBtn">
-      <el-button size="medium" v-show="limeted" @click="doCreatBattery" type="primary">电池登记
+      <el-button size="medium" v-show="limeted" @click="doCreatBattery" type="primary">{{$t('batteryList.batteryAddBtn')}}
         <i class="el-icon-circle-plus-outline"></i>
       </el-button>
       <!-- <el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/" multiple :on-exceed="handleExceed">
@@ -30,25 +30,25 @@
     </div>
     <div class="table">
       <el-table v-loading="loading" :data="tableData" style="width: 100%" max-height="750">
-        <el-table-column type="index" width="50" align="center" label="序号"></el-table-column>
-        <el-table-column prop="batteryId" align="center" label="电池编号">
+        <el-table-column type="index" width="80" align="center" :label="$t('batteryList.serial')"></el-table-column>
+        <el-table-column prop="batteryId" align="center" :label="$t('batteryList.batteryCode')">
         </el-table-column>
-        <el-table-column prop="model" align="center" label="电池型号">
+        <el-table-column prop="model" align="center" :label="$t('batteryList.model')">
         </el-table-column>
-        <el-table-column prop="specification" align="center" label="电池组规格">
+        <el-table-column prop="specification" align="center" :label="$t('batteryList.specif')">
         </el-table-column>
-        <el-table-column prop="customerName" align="center" label="客户企业名称">
+        <el-table-column prop="customerName" align="center" :label="$t('batteryList.customer')">
         </el-table-column>
-        <el-table-column prop="deviceId" align="center" label="监测设备编号">
+        <el-table-column prop="deviceId" align="center" :label="$t('batteryList.deviceCode')">
         </el-table-column>
-        <el-table-column prop="bindingName" align="center" label="绑定状态">
+        <el-table-column prop="bindingName" align="center" :label="$t('batteryList.bindStatus')">
         </el-table-column>
-        <el-table-column prop="online" align="center" label="在线状态">
+        <el-table-column prop="online" align="center" :label="$t('batteryList.onlineStatus')">
         </el-table-column>
-        <el-table-column align="center" label="运行状态">
+        <el-table-column align="center" :label="$t('batteryList.running')">
           <template slot-scope="scope">
             <el-button @click.native.prevent="examine(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].OLS" size="small">
-              查看
+              {{$t('batteryList.view')}}
             </el-button>
           </template>
         </el-table-column>
@@ -75,16 +75,16 @@
       </div>
     </div>
     <div>
-      <el-dialog title="电池登记" :visible.sync="creatBattery" width="600px">
+      <el-dialog :title="$t('batteryList.batteryAddBtn')" :visible.sync="creatBattery" width="600px">
         <el-form :model="BatteryForm" :rules="BatteryRules" ref="BatteryForm">
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="生产商id" prop="enterpriseName">
-                <el-input v-model="BatteryForm.enterpriseName" disabled auto-complete="off" placeholder="请填写生产商id"></el-input>
+              <el-form-item :label="$t('batteryList.enterprise')" prop="enterpriseName">
+                <el-input v-model="BatteryForm.enterpriseName" disabled auto-complete="off" :placeholder="$t('batteryList.warn.enterprise')"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="客户id" prop="customer">
+              <el-form-item :label="$t('batteryList.customerCom')" prop="customer">
                 <el-select v-model="BatteryForm.customer" style="width:238px">
                   <el-option v-for="item in customerList" :key="item.id" :label="item.name" :value="item.id">
                   </el-option>
@@ -95,24 +95,24 @@
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="电池id" prop="batteryId">
-                <el-input v-model="BatteryForm.batteryId" auto-complete="off" placeholder="请填写电池id"></el-input>
+              <el-form-item :label="$t('batteryList.batteryNumber')" prop="batteryId">
+                <el-input v-model="BatteryForm.batteryId" auto-complete="off" :placeholder="$t('batteryList.batteryNumber')"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="型号" prop="model">
-                <el-input v-model="BatteryForm.model" auto-complete="off" placeholder="请填写型号"></el-input>
+              <el-form-item :label="$t('batteryList.model')" prop="model">
+                <el-input v-model="BatteryForm.model" auto-complete="off" :placeholder="$t('batteryList.warn.model')"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="规格" prop="specification">
-                <el-input v-model="BatteryForm.specification" auto-complete="off" placeholder="请填规格"></el-input>
+              <el-form-item :label="$t('batteryList.specif')" prop="specification">
+                <el-input v-model="BatteryForm.specification" auto-complete="off" :placeholder="$t('batteryList.warn.specif')"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="设备编号" prop="deviceId">
+              <el-form-item :label="$t('batteryList.deviceCode')" prop="deviceId">
                 <el-select v-model="BatteryForm.deviceId" style="width:238px">
                   <el-option v-for="item in deviceIdList" :key="item" :label="item" :value="item">
                   </el-option>
@@ -123,30 +123,30 @@
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="生产日期" prop="createDate">
-                <el-date-picker v-model="BatteryForm.createDate" style="width:238px" type="date" value-format="yyyy-MM-dd" @change="formatCreatDate" placeholder="生产日期">
+              <el-form-item :label="$t('batteryList.createDate')" prop="createDate">
+                <el-date-picker v-model="BatteryForm.createDate" style="width:238px" type="date" value-format="yyyy-MM-dd" @change="formatCreatDate" :placeholder="$t('batteryList.createDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="出厂日期" prop="manufactureDate">
-                <el-date-picker v-model="BatteryForm.manufactureDate" style="width:238px" type="date" value-format="yyyy-MM-dd" placeholder="出厂日期">
+              <el-form-item :label="$t('batteryList.manufactureDate')" prop="manufactureDate">
+                <el-date-picker v-model="BatteryForm.manufactureDate" style="width:238px" type="date" value-format="yyyy-MM-dd" :placeholder="$t('batteryList.manufactureDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="质保期" prop="warrantyDate">
-                <el-date-picker v-model="BatteryForm.warrantyDate" style="width:238px" type="date" value-format="yyyy-MM-dd" placeholder="质保期">
+              <el-form-item :label="$t('batteryList.warrantyDate')" prop="warrantyDate">
+                <el-date-picker v-model="BatteryForm.warrantyDate" style="width:238px" type="date" value-format="yyyy-MM-dd" :placeholder="$t('batteryList.warrantyDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="resetBatteryForm('BatteryForm')">取 消</el-button>
-          <el-button @click="regBattery('BatteryForm')" :loading="SureReg" type="primary">确认</el-button>
+          <el-button @click="resetBatteryForm('BatteryForm')">{{$t('batteryList.cancel')}}</el-button>
+          <el-button @click="regBattery('BatteryForm')" :loading="SureReg" type="primary">{{$t('batteryList.sure')}}</el-button>
         </div>
       </el-dialog>
     </div>
@@ -159,7 +159,7 @@ import {
   GetList,
   deleteBattery
 } from "../../api/index.js";
-import { onTimeOut, onError, onSuccess } from "../../utils/callback.js";
+import { onSuccess } from "../../utils/callback.js";
 export default {
   data() {
     return {
@@ -176,23 +176,53 @@ export default {
       deviceId: "",
       BatteryRules: {
         batteryId: [
-          { required: true, message: "请输入电池id", trigger: "blur" }
+          {
+            required: true,
+            message: this.$t("batteryList.warn.batteryCode"),
+            trigger: "blur"
+          }
         ],
-        model: [{ required: true, message: "请输入型号", trigger: "blur" }],
+        model: [
+          {
+            required: true,
+            message: this.$t("batteryList.warn.model"),
+            trigger: "blur"
+          }
+        ],
         specification: [
-          { required: true, message: "请输入规格", trigger: "blur" }
+          {
+            required: true,
+            message: this.$t("batteryList.warn.specif"),
+            trigger: "blur"
+          }
         ],
         manufactureDate: [
-          { required: true, message: "请输入出厂日期", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("batteryList.warn.manufactureDate"),
+            trigger: "change"
+          }
         ],
         createDate: [
-          { required: true, message: "请输入生产日期", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("batteryList.warn.createDate"),
+            trigger: "change"
+          }
         ],
         warrantyDate: [
-          { required: true, message: "请输入质保期", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("batteryList.warn.warrantyDate"),
+            trigger: "change"
+          }
         ],
         deviceId: [
-          { required: true, message: "请选择设备编号", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("batteryList.warn.deviceId"),
+            trigger: "change"
+          }
         ]
       },
       regForm: false,
@@ -250,12 +280,10 @@ export default {
           addBattery(this.BatteryForm).then(res => {
             console.log(res);
             if (res.data.code === 0) {
-              onSuccess("创建成功");
+              onSuccess(`${this.$t("batteryList.success")}`);
               this.creatBattery = false;
               this.resetBatteryForm(form);
               this.getData();
-            } else {
-              onError("创建失败");
             }
           });
         } else {
@@ -280,40 +308,35 @@ export default {
         pageSize: this.handleSize,
         pageNum: this.currentPage
       };
-      GetList(pageObj)
-        .then(res => {
-          this.loading = false;
-          console.log(res);
-          let result = res.data;
-          if (result.code === 1) {
-            onTimeOut(this.$router);
+      GetList(pageObj).then(res => {
+        this.loading = false;
+        console.log(res);
+        let result = res.data;
+
+        if (result.code === 0) {
+          if (result.data.data) {
+            let tableObj = result.data.data;
+            this.totalPage = result.data.total;
+            this.tableData = [];
+            tableObj.forEach(key => {
+              if (key.onlineStatus === 1) {
+                key.online = this.$t("batteryList.online");
+                key.OLS = true;
+              } else {
+                key.online = this.$t("batteryList.offline");
+                key.OLS = false;
+              }
+              key.bindingName =
+                key.bindingStatus === 0
+                  ? this.$t("batteryList.noBind")
+                  : this.$t("batteryList.hasBind");
+              // key.online = key.onlineStatus === 1 ? "离线" : "在线";
+              key.status = key.status === 0 ? false : true;
+              this.tableData.push(key);
+            });
           }
-          if (result.code === 0) {
-            if (result.data.data) {
-              let tableObj = result.data.data;
-              this.totalPage = result.data.total;
-              this.tableData = [];
-              tableObj.forEach(key => {
-                if (key.onlineStatus === 1) {
-                  key.online = "在线";
-                  key.OLS = true;
-                } else {
-                  key.online = "离线";
-                  key.OLS = false;
-                }
-                key.bindingName = key.bindingStatus === 0 ? "未绑定" : "已绑定";
-                // key.online = key.onlineStatus === 1 ? "离线" : "在线";
-                key.status = key.status === 0 ? false : true;
-                this.tableData.push(key);
-              });
-            }
-          }
-        })
-        .catch(err => {
-          this.loading = false;
-          console.log(err);
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+      });
     },
     /*
     * 删除
@@ -327,41 +350,36 @@ export default {
         customer: tableData[index].customerId,
         batteryId: tableData[index].batteryId
       };
-      deleteBattery(params)
-        .then(res => {
-          this.loading = false;
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data.code === 0) {
-            onSuccess("删除成功");
-            this.getData();
-          }
-        })
-        .catch(err => {
-          this.loading = false;
-          console.log(err);
-          onError("服务器请求超时，请稍后重试");
-        });
+      deleteBattery(params).then(res => {
+        this.loading = false;
+        if (res.data.code === 0) {
+          onSuccess(`${this.$t("batteryList.delSuccess")}`);
+          this.getData();
+        }
+      });
     },
     /*
      * 查看运行状态
      */
     examine(index, tableData) {
-      let userData = JSON.parse(localStorage.getItem("loginData"));
+      // let userData = JSON.parse(localStorage.getItem("loginData"));
       let deviceId = tableData[index];
-      if (userData.mapType === 0) {
-        this.$router.push({
-          path: "position",
-          query: { deviceId: deviceId.deviceId }
-        });
-      }
-      if (userData.mapType === 1) {
-        this.$router.push({
-          path: "googlePos",
-          query: { deviceId: deviceId.deviceId }
-        });
-      }
+      this.$router.push({
+        path: "googlePos",
+        query: { deviceId: deviceId.deviceId }
+      });
+      // if (userData.mapType === 0) {
+      //   this.$router.push({
+      //     path: "position",
+      //     query: { deviceId: deviceId.deviceId }
+      //   });
+      // }
+      // if (userData.mapType === 1) {
+      //   this.$router.push({
+      //     path: "googlePos",
+      //     query: { deviceId: deviceId.deviceId }
+      //   });
+      // }
     },
     /*
     * 改变每页显示的条数

@@ -17,7 +17,7 @@
 <script>
 import google from "google";
 import { getFence, addFence, delFence } from "../../api/index.js";
-import { onTimeOut, onError, onWarn, onSuccess } from "../../utils/callback.js";
+import { onError, onWarn, onSuccess } from "../../utils/callback.js";
 let map;
 let markers = [];
 // let mouseTool;
@@ -133,9 +133,7 @@ export default {
         );
         addFence(gpsObj).then(res => {
           console.log(res);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
+
           if (res.data.code === 0) {
             google.maps.event.clearListeners(map, "click");
             if (markers.length > 0) {
@@ -147,9 +145,6 @@ export default {
             // drawingManager.setDrawingMode(null);
             onSuccess(`${this.$t("fence.tipMsg.addSuccess")}`);
             this.getData();
-          }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
           }
         });
       } else {
@@ -176,15 +171,10 @@ export default {
       }
       delFence(this.fenceId).then(res => {
         console.log(res);
-        if (res.data.code === 1) {
-          onTimeOut(this.$router);
-        }
+
         if (res.data.code === 0) {
           onSuccess(`${this.$t("fence.tipMsg.delSuccess")}`);
           this.getData();
-        }
-        if (res.data.code === -1) {
-          this.$message.error(res.data.msg);
         }
       });
     },
@@ -204,9 +194,7 @@ export default {
     getData() {
       getFence().then(res => {
         console.log(res);
-        if (res.data.code === 1) {
-          onTimeOut(this.$router);
-        }
+
         if (res.data.code === 0) {
           if (bermudaTriangleArr.length > 0) {
             bermudaTriangleArr.forEach(key => {
@@ -224,9 +212,6 @@ export default {
             this.buildFence();
           }
         }
-        if (res.data.code === -1) {
-          onError(res.data.msg);
-        }
       });
     },
     ToAddFence() {
@@ -240,7 +225,7 @@ export default {
             lat: 0,
             lng: 0
           },
-          zoom: 15
+          zoom: 18
         });
         this.getData();
       } catch (err) {

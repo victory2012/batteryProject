@@ -7,7 +7,7 @@
           <i class="el-icon-caret-bottom"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="cn">
+          <el-dropdown-item command="zh">
             <i class="iconfont icon-user"></i>中文</el-dropdown-item>
           <el-dropdown-item divided command="en">
             <i class="el-icon-setting"></i>English</el-dropdown-item>
@@ -46,6 +46,7 @@ export default {
     return {
       account: false,
       pwd: false,
+      localLanguge: "",
       isLogin: false,
       loginForm: {
         userName: "",
@@ -72,15 +73,15 @@ export default {
   },
   methods: {
     handleCommand(cammand) {
-      if (cammand === "cn") {
+      if (cammand === "zh") {
         this.localLanguge = "中文";
-        this.$i18n.locale = "CN";
-        localStorage.setItem("locale", "CN");
+        this.$i18n.locale = "zh";
+        localStorage.setItem("locale", "zh");
       }
       if (cammand === "en") {
         this.localLanguge = "English";
-        this.$i18n.locale = "EN";
-        localStorage.setItem("locale", "EN");
+        this.$i18n.locale = "en";
+        localStorage.setItem("locale", "en");
       }
       this.rules = {
         userName: [
@@ -125,9 +126,9 @@ export default {
     },
     changLocalLang() {
       if (this.langs === "en") {
-        this.$i18n.locale = "CN";
+        this.$i18n.locale = "zh";
       } else {
-        this.$i18n.locale = "EN";
+        this.$i18n.locale = "en";
       }
     },
     init() {
@@ -149,7 +150,7 @@ export default {
   created() {
     let locallanguage = localStorage.getItem("locale");
     if (locallanguage) {
-      this.localLanguge = locallanguage === "CN" ? "中文" : "English";
+      this.localLanguge = locallanguage === "zh" ? "中文" : "English";
     } else {
       let currentLang = navigator.language; // 判断除IE外其他浏览器使用语言
       if (!currentLang) {
@@ -158,14 +159,17 @@ export default {
       }
       if (currentLang === "zh-CN") {
         this.localLanguge = "中文";
-        localStorage.setItem("locale", "CN");
+        localStorage.setItem("locale", "zh");
+        this.$i18n.locale = "zh";
       } else {
         this.localLanguge = "English";
-        localStorage.setItem("locale", "EN");
+        localStorage.setItem("locale", "en");
+        this.$i18n.locale = "en";
       }
     }
   },
   mounted() {
+    console.log(this.$i18n.locale);
     this.init();
   }
 };
@@ -211,7 +215,7 @@ export default {
   justify-content: space-between;
 }
 .form_contianer {
-  width: 350px;
+  width: 380px;
   height: 190px;
   position: absolute;
   top: 50%;

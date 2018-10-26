@@ -1,14 +1,14 @@
 <template>
   <div class="userMsg">
     <div class="editorBtn">
-      <el-button type="primary" @click="doEditor" class="editorContent">编辑</el-button>
+      <el-button type="primary" @click="doEditor" class="editorContent">{{$t('user.edit')}}</el-button>
     </div>
     <div class="center">
       <el-row type="flex" class="row-bg" justify="space-around">
         <el-col :span="8">
           <div class="grid-content">
             <div class="sort-content">
-              <p class="tips">用户名</p>
+              <p class="tips">{{$t('user.userName')}}</p>
               <p class="gridInput">{{userArr.userName}}</p>
               <!-- <el-input v-model="userArr.userName" disabled class="gridInput"></el-input> -->
             </div>
@@ -17,7 +17,7 @@
         <el-col :span="8">
           <div class="grid-content">
             <div class="sort-content">
-              <p class="tips">账户身份</p>
+              <p class="tips">{{$t('user.userRole')}}</p>
               <p class="gridInput">{{userArr.userRole}}</p>
               <!-- <el-input v-model="userArr.userRole" disabled class="gridInput"></el-input> -->
             </div>
@@ -26,7 +26,7 @@
         <el-col :span="8">
           <div class="grid-content">
             <div class="sort-content">
-              <p class="tips">企业身份</p>
+              <p class="tips">{{$t('user.enterpriseRole')}}</p>
               <p class="gridInput">{{userArr.enterpriseRole}}</p>
               <!-- <el-input v-model="userArr.enterpriseRole" disabled class="gridInput"></el-input> -->
             </div>
@@ -39,7 +39,7 @@
         <el-col :span="8">
           <div class="grid-content">
             <div class="sort-content">
-              <p class="tips">企业名称</p>
+              <p class="tips">{{$t('user.enterpriseName')}}</p>
               <p class="gridInput">{{userArr.enterpriseName}}</p>
               <!-- <el-input v-model="userArr.enterpriseName" disabled class="gridInput"></el-input> -->
             </div>
@@ -48,7 +48,7 @@
         <el-col :span="8">
           <div class="grid-content">
             <div class="sort-content">
-              <p class="tips">手机号码</p>
+              <p class="tips">{{$t('user.phone')}}</p>
               <p class="gridInput">{{userArr.phoneNumber}}</p>
             </div>
           </div>
@@ -56,7 +56,7 @@
         <el-col :span="8">
           <div class="grid-content">
             <div class="sort-content">
-              <p class="tips">邮箱</p>
+              <p class="tips">{{$t('user.email')}}</p>
               <p class="gridInput">{{userArr.email}}</p>
             </div>
           </div>
@@ -68,24 +68,24 @@
         <div v-show="userMsgBox" class="transition-box">
           <div class="box">
             <div class="box-head">
-              <h3>个人信息编辑</h3>
+              <h3>{{$t('user.userInfo')}}</h3>
               <i @click="closeMsgBox('ruleForm')" class="el-icon-close"></i>
             </div>
             <div class="formWarrp">
               <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="210px" class="demo-ruleForm">
 
-                <el-form-item label="手机号码" prop="phoneNum">
+                <el-form-item :label="$t('user.phone')" prop="phoneNum">
                   <el-input v-model="ruleForm.phoneNum" type="tel" style="width:200px;"></el-input>
                 </el-form-item>
                 <!-- <el-form-item label="用户名" prop="userName">
                   <el-input v-model="ruleForm.userName" style="width:200px;"></el-input>
                 </el-form-item> -->
-                <el-form-item label="邮箱" prop="email">
+                <el-form-item :label="$t('user.email')" prop="email">
                   <el-input v-model="ruleForm.email" style="width:200px;"></el-input>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary" @click="submitForm('ruleForm')">确认</el-button>
-                  <el-button @click="resetForm('ruleForm')">取消</el-button>
+                  <el-button type="primary" @click="submitForm('ruleForm')">{{$t('user.save')}}</el-button>
+                  <el-button @click="resetForm('ruleForm')">{{$t('user.cancel')}}</el-button>
                 </el-form-item>
               </el-form>
             </div>
@@ -97,7 +97,7 @@
 </template>
 <script>
 import { getUserInfo, changeUserInfo } from "../../api/index.js";
-import { onTimeOut, onSuccess, onError } from "../../utils/callback";
+import { onSuccess } from "../../utils/callback";
 export default {
   data() {
     return {
@@ -105,32 +105,62 @@ export default {
       userArr: [],
       ruleForm: {},
       rules: {
-        email: [{ required: false, message: "请输入用户名", trigger: "blur" }],
+        email: [
+          { required: false, message: this.$t("user.nameErr"), trigger: "blur" }
+        ],
         phoneNum: [
-          { required: true, message: "请输入手机号码", trigger: "change" },
-          { pattern: /^1[3|4|5|7|8][0-9]\d{8}$/, message: "手机号格式错误" }
+          {
+            required: true,
+            message: this.$t("user.phoneErr"),
+            trigger: "change"
+          },
+          {
+            pattern: /^1[3|4|5|7|8][0-9]\d{8}$/,
+            message: this.$t("user.phoneCheck")
+          }
         ]
       }
     };
   },
   methods: {
     getData() {
-      getUserInfo()
-        .then(res => {
-          console.log(res.data);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data.code === 0) {
-            this.userArr = res.data.data;
-          }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+      getUserInfo().then(res => {
+        console.log(res.data);
+        if (res.data.code === 0) {
+          let result = res.data.data;
+          this.userArr = result;
+          this.userArr.userRole = this.userRole(result.userRole);
+          this.userArr.enterpriseRole = this.companyRole(result.enterpriseRole);
+        }
+      });
+    },
+    companyRole(str) {
+      switch (str) {
+        case "platform":
+          return `${this.$t("platform")}`;
+        case "manufacturer":
+          return `${this.$t("manufacturer")}`;
+        case "customer":
+          return `${this.$t("customer")}`;
+        default:
+          return "";
+      }
+    },
+    userRole(str) {
+      switch (str) {
+        case "plat_super_admin":
+          return this.$t("useMsg.superAdministrator");
+        case "super_admin":
+          return this.$t("useMsg.superAdministrator");
+        case "admin":
+          return this.$t("useMsg.administrator");
+        case "customer_super_admin":
+          return this.$t("useMsg.administrator");
+        case "manufacturer_super_admin":
+          return this.$t("useMsg.administrator");
+        default:
+          return "";
+      }
     },
     doEditor() {
       this.userMsgBox = true;
@@ -150,25 +180,16 @@ export default {
             email: this.ruleForm.email,
             phoneNumber: this.ruleForm.phoneNum
           };
-          changeUserInfo(userObj)
-            .then(res => {
-              console.log(res);
-              if (res.data.code === 1) {
-                onTimeOut(this.$router);
-              }
-              if (res.data.code === 0) {
-                this.userMsgBox = false;
-                this.ruleForm = {};
-                onSuccess("修改成功");
-                this.getData();
-              }
-              if (res.data.code === -1) {
-                onError(res.data.msg);
-              }
-            })
-            .catch(() => {
-              onError("服务器请求超时，请稍后重试");
-            });
+          changeUserInfo(userObj).then(res => {
+            console.log(res);
+
+            if (res.data.code === 0) {
+              this.userMsgBox = false;
+              this.ruleForm = {};
+              onSuccess(`${this.$t("user.seccess")}`);
+              this.getData();
+            }
+          });
         } else {
           console.log("error submit!!");
           return false;

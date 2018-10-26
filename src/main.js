@@ -21,8 +21,6 @@ Vue.use(ElementUI, {
   size: 'small'
 });
 /* eslint-disable no-new */
-
-console.log(i18n);
 const store = createStore()
 new Vue({
   el: '#app',

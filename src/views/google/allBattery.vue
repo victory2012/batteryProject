@@ -64,7 +64,7 @@
 <script>
 import google from "google";
 import { websockets, GetDeviceList } from "../../api/index.js";
-import { onTimeOut, onError, onWarn } from "../../utils/callback.js";
+import { onError, onWarn } from "../../utils/callback.js";
 let map;
 let pointerObj = {};
 export default {
@@ -141,43 +141,34 @@ export default {
         pageSize: 999999999,
         bindingStatus: ""
       };
-      GetDeviceList(pageObj)
-        .then(res => {
-          // console.log(res);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
+      GetDeviceList(pageObj).then(res => {
+        // console.log(res);
+
+        if (res.data.code === 0) {
+          let result = res.data.data.data;
+          this.allDevice = result.length;
+          this.sendData = { api: "bind", param: [] };
+          pointerObj = {};
+          if (result.length > 0) {
+            result.forEach(key => {
+              if (key.longitude && key.latitude && key.onlineStatus === 1) {
+                pointerObj[key.deviceId] = `${key.latitude},${key.longitude}`;
+                // if (!this.hasSet) {
+                //   this.hasSet = true;
+                //   map.setCenter(
+                //     new google.maps.LatLng(key.latitude, key.longitude)
+                //   );
+                // }
+                this.sendData.param.push(key.deviceId);
+              }
+            });
+            this.mapInit(pointerObj, "http");
+            this.sockets(); // websocket 请求
+          } else {
+            onWarn("暂无设备, 请先注册设备");
           }
-          if (res.data.code === 0) {
-            let result = res.data.data.data;
-            this.allDevice = result.length;
-            this.sendData = { api: "bind", param: [] };
-            pointerObj = {};
-            if (result.length > 0) {
-              result.forEach(key => {
-                if (key.longitude && key.latitude && key.onlineStatus === 1) {
-                  pointerObj[key.deviceId] = `${key.latitude},${key.longitude}`;
-                  // if (!this.hasSet) {
-                  //   this.hasSet = true;
-                  //   map.setCenter(
-                  //     new google.maps.LatLng(key.latitude, key.longitude)
-                  //   );
-                  // }
-                  this.sendData.param.push(key.deviceId);
-                }
-              });
-              this.mapInit(pointerObj, "http");
-              this.sockets(); // websocket 请求
-            } else {
-              onWarn("暂无设备, 请先注册设备");
-            }
-          }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+      });
     },
     /*
       websockets 请求

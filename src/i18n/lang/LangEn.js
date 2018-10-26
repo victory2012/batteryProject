@@ -1,214 +1,279 @@
 module.exports = {
-  platform: 'platform',
-  manufacturer: 'manufacturer',
-  customer: 'customer',
-  adminIden: 'customer',
-  internetErr: '服务器请求超时，请稍后重试',
-  mapError: '地图加载失败，请检查网络连接',
+  platform: 'Platform',
+  manufacturer: 'Manufacturer',
+  customer: 'Customer',
+  adminIden: 'Customer',
+  internetErr: 'Service request time out, please try again later.',
+  mapError: 'Map failed to load, please check network connection.',
+  connectErr: 'Service request time out, please try again later.',
   responseCode: {
-    timeOut: 'time Out',
-    hasdevice: 'has device',
-    notFindDevice: 'not Find Device',
-    hasHost: 'has Host',
-    noHost: 'no Host'
+    timeOut: 'Login time out, please try again later.',
+    sessionOut: 'Current session has expired.', // 会话过期
+    accountExists: "This user account already exists.", // 账号已存在
+    accountNotExist: "This user account does not exist.", // 账号不存在
+    accountOperation: "Operation cannot be performed by current user account.", // 账号操作失败
+    UnableDevice: 'Unable to operate on this device.', // 设备操作失败
+    hasdevice: 'This device already exists.', // 设备已存在
+    notFindDevice: 'This device was not found.', // 设备未找到
+    hasHost: 'This battery already exists.', // 宿主已存在
+    noHost: 'This battery was not found.', // 宿主未找到
+    UnableBattery: 'Unable to operate on this battery.', // 宿主操作失败
+    UnableGecfence: 'Unable to set up this geofence.' // 电子围栏操作失败
   },
   loginMsg: {
-    userNameMsg: 'enter user name', // 登录-- 账户错误提示信息
-    password: 'enter password', // 登录-- 密码错误提示信息
-    projectName: 'admin', // 项目名称
-    subProjectName: 'backend manage',
-    RMaccount: 'account', // 记住账户
-    RMpassword: 'password', // 记住密码
-    accountPlace: 'account', // placeholder
-    passwordPlace: 'password', // placeholder
-    loginBtn: 'login', // 登录按钮
+    userNameMsg: 'Please enter user id.',
+    password: 'Please enter password.',
+    projectName: 'Battery Tracking Management System',
+    subProjectName: 'Battery Tracking Management System',
+    RMaccount: 'Remember the account',
+    RMpassword: 'Remember the password',
+    accountPlace: 'User Id',
+    passwordPlace: 'Password',
+    loginBtn: 'Login',
     errorMsg: {
-      account: 'place enter account',
-      password: 'place enter password'
-    },
-    tips: 'tips',
-    sortage: 'place close incognito mode'
+      account: 'Please enter user id.',
+      password: 'Please enter password.'
+    }
   },
   userInfo: {
-    userMsg: 'user',
-    pasword: 'Password',
-    logOut: 'sign out'
+    userMsg: 'User Profile',
+    pasword: 'Change Password',
+    logOut: 'Logout'
   },
   menu: { // 菜单列表
-    overview: 'all battery',
-    realposition: 'postions',
-    history: 'history track',
-    fence: 'fences',
-    batteryManage: 'battery-manage',
-    batteryList: 'battery',
-    alarm: 'alarm',
-    userManage: "user",
-    device: 'device'
+    overview: 'Overview',
+    realposition: 'Real Location',
+    history: 'Motion Track',
+    fence: 'Geofence',
+    batteryManage: 'Battery Management',
+    batteryList: 'Battery Profiles',
+    alarm: 'Battery Alarms',
+    userManage: "User Management",
+    device: 'Device Management'
   },
   overview: {
-    total: 'total',
-    online: 'mounth',
-    offLine: 'valid',
-    invalid: 'invalid'
+    total: 'All',
+    online: 'This Month',
+    offLine: 'Valid',
+    invalid: 'Invalid'
   },
   positions: {
-    title1: 'device list',
-    title2: 'online battery list',
-    lookAll: 'look all',
-    track: 'history',
-    onLine: 'onLine',
-    offline: 'offline',
-    batteryCode: 'batteryCode',
-    deviceCode: 'deviceCode',
-    updateTime: 'update time',
-    intersection: 'intersection',
-    latLng: 'coordinate',
-    address: 'address',
-    getAdressErr: "adress error"
+    title1: 'Device Profiles',
+    title2: 'Online Battery List',
+    lookAll: 'View All',
+    track: 'Motion Track',
+    onLine: 'Online',
+    offline: 'Offline',
+    batteryCode: 'Battery Id',
+    deviceCode: 'Device Id',
+    updateTime: 'Time',
+    intersection: 'Road junction',
+    latLng: 'Coordinate',
+    address: 'Address',
+    getAdressErr: "Address acquisition failed."
   },
   history: {
-    startTime: 'select start time',
-    endTime: 'select end time',
-    start: 'start',
-    pause: 'pause',
+    startTime: 'Please enter start time.',
+    endTime: 'Please enter end time.',
+    start: 'Start',
+    pause: 'Pause',
     continue: 'continue',
-    stop: 'stop',
-    heatActive: 'heat',
-    TrackReplay: 'replay',
-    times: 'times',
-    batteryList: 'battery list',
+    stop: 'Stop',
+    heatActive: 'Hot Zone',
+    TrackReplay: 'Playback',
+    times: 'Time',
+    batteryList: 'Battery Profiles',
 
-    online: 'up line',
-    offLine: 'offLine',
-    checkErr: 'startTime < end time',
-    noData: "now no data in this device",
-    noDevice: 'no device,place register device'
-  },
-  pageBtn: {
-    previous: 'previous',
-    next: 'next'
-  },
-  toggleTip: {
-    open: "open",
-    close: 'close'
+    online: 'Online',
+    offLine: 'Offline',
+    checkErr: 'Start time must before end time.',
+    noData: "This device has no data during the current time period.",
+    noDevice: 'There is no corresponding device, please register first.',
+    latLng: 'Coordinate',
+    address: 'Address'
   },
   timeBtn: {
-    cancle: "cancel",
-    sure: 'Sure'
+    cancle: "Cancel",
+    sure: 'Submit'
   },
   fence: {
-    cancelSeting: 'cancel',
-    sureSeting: 'Seting',
-    back: 'back',
-    addBtn: 'add Fence',
-    delBtn: 'del Fence',
+    cancelSeting: 'Cancel',
+    sureSeting: 'Submit',
+    back: 'Quit',
+    addBtn: 'Add geofence on map.',
+    delBtn: 'Remove geofence on map.',
     tipMsg: {
-      addSuccess: 'add seccess',
-      delSuccess: 'delete seccess',
-      addPointer: 'place add pointer',
-      selectToDel: 'place click your want to delete',
-      morePointer: 'less then ten pointer'
+      addSuccess: 'Added Successfully.',
+      delSuccess: 'Removed Successfully.',
+      addPointer: 'Please select the geofence point on map.',
+      selectToDel: 'Please choose the geofence you want remove on map.',
+      morePointer: 'Select 10 points at most.'
     }
   },
   batteryList: {
-    serial: 'serial',
-    batteryCode: 'Code',
-    binding: 'bind',
-    running: 'run',
-    detail: 'detail',
-    online: 'online',
-    offline: 'offline',
-    noBind: 'noBind',
-    hasBind: 'hasBind',
-    batteryDetail: 'battery Detail',
-    batteryNumber: 'Number',
-    model: 'model',
-    specif: 'Specifications',
+    serial: 'No.',
+    batteryCode: 'Battery Id',
+    binding: 'Binding Status',
+    running: 'Operating Satus',
+    detail: 'Action',
+    online: 'Online',
+    offline: 'Offline',
+    noBind: 'Unbound',
+    hasBind: 'Bound',
+    batteryDetail: 'Battery Detail',
+    batteryNumber: 'Battery Id',
+    model: 'Model',
+    specif: 'Specification',
     customer: 'Customer',
-    deviceCode: 'device Code',
-    bindStatus: 'bind Status',
-    onlineStatus: 'online Status'
+    deviceCode: 'Device Id',
+    bindStatus: 'Binding Status',
+    onlineStatus: 'Online Status',
+
+    view: 'View',
+    batteryAddBtn: 'Battery Registration',
+    enterprise: 'Manufacturer',
+    customerCom: 'Customer',
+    createDate: 'Date of production.',
+    manufactureDate: 'Date of manufacture.',
+    warrantyDate: 'Warranty',
+    cancel: 'Cancel',
+    sure: 'Confirm',
+    warn: {
+      enterprise: 'Please enter manufacturer id.',
+      customerCom: 'Please enter Customer id.',
+      batteryCode: 'Please enter battery id.',
+      model: 'Please enter battery model.',
+      specif: 'Please enter battery specification.',
+      createDate: 'Date of production',
+      manufactureDate: 'Date of manufacture',
+      warrantyDate: 'Warranty',
+      deviceId: 'Please enter device id.'
+    },
+    success: "Created Successfully.",
+    delSuccess: "Deleted Successfully."
   },
   alarmList: {
-    serial: 'serial',
-    time: 'alarm time',
-    batteryCode: 'battery Code',
-    content: 'content',
-    handle: 'handle',
-    detail: 'detail',
-    batteryDetail: 'battery Detail',
-    batteryNumber: 'Number',
-    specif: 'Specifications',
-    customer: 'customer',
-    deviceCode: 'device Code',
-    grid: 'coordinate',
-    position: 'position',
-    location: 'See location'
+    serial: 'No.',
+    time: 'Alarm Time',
+    batteryCode: 'Battery Id',
+    content: 'Alarm Description',
+    handle: 'Action',
+    detail: 'Detail',
+    batteryDetail: 'Battery Detail',
+    batteryNumber: 'Battery Id',
+    specif: 'Specification',
+    customer: 'Customer',
+    deviceCode: 'Device Id',
+    grid: 'Coordinate Position',
+    position: 'Location',
+    location: 'View'
   },
   useMsg: {
-    serial: 'serial',
-    name: 'user Name',
-    accountIdentity: 'Identity',
-    companyIdentity: 'company',
-    detail: 'detail',
-    administrator: 'admin',
-    superAdministrator: 'super Admin',
-    userDetail: 'user Detail',
-    userName: 'user Name',
-    accountRole: 'account Role',
-    enterpriseRole: 'enterprise Role',
-    enterpriseName: 'enterprise Name',
-    phone: 'phone',
-    email: 'email'
+    serial: 'No.',
+    name: 'User Id',
+    accountIdentity: 'Account Type',
+    companyIdentity: 'Company Type',
+    detail: 'Detail',
+    administrator: 'Administrator',
+    superAdministrator: 'Super Administrator',
+    userDetail: 'User Profile',
+    userName: 'User Id',
+    accountRole: 'Account Type',
+    enterpriseRole: 'Company Type',
+    enterpriseName: 'Company Name',
+    phone: 'Mobile',
+    email: 'Email',
+
+    add: {
+      china: 'In China',
+      international: 'Abroad',
+      userName: 'User Id',
+      password: 'Password',
+      phone: 'Mobile',
+      email: 'Email(optional)',
+      enterpriseName: 'Company Name',
+      nature: 'Company Type',
+      manufacturer: 'New Manufacturer Administrator.',
+      customer: 'New Customer Administrator.',
+      manuProduct: 'New Manufacturer User.',
+      cusNoraml: 'New User',
+      cancel: 'Cancel',
+      sure: 'Submit'
+    },
+    warn: {
+      userName: 'Please enter user id.',
+      nameLimit: 'The user id at least 4 characters.',
+      password: 'Please enter password.',
+      passwordLimit: 'The password at least 6 characters.',
+      phone: 'Please enter mobile number.',
+      phoneCheck: 'Wrong format of mobile number entered.',
+      enterprise: 'Please eneter name of company.',
+      nature: 'Please choose nature of company.'
+    },
+    success: 'Created Successfully.',
+    no: 'No Data'
   },
   device: {
-    serial: 'serial',
-    deviceCode: 'device Code',
-    bindStatus: 'bind Status',
-    runStatus: 'run Status',
-    detail: 'detail',
-    deviceDetail: 'device Detail',
-    manufacturerName: 'manufacturer Name',
-    createTime: 'createTime',
-    batteryCode: 'battery Code',
-    onlineStatus: 'online Status',
-    device: 'device',
-    location: 'See location',
-    addDevice: 'Add',
-    nobind: 'no bind',
-    hasbind: 'has bind',
-    online: 'online',
-    offline: 'offline'
+    serial: 'No.',
+    deviceCode: 'Devicd Id',
+    bindStatus: 'Binding Status',
+    runStatus: 'Online Status',
+    detail: 'Detail',
+    deviceDetail: 'Device Detail',
+    manufacturerName: 'Company Name',
+    createTime: 'Create time',
+    batteryCode: '',
+    onlineStatus: 'Online Status',
+    device: 'Device',
+    location: 'View',
+    addDevice: 'Device Registration',
+    nobind: 'Unbound',
+    hasbind: 'Bound',
+    online: 'Online',
+    offline: 'Offline'
   },
   addDevice: {
-    title: 'add device',
-    back: 'back',
-    deviceCode: 'device Code',
-    manufacturer: 'manufacturer',
+    title: 'Device Registration',
+    back: 'Cancel',
+    deviceCode: 'Devicd Id',
+    manufacturer: 'Manufacturer',
     Customer: 'Customer',
-    createBtn: 'create device',
-    noData: 'No data',
-    errorTip: "place enter device code",
-    success: 'success'
+    createBtn: 'Submit',
+    noData: 'No Data',
+    errorTip: "Please enter devicd id.",
+    manufacturerErr: 'Please choose Manufacturer',
+    success: 'Created successfully.'
   },
   user: {
-    edit: 'edit',
-    save: 'save',
-    cancel: 'cancel',
-    userName: 'user Name',
-    userRole: 'user Role',
-    enterpriseRole: 'enterprise Role',
-    enterpriseName: 'enterprise Name',
-    phone: 'phone',
-    email: 'email',
-    no: 'no',
-    seccess: 'seccess'
+    edit: 'Edit',
+    save: 'Submit',
+    cancel: 'Cancel',
+    userName: 'User Id',
+    userRole: 'Account Type',
+    enterpriseRole: 'Company Type',
+    enterpriseName: 'Company Name',
+    phone: 'Mobile',
+    email: 'Email',
+    no: 'No Data',
+    seccess: 'Changed Successfully.',
+    userInfo: 'Personal information editing',
+    nameErr: 'Please enter the user id.',
+    phoneErr: 'Please enter the mobile phone number.',
+    phoneCheck: 'Wrong format of mobile phone number.'
   },
   password: {
-    new: 'New password',
-    placeholder: 'place enter password',
-    changeBtn: 'change password',
-    error: 'place enter password',
-    success: 'success'
+    new: 'new password',
+    placeholder: 'Please enter password.',
+    changeBtn: 'Change password',
+    error: 'Please enter password.',
+    success: 'Changed successfully.',
+    passwordLimit: 'Password length is 3 to 10 characters.'
+  },
+  googleAbno: {
+    return: 'Back',
+    title: 'View the current location.',
+    OUT: 'OUT',
+    Geofence: 'Out of the Geofence.',
+    nowPosition: 'Current Location'
   }
 };

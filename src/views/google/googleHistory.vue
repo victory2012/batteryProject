@@ -57,7 +57,7 @@ import {
   getTime,
   yesTody
 } from "../../utils/transition.js";
-import { onWarn, onTimeOut, onError } from "../../utils/callback.js";
+import { onWarn, onError } from "../../utils/callback.js";
 var map;
 let heatmapData;
 let line;
@@ -221,9 +221,7 @@ export default {
     getData(params) {
       GetTrajectory(params).then(res => {
         console.log(res);
-        if (res.data.code === 1) {
-          onTimeOut(this.$router);
-        }
+
         if (res.data.code === 0) {
           let result = res.data.data;
           // console.log(result);
@@ -249,9 +247,6 @@ export default {
           } else {
             onWarn(`${this.$t("history.noData")}`);
           }
-        }
-        if (res.data.code === -1) {
-          onError(res.data.msg);
         }
       });
     },
@@ -289,12 +284,13 @@ export default {
       try {
         map = new google.maps.Map(document.getElementById("mapcontainer"), {
           center: {
-            lat: 31.232803,
-            lng: 121.475101
+            lat: 0,
+            lng: 0
           },
           zoom: 15
         });
         this.getHisData();
+        // var geocoders = new google.maps.Geocoder();
         map.addListener("click", e => {
           if (this.localMakerArr.length > 0) {
             this.localMakerArr.forEach(key => {
@@ -318,16 +314,20 @@ export default {
             url:
               "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
               latLngData +
-              "&key=AIzaSyC8IXpNgfA7uD-Xb0jEqhkEdB7j3gbgOiE&fields=formatted_address",
+              "&key=AIzaSyAz6eHKxmBqalyW0LVFjs9mugr5t0PxvYI&fields=formatted_address",
             async: true,
             success: function(data) {
               console.log(data);
-              var site =
-                "坐标：" +
-                latLngData +
-                "<br />" +
-                "地址：" +
-                data.results[0].formatted_address;
+              let site = `${this.$t(
+                "history.latLng"
+              )}：${latLngData}<br />${this.$t("history.address")}：${
+                data.results[0].formatted_address
+              }`;
+              // "坐标：" +
+              // latLngData +
+              // "<br />" +
+              // "地址：" +
+              // data.results[0].formatted_address;
               var infowindow = new google.maps.InfoWindow({
                 content: site
               });
@@ -351,9 +351,7 @@ export default {
       };
       GetDeviceList(pageObj).then(res => {
         console.log("GetDeviceList", res);
-        if (res.data.code === 1) {
-          onTimeOut(this.$router);
-        }
+
         if (res.data && res.data.code === 0) {
           let result = res.data.data.data;
           this.total = res.data.data.total;
@@ -386,9 +384,6 @@ export default {
           } else {
             onWarn(`${this.$t("history.noDevice")}`);
           }
-        }
-        if (res.data.code === -1) {
-          onError(res.data.msg);
         }
       });
     },

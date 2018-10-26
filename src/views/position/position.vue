@@ -123,7 +123,7 @@ import AMap from "AMap";
 // import AMapUI from "AMapUI";
 import { websockets, GetDeviceList } from "../../api/index.js";
 import { trakTimeformat, nowDate } from "../../utils/transition.js";
-import { onError, onTimeOut } from "../../utils/callback";
+import { onError } from "../../utils/callback";
 import gaodeMap from "./gaode-map";
 
 let map;
@@ -179,9 +179,7 @@ export default {
       }
       GetDeviceList(pageObj).then(res => {
         console.log(res.data);
-        if (res.data.code === 1) {
-          onTimeOut(this.$router);
-        }
+
         if (res.data.code === 0) {
           this.pointerArr = [];
           let result = res.data.data.data;
@@ -221,9 +219,6 @@ export default {
           } else {
             onError("暂无设备, 请先注册设备");
           }
-        }
-        if (res.data.code === -1) {
-          onError(res.data.msg);
         }
       });
     },
@@ -443,19 +438,23 @@ export default {
     },
     // 查看历史轨迹。路由传参 设备id
     HistoryTrack(batteryId) {
-      let userData = JSON.parse(localStorage.getItem("loginData"));
-      if (userData.mapType === 0) {
-        this.$router.push({
-          path: "history",
-          query: { batteryId: batteryId }
-        });
-      }
-      if (userData.mapType === 1) {
-        this.$router.push({
-          path: "googleHis",
-          query: { batteryId: batteryId }
-        });
-      }
+      this.$router.push({
+        path: "googleHis",
+        query: { batteryId: batteryId }
+      });
+      // let userData = JSON.parse(localStorage.getItem("loginData"));
+      // if (userData.mapType === 0) {
+      //   this.$router.push({
+      //     path: "history",
+      //     query: { batteryId: batteryId }
+      //   });
+      // }
+      // if (userData.mapType === 1) {
+      //   this.$router.push({
+      //     path: "googleHis",
+      //     query: { batteryId: batteryId }
+      //   });
+      // }
     }
   },
   /*

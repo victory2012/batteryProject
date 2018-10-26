@@ -1,6 +1,6 @@
 <template>
   <div>
-    
+
   </div>
 </template>
 <script>
@@ -28,47 +28,32 @@ export default {
     */
     getData() {
       let pageObj = {
-
         pageSize: this.handleSize,
         pageNum: this.currentPage
       };
-      deviceList(pageObj)
-        .then(res => {
-          this.loading = false;
-          console.log(res);
-          let result = res.data;
-          if (result.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
+      deviceList(pageObj).then(res => {
+        this.loading = false;
+        console.log(res);
+        let result = res.data;
+
+        if (result.code === 0) {
+          if (result.data.data) {
+            let tableObj = result.data.data;
+            this.tableData = [];
+            tableObj.forEach(key => {
+              if (key.bindingStatus === 0) {
+                key.bindingName = "未绑定";
+                key.bindingStatus = false;
+              } else {
+                key.bindingName = "已绑定";
+                key.bindingStatus = true;
+              }
+              key.status = key.status === 0 ? true : false;
+              this.tableData.push(key);
             });
           }
-          if (result.code === 0) {
-            if (result.data.data) {
-              let tableObj = result.data.data;
-              this.tableData = [];
-              tableObj.forEach(key => {
-                if (key.bindingStatus === 0) {
-                  key.bindingName = "未绑定";
-                  key.bindingStatus = false;
-                } else {
-                  key.bindingName = "已绑定";
-                  key.bindingStatus = true;
-                }
-                key.status = key.status === 0 ? true : false;
-                this.tableData.push(key);
-              });
-            }
-          }
-        })
-        .catch(err => {
-          this.loading = false;
-          console.log(err);
-          this.$message.error("服务器请求超时，请稍后重试");
-        });
+        }
+      });
     },
     /*
     *  改变每页显示的条数

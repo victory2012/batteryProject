@@ -12,7 +12,7 @@
 <script>
 import AMap from "AMap";
 import { getFence, websockets, singleDeviceId } from "../../api/index.js";
-import { onTimeOut, onWarn, onError } from "../../utils/callback.js";
+import { onWarn, onError } from "../../utils/callback.js";
 let map;
 let grid;
 let polygonArr = [];
@@ -84,9 +84,6 @@ export default {
     },
     getData() {
       getFence().then(res => {
-        if (res.data.code === 1) {
-          onTimeOut(this.$router);
-        }
         if (res.data.code === 0) {
           if (res.data.data.length > 0) {
             let result = res.data.data;
@@ -97,9 +94,6 @@ export default {
               this.hasFence(gpsList, id);
             });
           }
-        }
-        if (res.data.code === -1) {
-          onError(res.data.msg);
         }
       });
     },
@@ -183,34 +177,24 @@ export default {
     },
     singleDevice(ws) {
       let NowDeviceId = this.$route.query.deviceId;
-      singleDeviceId(NowDeviceId)
-        .then(res => {
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
+      singleDeviceId(NowDeviceId).then(res => {
+        if (res.data.code === 0) {
+          let result = res.data.data;
+          console.log(result);
+          if (result) {
+            pointerObj[result.deviceId] = `${result.longitude},${
+              result.latitude
+            }`;
+            this.sendData.param.push(result.deviceId);
+            this.mapInit(pointerObj);
+            setTimeout(() => {
+              ws.send(JSON.stringify(this.sendData));
+            }, 1000);
+          } else {
+            onWarn("暂无设备, 请先注册设备");
           }
-          if (res.data.code === 0) {
-            let result = res.data.data;
-            console.log(result);
-            if (result) {
-              pointerObj[result.deviceId] = `${result.longitude},${
-                result.latitude
-              }`;
-              this.sendData.param.push(result.deviceId);
-              this.mapInit(pointerObj);
-              setTimeout(() => {
-                ws.send(JSON.stringify(this.sendData));
-              }, 1000);
-            } else {
-              onWarn("暂无设备, 请先注册设备");
-            }
-          }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+      });
     }
   },
   mounted() {

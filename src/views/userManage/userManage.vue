@@ -7,57 +7,57 @@
       </div> -->
       <div v-if="manufacturer" @click="creatAdmin = true">
         <img src="../../../static/img/add-admin.png" alt="">
-        <p>添加生产企业管理员</p>
+        <p>{{$t('useMsg.add.manufacturer')}}</p>
       </div>
       <div v-else-if="customer" @click="creatCustorm = true">
         <img src="../../../static/img/add-user.png" alt="">
-        <p>添加客户企业管理员</p>
+        <p>{{$t('useMsg.add.customer')}}</p>
       </div>
       <div v-if="manufacturerAdmin" @click="manAdmin = true">
         <img src="../../../static/img/add-user.png" alt="">
-        <p>添加生产企业普通管理员</p>
+        <p>{{$t('useMsg.add.manuProduct')}}</p>
       </div>
       <div v-if="customerAdmin" @click="creatCustormAdmin = true">
         <img src="../../../static/img/add-user.png" alt="">
-        <p>添加普通管理员</p>
+        <p>{{$t('useMsg.add.cusNoraml')}}</p>
       </div>
     </div>
     <div v-if="manufacturer">
-      <el-dialog title="创建生产企业管理员" :visible.sync="creatAdmin" width="600px">
+      <el-dialog :title="$t('useMsg.add.manufacturer')" :visible.sync="creatAdmin" width="600px">
         <el-form :model="adminForm" :rules="customerRules" ref="adminForm">
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="用户名" prop="userName">
+              <el-form-item :label="$t('useMsg.add.userName')" prop="userName">
                 <el-input v-model="adminForm.userName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="登陆密码" prop="password">
+              <el-form-item :label="$t('useMsg.add.password')" prop="password">
                 <el-input v-model="adminForm.password" type="password" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="手机号码" prop="phoneNumber">
+              <el-form-item :label="$t('useMsg.add.phone')" prop="phoneNumber">
                 <el-input v-model="adminForm.phoneNumber" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="邮箱（选填）" prop="email">
+              <el-form-item :label="$t('useMsg.add.email')" prop="email">
                 <el-input v-model="adminForm.email" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="企业名称" prop="enterpriseName">
+              <el-form-item :label="$t('useMsg.add.enterpriseName')" prop="enterpriseName">
                 <el-input v-model="adminForm.enterpriseName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="企业性质" prop="nature">
-                <el-select v-model="adminForm.nature" placeholder="企业性质" style="width:240px;">
+              <el-form-item :label="$t('useMsg.add.nature')" prop="nature">
+                <el-select v-model="adminForm.nature" :placeholder="$t('useMsg.add.nature')" style="width:240px;">
                   <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
                   </el-option>
                 </el-select>
@@ -66,47 +66,47 @@
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="resetAdmin('adminForm')">取 消</el-button>
-          <el-button @click="submitAdmin('adminForm')" type="primary">确 认</el-button>
+          <el-button @click="resetAdmin('adminForm')">{{$t('useMsg.add.cancel')}}</el-button>
+          <el-button @click="submitAdmin('adminForm')" type="primary">{{$t('useMsg.add.sure')}}</el-button>
         </div>
       </el-dialog>
     </div>
     <div v-if="customer">
-      <el-dialog title="添加客户企业管理员" :visible.sync="creatCustorm" width="600px">
+      <el-dialog :title="$t('useMsg.add.customer')" :visible.sync="creatCustorm" width="600px">
         <el-form :model="customerForm" :rules="customerRules" ref="customerForm">
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="用户名" prop="userName">
+              <el-form-item :label="$t('useMsg.add.userName')" prop="userName">
                 <el-input v-model="customerForm.userName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="登陆密码" prop="password">
+              <el-form-item :label="$t('useMsg.add.password')" prop="password">
                 <el-input v-model="customerForm.password" type="password" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="手机号码" prop="phoneNumber">
+              <el-form-item :label="$t('useMsg.add.phone')" prop="phoneNumber">
                 <el-input v-model="customerForm.phoneNumber" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="企业名称" prop="enterpriseName">
+              <el-form-item :label="$t('useMsg.add.enterpriseName')" prop="enterpriseName">
                 <el-input v-model="customerForm.enterpriseName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="邮箱（选填）" prop="email">
+              <el-form-item :label="$t('useMsg.add.email')" prop="email">
                 <el-input v-model="customerForm.email" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="企业性质" prop="nature">
-                <el-select v-model="customerForm.nature" placeholder="企业性质" style="width:240px;">
+              <el-form-item :label="$t('useMsg.add.nature')" prop="nature">
+                <el-select v-model="customerForm.nature" :placeholder="$t('useMsg.add.nature')" style="width:240px;">
                   <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
                   </el-option>
                 </el-select>
@@ -115,47 +115,47 @@
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="resetCustomer('customerForm')">取 消</el-button>
-          <el-button @click="submitCustomer('customerForm')" type="primary">确 认</el-button>
+          <el-button @click="resetCustomer('customerForm')">{{$t('useMsg.add.cancel')}}</el-button>
+          <el-button @click="submitCustomer('customerForm')" type="primary">{{$t('useMsg.add.sure')}}</el-button>
         </div>
       </el-dialog>
     </div>
     <div v-if="manufacturerAdmin">
-      <el-dialog title="添加生产企业普通管理员" :visible.sync="manAdmin" width="600px">
+      <el-dialog :title="$t('useMsg.add.manuProduct')" :visible.sync="manAdmin" width="600px">
         <el-form :model="manAdminForm" :rules="customerRules" ref="manAdminForm">
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="用户名" prop="userName">
+              <el-form-item :label="$t('useMsg.add.userName')" prop="userName">
                 <el-input v-model="manAdminForm.userName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="登陆密码" prop="password">
+              <el-form-item :label="$t('useMsg.add.password')" prop="password">
                 <el-input v-model="manAdminForm.password" type="password" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="手机号码" prop="phoneNumber">
+              <el-form-item :label="$t('useMsg.add.phone')" prop="phoneNumber">
                 <el-input v-model="manAdminForm.phoneNumber" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="企业名称" prop="enterpriseName">
+              <el-form-item :label="$t('useMsg.add.enterpriseName')" prop="enterpriseName">
                 <el-input v-model="manAdminForm.enterpriseName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="邮箱（选填）" prop="email">
+              <el-form-item :label="$t('useMsg.add.email')" prop="email">
                 <el-input v-model="manAdminForm.email" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="企业性质" prop="nature">
-                <el-select v-model="manAdminForm.nature" placeholder="企业性质" style="width:240px;">
+              <el-form-item :label="$t('useMsg.add.nature')" prop="nature">
+                <el-select v-model="manAdminForm.nature" :placeholder="$t('useMsg.add.nature')" style="width:240px;">
                   <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
                   </el-option>
                 </el-select>
@@ -164,47 +164,47 @@
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="resetManufacturer('manAdminForm')">取 消</el-button>
-          <el-button @click="submitManufacturerAdmin('manAdminForm')" type="primary">确 认</el-button>
+          <el-button @click="resetManufacturer('manAdminForm')">{{$t('useMsg.add.cancel')}}</el-button>
+          <el-button @click="submitManufacturerAdmin('manAdminForm')" type="primary">{{$t('useMsg.add.sure')}}</el-button>
         </div>
       </el-dialog>
     </div>
     <div v-if="customerAdmin">
-      <el-dialog title="添加普通管理员" :visible.sync="creatCustormAdmin" width="600px">
+      <el-dialog :title="$t('useMsg.add.cusNoraml')" :visible.sync="creatCustormAdmin" width="600px">
         <el-form :model="CustormAdminForm" :rules="customerRules" ref="CustormAdminForm">
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="用户名" prop="userName">
+              <el-form-item :label="$t('useMsg.add.userName')" prop="userName">
                 <el-input v-model="CustormAdminForm.userName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="登陆密码" prop="password">
+              <el-form-item :label="$t('useMsg.add.password')" prop="password">
                 <el-input v-model="CustormAdminForm.password" type="password" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="手机号码" prop="phoneNumber">
+              <el-form-item :label="$t('useMsg.add.phone')" prop="phoneNumber">
                 <el-input v-model="CustormAdminForm.phoneNumber" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="企业名称" prop="enterpriseName">
+              <el-form-item :label="$t('useMsg.add.enterpriseName')" prop="enterpriseName">
                 <el-input v-model="CustormAdminForm.enterpriseName" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item label="邮箱（选填）" prop="email">
+              <el-form-item :label="$t('useMsg.add.email')" prop="email">
                 <el-input v-model="CustormAdminForm.email" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="企业性质" prop="nature">
-                <el-select v-model="CustormAdminForm.nature" placeholder="企业性质" style="width:240px;">
+              <el-form-item :label="$t('useMsg.add.nature')" prop="nature">
+                <el-select v-model="CustormAdminForm.nature" :placeholder="$t('useMsg.add.nature')" style="width:240px;">
                   <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
                   </el-option>
                 </el-select>
@@ -213,25 +213,25 @@
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="resetCustormAdmin('CustormAdminForm')">取 消</el-button>
-          <el-button @click="submitCustormAdmin('CustormAdminForm')" type="primary">确 认</el-button>
+          <el-button @click="resetCustormAdmin('CustormAdminForm')">{{$t('useMsg.add.cancel')}}</el-button>
+          <el-button @click="submitCustormAdmin('CustormAdminForm')" type="primary">{{$t('useMsg.add.sure')}}</el-button>
         </div>
       </el-dialog>
     </div>
     <div>
       <el-table v-loading="loading" :data="tableData" max-height="750">
-        <el-table-column type="index" width="50" align="center" label="序号"></el-table-column>
-        <el-table-column prop="userName" align="center" label="用户名">
+        <el-table-column type="index" width="80" align="center" :label="$t('useMsg.serial')"></el-table-column>
+        <el-table-column prop="userName" align="center" :label="$t('useMsg.name')">
         </el-table-column>
-        <el-table-column prop="accountRole" align="center" label="账户身份">
+        <el-table-column prop="accountRole" align="center" :label="$t('useMsg.accountIdentity')">
         </el-table-column>
-        <el-table-column prop="enterpriseRole" align="center" label="企业身份">
+        <el-table-column prop="enterpriseRole" align="center" :label="$t('useMsg.companyIdentity')">
         </el-table-column>
-        <el-table-column prop="enterpriseName" align="center" label="企业名称">
+        <el-table-column prop="enterpriseName" align="center" :label="$t('useMsg.enterpriseName')">
         </el-table-column>
-        <el-table-column prop="phoneNumber" align="center" label="手机号码">
+        <el-table-column prop="phoneNumber" align="center" :label="$t('useMsg.phone')">
         </el-table-column>
-        <el-table-column prop="email" align="center" label="邮箱">
+        <el-table-column prop="email" align="center" :label="$t('useMsg.email')">
         </el-table-column>
         <!-- <el-table-column label="操作" align="center">
         <template slot-scope="scope">
@@ -292,8 +292,8 @@ import {
   addCustomerAdmin, // 添加生产企业普通管理员
   addCustomer // 添加客户超级管理员
 } from "../../api/index.js";
-import { userRole, companyRole } from "../../utils/transition.js";
-import { onTimeOut, onSuccess, onError } from "../../utils/callback"
+// import { userRole, companyRole } from "../../utils/transition.js";
+import { onSuccess } from "../../utils/callback";
 export default {
   name: "userTable",
   data() {
@@ -316,36 +316,64 @@ export default {
       CustormAdminForm: {},
       natureOptions: [
         {
-          label: '国内',
-          value: '0'
+          label: this.$t("useMsg.add.china"),
+          value: "0"
         },
         {
-          label: '国际',
-          value: '1'
+          label: this.$t("useMsg.add.international"),
+          value: "1"
         }
       ],
       customerRules: {
         userName: [
-          { required: true, message: "请输入用户名", trigger: "change" },
-          { min: 4, message: "用户名至少4位", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("useMsg.warn.userName"),
+            trigger: "change"
+          },
+          {
+            min: 4,
+            message: this.$t("useMsg.warn.nameLimit"),
+            trigger: "change"
+          }
         ],
         password: [
-          { required: true, message: "请输入密码", trigger: "change" },
-          { min: 6, message: "密码至少6位", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("useMsg.warn.password"),
+            trigger: "change"
+          },
+          {
+            min: 6,
+            message: this.$t("useMsg.warn.passwordLimit"),
+            trigger: "change"
+          }
         ],
         phoneNumber: [
-          { required: true, message: "请输入手机号码", trigger: "change" },
+          {
+            required: true,
+            message: this.$t("useMsg.warn.phone"),
+            trigger: "change"
+          },
           {
             pattern: /^1[3|4|5|7|8][0-9]\d{8}$/,
-            message: "手机号格式错误",
+            message: this.$t("useMsg.warn.phoneCheck"),
             trigger: "change"
           }
         ],
         enterpriseName: [
-          { required: true, message: "请输入企业名称", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("useMsg.warn.enterprise"),
+            trigger: "change"
+          }
         ],
         nature: [
-          { required: true, message: "请选择企业性质", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("useMsg.warn.nature"),
+            trigger: "change"
+          }
         ]
       },
       creatAdmin: false,
@@ -390,28 +418,19 @@ export default {
             phoneNumber: this.customerForm.phoneNumber,
             email: this.customerForm.email || "",
             enterpriseName: this.customerForm.enterpriseName,
-            mapType: this.customerForm.nature
+            mapType: "1"
+            // mapType: this.customerForm.nature
           };
-          addCustomer(paramsAdmin)
-            .then(res => {
-              console.log(res.data);
-              let result = res.data;
-              if (result.code === 1) {
-                onTimeOut(this.$router);
-              }
-              if (result.code === -1) {
-                onError(`创建失败，原因${result.msg}`);
-              }
-              if (result.code === 0) {
-                onSuccess("创建成功！");
-                this.creatCustorm = false;
-                this.resetCustomer(this.customerForm);
-                this.getData();
-              }
-            })
-            .catch(() => {
-              onError("服务器请求超时，请稍后重试");
-            });
+          addCustomer(paramsAdmin).then(res => {
+            console.log(res.data);
+            let result = res.data;
+            if (result.code === 0) {
+              onSuccess(`${this.$t("useMsg.success")}`);
+              this.creatCustorm = false;
+              this.resetCustomer(this.customerForm);
+              this.getData();
+            }
+          });
         } else {
           console.log("error submit!!");
           return false;
@@ -428,29 +447,20 @@ export default {
             phoneNumber: this.adminForm.phoneNumber,
             enterpriseName: this.adminForm.enterpriseName,
             email: this.adminForm.email || "",
-            mapType: this.adminForm.nature
+            mapType: "1"
+            // mapType: this.adminForm.nature
           };
           console.log(paramsAdmin);
           // 添加生产企业超级管理员
-          addManufacturer(paramsAdmin)
-            .then(res => {
-              console.log(res.data);
-              let result = res.data;
-              if (result.code === 1) {
-                onTimeOut(this.$router);
-              }
-              if (result.code === -1) {
-                onError(`创建失败，原因${result.msg}`);
-              }
-              if (result.code === 0) {
-                onSuccess("创建成功！");
-                this.resetAdmin("adminForm");
-                this.getData();
-              }
-            })
-            .catch(() => {
-              onError("服务器请求超时，请稍后重试");
-            });
+          addManufacturer(paramsAdmin).then(res => {
+            console.log(res.data);
+            let result = res.data;
+            if (result.code === 0) {
+              onSuccess(`${this.$t("useMsg.success")}`);
+              this.resetAdmin("adminForm");
+              this.getData();
+            }
+          });
         } else {
           return false;
         }
@@ -466,29 +476,20 @@ export default {
             phoneNumber: this.manAdminForm.phoneNumber,
             enterpriseName: this.manAdminForm.enterpriseName,
             email: this.manAdminForm.email || "",
-            mapType: this.manAdminForm.nature
+            mapType: "1"
+            // mapType: this.manAdminForm.nature
           };
           console.log(paramsAdmin);
           // 添加生产企业普通管理员
-          addManufacturerAdmin(paramsAdmin)
-            .then(res => {
-              console.log(res.data);
-              let result = res.data;
-              if (result.code === 1) {
-                onTimeOut(this.$router);
-              }
-              if (result.code === -1) {
-                onError(`创建失败，原因${result.msg}`);
-              }
-              if (result.code === 0) {
-                onSuccess("创建成功！");
-                this.getData();
-                this.resetManufacturer("manAdminForm");
-              }
-            })
-            .catch(() => {
-              onError("服务器请求超时，请稍后重试");
-            });
+          addManufacturerAdmin(paramsAdmin).then(res => {
+            console.log(res.data);
+            let result = res.data;
+            if (result.code === 0) {
+              onSuccess(`${this.$t("useMsg.success")}`);
+              this.getData();
+              this.resetManufacturer("manAdminForm");
+            }
+          });
         } else {
           return false;
         }
@@ -503,28 +504,20 @@ export default {
             phoneNumber: this.CustormAdminForm.phoneNumber,
             enterpriseName: this.CustormAdminForm.enterpriseName,
             email: this.CustormAdminForm.email || "",
-            mapType: this.CustormAdminForm.nature
+            mapType: "1"
+            // mapType: this.CustormAdminForm.nature
           };
           console.log(paramsAdmin);
-          addCustomerAdmin(paramsAdmin)
-            .then(res => {
-              console.log(res.data);
-              let result = res.data;
-              if (result.code === 1) {
-                onTimeOut(this.$router);
-              }
-              if (result.code === -1) {
-                onError(`创建失败，原因${result.msg}`);
-              }
-              if (result.code === 0) {
-                onSuccess("创建成功！");
-                this.resetCustormAdmin("CustormAdminForm");
-                this.getData();
-              }
-            })
-            .catch(() => {
-              onError("服务器请求超时，请稍后重试");
-            });
+          addCustomerAdmin(paramsAdmin).then(res => {
+            console.log(res.data);
+            let result = res.data;
+
+            if (result.code === 0) {
+              onSuccess(`${this.$t("useMsg.success")}`);
+              this.resetCustormAdmin("CustormAdminForm");
+              this.getData();
+            }
+          });
         }
       });
     },
@@ -560,36 +553,53 @@ export default {
       this.getManufacturer(pageObj);
     },
     getManufacturer(pageObj) {
-      manufacturerList(pageObj)
-        .then(res => {
-          this.loading = false;
-          console.log(res);
-          let result = res.data;
-          if (result.code === 1) {
-            onTimeOut(this.$router);
+      manufacturerList(pageObj).then(res => {
+        this.loading = false;
+        console.log(res);
+        let result = res.data;
+        if (result.code === 0) {
+          if (result.data.data) {
+            let tableObj = result.data.data;
+            this.totalPage = result.data.total;
+            this.tableData = [];
+            tableObj.forEach(key => {
+              key.accountRole = this.userRole(key.userRole);
+              key.status = key.status === 0 ? false : true;
+              key.email = key.email;
+              key.enterpriseRole = this.companyRole(key.enterpriseRole);
+              this.tableData.push(key);
+            });
           }
-          if (result.code === -1) {
-            onError(result.msg);
-          }
-          if (result.code === 0) {
-            if (result.data.data) {
-              let tableObj = result.data.data;
-              this.totalPage = result.data.total;
-              this.tableData = [];
-              tableObj.forEach(key => {
-                key.accountRole = userRole(key.userRole);
-                key.status = key.status === 0 ? false : true;
-                key.email = key.email || "无";
-                key.enterpriseRole = companyRole(key.enterpriseRole);
-                this.tableData.push(key);
-              });
-            }
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+      });
+    },
+    companyRole(str) {
+      switch (str) {
+        case "platform":
+          return `${this.$t("platform")}`;
+        case "manufacturer":
+          return `${this.$t("manufacturer")}`;
+        case "customer":
+          return `${this.$t("customer")}`;
+        default:
+          return "";
+      }
+    },
+    userRole(str) {
+      switch (str) {
+        case "plat_super_admin":
+          return this.$t("useMsg.superAdministrator");
+        case "super_admin":
+          return this.$t("useMsg.superAdministrator");
+        case "admin":
+          return this.$t("useMsg.administrator");
+        case "customer_super_admin":
+          return this.$t("useMsg.administrator");
+        case "manufacturer_super_admin":
+          return this.$t("useMsg.administrator");
+        default:
+          return "";
+      }
     },
     /*
     * 删除

@@ -17,7 +17,7 @@
 <script>
 import AMap from "AMap";
 import { getFence, addFence, delFence } from "../../api/index.js";
-import { onTimeOut, onError, onWarn, onSuccess } from "../../utils/callback.js";
+import { onError, onWarn, onSuccess } from "../../utils/callback.js";
 let map;
 let marker;
 let markers = [];
@@ -126,24 +126,15 @@ export default {
         onError("请选区围栏点");
         return;
       }
-      addFence(gpsObj)
-        .then(res => {
-          // console.log(res);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data.code === 0) {
-            onSuccess("添加成功");
-            this.cancelSetings();
-            this.getData();
-          }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+      addFence(gpsObj).then(res => {
+        // console.log(res);
+
+        if (res.data.code === 0) {
+          onSuccess("添加成功");
+          this.cancelSetings();
+          this.getData();
+        }
+      });
     },
     /* 取消设置 */
     cancelSetings() {
@@ -164,22 +155,12 @@ export default {
         onWarn("请先选择要删除的围栏");
         return;
       }
-      delFence(this.fenceId)
-        .then(res => {
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data.code === 0) {
-            onSuccess("删除成功");
-            this.polygon.setMap(null);
-          }
-          if (res.data.code === -1) {
-            this.$message.error(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+      delFence(this.fenceId).then(res => {
+        if (res.data.code === 0) {
+          onSuccess("删除成功");
+          this.polygon.setMap(null);
+        }
+      });
     },
     /* goBack 返回 */
     goBack() {
@@ -193,9 +174,7 @@ export default {
     getData() {
       getFence().then(res => {
         // console.log(res);
-        if (res.data.code === 1) {
-          onTimeOut(this.$router);
-        }
+
         if (res.data.code === 0) {
           if (res.data.data.length > 0) {
             let result = res.data.data;
@@ -207,9 +186,6 @@ export default {
           } else {
             this.buildFence();
           }
-        }
-        if (res.data.code === -1) {
-          this.$message.error(res.data.msg);
         }
       });
     },

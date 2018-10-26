@@ -4,7 +4,7 @@
     <div class="collapse-btn" @click="collapseChage">
       <i class="el-icon-menu"></i>
     </div>
-    <div class="logo">{{$t('subProjectName')}}</div>
+    <div class="logo">{{$t('loginMsg.subProjectName')}}</div>
     <div class="header-right">
       <div class="header-user-con">
         <!-- 全屏显示 -->
@@ -107,7 +107,7 @@ export default {
 </script>
 <style scoped>
 .dropdown {
-  width: 150px;
+  width: 160px;
   text-align: left;
 }
 .dropdown .icons {
@@ -185,8 +185,5 @@ export default {
 .el-dropdown-link {
   color: #fff;
   cursor: pointer;
-}
-.el-dropdown-menu__item {
-  text-align: center;
 }
 </style>

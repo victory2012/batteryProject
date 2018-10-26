@@ -70,43 +70,29 @@ export default {
         pageSize: this.handleSize,
         pageNum: this.currentPage
       };
-      GetList(pageObj)
-        .then(res => {
-          this.loading = false;
-          console.log(res);
-          let result = res.data;
-          if (result.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
+      GetList(pageObj).then(res => {
+        this.loading = false;
+        console.log(res);
+        let result = res.data;
+
+        if (result.code === 0) {
+          if (result.data.data) {
+            let tableObj = result.data.data;
+            this.tableData = [];
+            tableObj.forEach(key => {
+              if (key.bindingStatus === 0) {
+                key.bindingName = "未绑定";
+                key.bindingStatus = false;
+              } else {
+                key.bindingName = "已绑定";
+                key.bindingStatus = true;
+              }
+              key.status = key.status === 0 ? false : true;
+              this.tableData.push(key);
             });
           }
-          if (result.code === 0) {
-            if (result.data.data) {
-              let tableObj = result.data.data;
-              this.tableData = [];
-              tableObj.forEach(key => {
-                if (key.bindingStatus === 0) {
-                  key.bindingName = "未绑定";
-                  key.bindingStatus = false;
-                } else {
-                  key.bindingName = "已绑定";
-                  key.bindingStatus = true;
-                }
-                key.status = key.status === 0 ? false : true;
-                this.tableData.push(key);
-              });
-            }
-          }
-        })
-        .catch(err => {
-          this.loading = false;
-          console.log(err);
-          this.$message.error("服务器请求超时，请稍后重试");
-        });
+        }
+      });
     },
     /*
     * 删除
@@ -120,31 +106,17 @@ export default {
         customer: tableData[index].customerId,
         batteryId: tableData[index].batteryId
       };
-      deleteBattery(params)
-        .then(res => {
-          this.loading = false;
-          if (res.data.code === 1) {
-            this.$message({
-              message: "登录超时，请重新登录",
-              type: "warning"
-            });
-            this.$router.push({
-              path: "/login"
-            });
-          }
-          if (res.data.code === 0) {
-            this.$message({
-              message: "删除成功",
-              type: "success"
-            });
-            this.getData();
-          }
-        })
-        .catch(err => {
-          this.loading = false;
-          console.log(err);
-          this.$message.error("服务器请求超时，请稍后重试");
-        });
+      deleteBattery(params).then(res => {
+        this.loading = false;
+
+        if (res.data.code === 0) {
+          this.$message({
+            message: "删除成功",
+            type: "success"
+          });
+          this.getData();
+        }
+      });
     },
     /*
      * 查看运行状态

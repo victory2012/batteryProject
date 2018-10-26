@@ -272,7 +272,7 @@ export default {
 
 <style>
 .calendar {
-  float: left;
+  /* float: left; */
   display: inline-block;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -351,7 +351,7 @@ export default {
   box-sizing: border-box;
   display: inline-block;
   overflow: hidden;
-  float: left;
+  /* float: left; */
 }
 
 .calendar-week:before,
@@ -389,7 +389,7 @@ export default {
 }
 
 .calendar-foot {
-  margin-top: 5px;
+  margin-top: 20px;
 }
 
 .calendar-hour {

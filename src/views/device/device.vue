@@ -1,7 +1,7 @@
 <template>
   <div class="batterylist">
     <div class="headerBtn flex">
-      <el-button size="medium" @click="addBox=true" type="primary">设备注册
+      <el-button size="medium" @click="addBox=true" type="primary">{{$t('addDevice.title')}}
         <i class="el-icon-circle-plus-outline"></i>
       </el-button>
       <!-- <el-input placeholder="设备编号" v-model="input10" style="width:10%;margin-left:10px;height:32px;" clearable></el-input>
@@ -20,21 +20,21 @@
     </div>
     <div class="table">
       <el-table v-loading="loading" :data="tableData" style="width: 100%" max-height="750">
-        <el-table-column type="index" width="50" align="center" label="序号"></el-table-column>
-        <el-table-column prop="deviceId" align="center" label="设备编号">
+        <el-table-column type="index" width="50" align="center" :label="$t('device.serial')"></el-table-column>
+        <el-table-column prop="deviceId" align="center" :label="$t('device.deviceCode')">
         </el-table-column>
-        <el-table-column prop="manufacturerName" align="center" label="企业名称">
+        <el-table-column prop="manufacturerName" align="center" :label="$t('device.manufacturerName')">
         </el-table-column>
-        <el-table-column align="center" prop="createTime" label="创建时间">
+        <el-table-column align="center" prop="createTime" :label="$t('device.createTime')">
         </el-table-column>
-        <el-table-column prop="bindingName" align="center" label="电池绑定状态">
+        <el-table-column prop="bindingName" align="center" :label="$t('device.bindStatus')">
         </el-table-column>
-        <el-table-column prop="online" align="center" label="在线状态">
+        <el-table-column prop="online" align="center" :label="$t('device.runStatus')">
         </el-table-column>
-        <el-table-column align="center" label="监测设备">
+        <el-table-column align="center" :label="$t('device.device')">
           <template slot-scope="scope">
             <el-button @click.native.prevent="MonitorDevice(scope.$index, tableData)" type="text" size="small">
-              查看
+              {{$t('device.location')}}
             </el-button>
           </template>
         </el-table-column>
@@ -62,29 +62,29 @@
         <div v-show="addBox" class="transition-box">
           <div class="box">
             <div class="box-head">
-              <h3>设备注册</h3>
+              <h3>{{$t('addDevice.title')}}</h3>
               <i @click="closeBox" class="el-icon-close"></i>
             </div>
             <div class="formWarrp">
               <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="200px" class="demo-ruleForm">
-                <el-form-item label="设备编号" prop="deviceId">
-                  <el-input v-model="ruleForm.deviceId" style="width:200px;" placeholder="设备编号"></el-input>
+                <el-form-item :label="$t('addDevice.deviceCode')" prop="deviceId">
+                  <el-input v-model="ruleForm.deviceId" style="width:200px;" :placeholder="$t('device.deviceCode')"></el-input>
                 </el-form-item>
-                <el-form-item label="生产商id" prop="manufacturerId">
-                  <el-select v-model="ruleForm.manufacturerId" placeholder="生产商id" style="width:200px;">
+                <el-form-item :label="$t('addDevice.manufacturer')" prop="manufacturerId">
+                  <el-select v-model="ruleForm.manufacturerId" :placeholder="$t('addDevice.manufacturer')" style="width:200px;">
                     <el-option v-for="item in manufacturerOptions" :key="item.id" :label="item.name" :value="item.id">
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="客户id" prop="customerId">
-                  <el-select v-model="ruleForm.customerId" placeholder="客户id" style="width:200px;">
+                <el-form-item :label="$t('addDevice.Customer')" prop="customerId">
+                  <el-select v-model="ruleForm.customerId" :placeholder="$t('addDevice.Customer')" style="width:200px;">
                     <el-option v-for="item in customerOptions" :key="item.id" :label="item.name" :value="item.id">
                     </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary" @click="submitForm('ruleForm')">确认</el-button>
-                  <el-button @click="resetForm('ruleForm')">取消</el-button>
+                  <el-button type="primary" @click="submitForm('ruleForm')">{{$t('addDevice.createBtn')}}</el-button>
+                  <el-button @click="resetForm('ruleForm')">{{$t('addDevice.back')}}</el-button>
                 </el-form-item>
               </el-form>
             </div>
@@ -102,7 +102,7 @@ import {
   enterpriseCustomer
 } from "../../api/index.js";
 import { timeFormats } from "../../utils/transition.js";
-import { onTimeOut, onError } from "../../utils/callback.js";
+// import { onError } from "../../utils/callback.js";
 export default {
   data() {
     return {
@@ -119,7 +119,18 @@ export default {
       ruleForm: {},
       rules: {
         deviceId: [
-          { required: true, message: "请输入生产商id", trigger: "blur" }
+          {
+            required: true,
+            message: this.$t("addDevice.errorTip"),
+            trigger: "blur"
+          }
+        ],
+        manufacturerId: [
+          {
+            required: true,
+            message: this.$t("addDevice.manufacturerErr"),
+            trigger: "blur"
+          }
         ]
       },
       options: [],
@@ -137,9 +148,6 @@ export default {
       deviceList(pageObj).then(res => {
         this.loading = false;
         let result = res.data;
-        if (result.code === 1) {
-          onTimeOut(this.$router);
-        }
         if (result.code === 0) {
           if (result.data.data) {
             let tableObj = result.data.data;
@@ -147,19 +155,19 @@ export default {
             this.tableData = [];
             tableObj.forEach(key => {
               if (key.bindingStatus === 0) {
-                key.bindingName = "未绑定";
+                key.bindingName = this.$t("device.nobind");
               } else {
-                key.bindingName = "已绑定";
+                key.bindingName = this.$t("device.hasbind");
               }
-              key.online = key.onlineStatus === 0 ? "离线" : "在线";
+              key.online =
+                key.onlineStatus === 0
+                  ? this.$t("device.offline")
+                  : this.$t("device.online");
               key.createTime = timeFormats(key.createTime);
               key.status = key.status === 0 ? true : false;
               this.tableData.push(key);
             });
           }
-        }
-        if (result.code === -1) {
-          onError(result.msg);
         }
       });
     },
@@ -175,38 +183,36 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           console.log(this.ruleForm);
+          this.manufacturerOptions.forEach(key => {
+            if (this.ruleForm.manufacturerId === key.id) {
+              this.ruleForm.manufacturerName = key.id;
+            }
+          });
           let params = {
-            manufacturerId: this.ruleForm.manufacturerId.id,
-            customerId: this.ruleForm.customerId,
+            manufacturerId: this.ruleForm.manufacturerId,
             deviceId: this.ruleForm.deviceId,
-            manufacturerName: this.ruleForm.manufacturerId.name,
-            customerName: this.ruleForm.customerName
+            manufacturerName: this.ruleForm.manufacturerName
           };
-          createDeviceList(params)
-            .then(res => {
-              console.log(res);
-              if (res.data.code === 1) {
-                this.$message({
-                  message: "登录超时，请重新登录",
-                  type: "warning"
-                });
-                this.$router.push({
-                  path: "/login"
-                });
+          if (this.ruleForm.customerId) {
+            this.customerOptions.forEach(key => {
+              if (key.id === this.ruleForm.customerId) {
+                this.ruleForm.customerName = key.name;
               }
-              if (res.data.code === 0) {
-                this.$message({
-                  message: "创建成功",
-                  type: "success"
-                });
-                this.closeBox();
-                this.init();
-              }
-              if (res.data.code === -1) {
-                this.$message.error(res.data.msg);
-              }
-            })
-            .catch();
+            });
+            params.customerName = this.ruleForm.customerName;
+            params.customerId = this.ruleForm.customerId;
+          }
+          createDeviceList(params).then(res => {
+            console.log(res);
+            if (res.data.code === 0) {
+              this.$message({
+                message: `${this.$t("addDevice.success")}`,
+                type: "success"
+              });
+              this.closeBox();
+              this.init();
+            }
+          });
         } else {
           return false;
         }
@@ -258,19 +264,23 @@ export default {
     },
     MonitorDevice(index, data) {
       let deviceId = data[index];
-      let userData = JSON.parse(localStorage.getItem("loginData"));
-      if (userData.mapType === 0) {
-        this.$router.push({
-          path: "position",
-          query: { deviceId: deviceId.deviceId }
-        });
-      }
-      if (userData.mapType === 1) {
-        this.$router.push({
-          path: "googlePos",
-          query: { deviceId: deviceId.deviceId }
-        });
-      }
+      this.$router.push({
+        path: "googlePos",
+        query: { deviceId: deviceId.deviceId }
+      });
+      // let userData = JSON.parse(localStorage.getItem("loginData"));
+      // if (userData.mapType === 0) {
+      //   this.$router.push({
+      //     path: "position",
+      //     query: { deviceId: deviceId.deviceId }
+      //   });
+      // }
+      // if (userData.mapType === 1) {
+      //   this.$router.push({
+      //     path: "googlePos",
+      //     query: { deviceId: deviceId.deviceId }
+      //   });
+      // }
     }
   },
   mounted() {

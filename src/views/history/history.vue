@@ -67,7 +67,7 @@ import {
   yesTody,
   getTime
 } from "../../utils/transition.js";
-import { onWarn, onTimeOut, onError } from "../../utils/callback.js";
+import { onWarn, onError } from "../../utils/callback.js";
 var map, navg, heatmap, pathSimplifierIns;
 let infoWindow;
 let pointArr = [];
@@ -331,52 +331,43 @@ export default {
         pageSize: 10,
         bindingStatus: "1"
       };
-      GetDeviceList(pageObj)
-        .then(res => {
-          console.log("GetDeviceList", res);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
-          }
-          if (res.data && res.data.code === 0) {
-            let result = res.data.data.data;
-            this.total = res.data.data.total;
-            this.pointerArr = [];
-            if (result.length > 0) {
-              this.batteryId = this.$route.query.batteryId; // 路由参数
-              result.forEach(key => {
-                if (key.batteryId) {
-                  if (this.batteryId && this.batteryId === key.batteryId) {
-                    this.queryDevice = key.deviceId; // 根据路由参数中的电池id 获取对应的设备id；
-                  }
-                  this.pointerArr.push(key);
+      GetDeviceList(pageObj).then(res => {
+        console.log("GetDeviceList", res);
+
+        if (res.data && res.data.code === 0) {
+          let result = res.data.data.data;
+          this.total = res.data.data.total;
+          this.pointerArr = [];
+          if (result.length > 0) {
+            this.batteryId = this.$route.query.batteryId; // 路由参数
+            result.forEach(key => {
+              if (key.batteryId) {
+                if (this.batteryId && this.batteryId === key.batteryId) {
+                  this.queryDevice = key.deviceId; // 根据路由参数中的电池id 获取对应的设备id；
                 }
-              });
-              let params = {
-                pushDateStart: timeFormatSort(this.starts),
-                pushDateEnd: timeFormatSort(this.endtime)
-              };
-              if (this.batteryId && this.pageNum === 1) {
-                this.devicelabel = this.batteryId;
-                params.batteryId = this.batteryId;
-                this.getData(params);
-              } else {
-                this.devicelabel = result[0].batteryId;
-                params.batteryId = result[0].batteryId;
-                this.queryDevice = result[0].deviceId;
-                this.getData(params);
+                this.pointerArr.push(key);
               }
-              this.getTimeList(this.queryDevice);
+            });
+            let params = {
+              pushDateStart: timeFormatSort(this.starts),
+              pushDateEnd: timeFormatSort(this.endtime)
+            };
+            if (this.batteryId && this.pageNum === 1) {
+              this.devicelabel = this.batteryId;
+              params.batteryId = this.batteryId;
+              this.getData(params);
             } else {
-              onWarn("暂无设备, 请先注册设备");
+              this.devicelabel = result[0].batteryId;
+              params.batteryId = result[0].batteryId;
+              this.queryDevice = result[0].deviceId;
+              this.getData(params);
             }
+            this.getTimeList(this.queryDevice);
+          } else {
+            onWarn("暂无设备, 请先注册设备");
           }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+      });
     },
     // 历史轨迹 轨迹配置
     track() {

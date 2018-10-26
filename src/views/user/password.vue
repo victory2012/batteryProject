@@ -1,12 +1,12 @@
 <template>
   <div class="">
     <div class="sort-content">
-      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="新密码" prop="password">
+      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="130px" class="demo-ruleForm">
+        <el-form-item :label="$t('password.new')" prop="password">
           <el-input v-model="ruleForm.password" type="password" style="width:220px;"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')">修改密码</el-button>
+          <el-button type="primary" @click="submitForm('ruleForm')">{{$t('password.changeBtn')}}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -14,7 +14,7 @@
 </template>
 <script>
 import { changePassword } from "../../api/index.js";
-import { onTimeOut, onError, onSuccess } from "../../utils/callback";
+import { onSuccess } from "../../utils/callback";
 
 export default {
   name: "Password",
@@ -25,8 +25,17 @@ export default {
       },
       rules: {
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { min: 6, max: 16, message: "长度在 3 到 10 个字符", trigger: "change" }
+          {
+            required: true,
+            message: this.$t("password.placeholder"),
+            trigger: "blur"
+          },
+          {
+            min: 3,
+            max: 16,
+            message: this.$t("password.passwordLimit"),
+            trigger: "change"
+          }
         ]
       }
     };
@@ -38,24 +47,14 @@ export default {
           let userObj = {
             password: this.ruleForm.password
           };
-          changePassword(userObj)
-            .then(res => {
-              console.log(res);
-              if (res.data.code === 1) {
-                onTimeOut(this.$router);
-              }
-              if (res.data.code === 0) {
-                this.userMsgBox = false;
-                this.ruleForm = {};
-                onSuccess("修改成功！")
-              }
-              if (res.data.code === -1) {
-                onError(res.data.msg);
-              }
-            })
-            .catch(() => {
-              onError("服务器请求超时，请稍后重试");
-            });
+          changePassword(userObj).then(res => {
+            console.log(res);
+            if (res.data.code === 0) {
+              this.userMsgBox = false;
+              this.ruleForm = {};
+              onSuccess(`${this.$t("password.success")}`);
+            }
+          });
         }
       });
     }

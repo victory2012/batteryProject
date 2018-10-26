@@ -2,9 +2,9 @@
   <div class="outer-box">
     <div id="AddContainer" class="fenceContainer"></div>
     <div class="HandleBtn">
-      <el-button @click="goBack" type="primary">返回</el-button>
+      <el-button @click="goBack" type="primary">{{$t('googleAbno.return')}}</el-button>
     </div>
-    <div class="localPosition" @click="singleDevice" title="查看设备当前位置">
+    <div class="localPosition" @click="singleDevice" :title="$t('googleAbno.title')">
       <img src="../../../static/img/local_normal.png" alt="">
     </div>
   </div>
@@ -12,7 +12,7 @@
 <script>
 import google from "google";
 import { getFence, websockets, singleDeviceId } from "../../api/index.js";
-import { onTimeOut, onError } from "../../utils/callback.js";
+import { onError } from "../../utils/callback.js";
 let map;
 let grid;
 let pointerObj = {};
@@ -54,9 +54,6 @@ export default {
     },
     getData() {
       getFence().then(res => {
-        if (res.data.code === 1) {
-          onTimeOut(this.$router);
-        }
         if (res.data.code === 0) {
           if (res.data.data.length > 0) {
             let result = res.data.data;
@@ -68,17 +65,14 @@ export default {
             });
           }
         }
-        if (res.data.code === -1) {
-          onError(res.data.msg);
-        }
       });
     },
     init() {
       try {
         map = new google.maps.Map(document.getElementById("AddContainer"), {
           center: {
-            lat: 31.232803,
-            lng: 121.475101
+            lat: 0,
+            lng: 0
           },
           zoom: 15
         });
@@ -88,14 +82,14 @@ export default {
           map.setCenter(outPointer);
           new google.maps.Marker({
             position: outPointer,
-            label: "OUT",
-            title: `超出围栏点`,
+            label: "out",
+            title: `${this.$t("googleAbno.Geofence")}`,
             map: map
           });
         }
         this.getData();
       } catch (err) {
-        onError("地图加载失败，请检查网络连接");
+        onError(`${this.$t("mapError")}`);
       }
     },
     mapInit(obj) {
@@ -104,8 +98,8 @@ export default {
         var lngs = key.toString().split(",");
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(lngs[1], lngs[0]),
-          title: `当前实时位置`,
-          label: "NOW",
+          title: `${this.$t("googleAbno.nowPosition")}`,
+          label: "now",
           map: map
         });
         this.markers.push(marker);
@@ -137,7 +131,7 @@ export default {
         };
         ws.onerror = () => {
           console.log("onerror...");
-          onError("服务器繁忙，请稍后重试。");
+          onError(`${this.$t("connectErr")}`);
           this.over();
         };
         this.over = () => {
@@ -147,36 +141,26 @@ export default {
     },
     singleDevice() {
       let NowDeviceId = this.$route.query.deviceId;
-      singleDeviceId(NowDeviceId)
-        .then(res => {
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
+      singleDeviceId(NowDeviceId).then(res => {
+        if (res.data.code === 0) {
+          let result = res.data.data;
+          console.log(result);
+          if (this.markers.length > 0) {
+            this.markers.forEach(key => {
+              key.setMap(null);
+            });
+            this.markers = [];
           }
-          if (res.data.code === 0) {
-            let result = res.data.data;
-            console.log(result);
-            if (this.markers.length > 0) {
-              this.markers.forEach(key => {
-                key.setMap(null);
-              });
-              this.markers = [];
-            }
-            if (result) {
-              pointerObj[result.deviceId] = `${result.longitude},${
-                result.latitude
-              }`;
-              this.sendData.param.push(result.deviceId);
-              this.mapInit(pointerObj);
-              this.localPosition(JSON.stringify(this.sendData));
-            }
+          if (result) {
+            pointerObj[result.deviceId] = `${result.longitude},${
+              result.latitude
+            }`;
+            this.sendData.param.push(result.deviceId);
+            this.mapInit(pointerObj);
+            this.localPosition(JSON.stringify(this.sendData));
           }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+      });
     }
   },
   mounted() {

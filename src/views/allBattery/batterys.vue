@@ -57,7 +57,7 @@
 // import AMap from "AMap";
 import { mapState } from "vuex";
 import { websockets, GetDeviceList, GetCount } from "../../api/index.js";
-import { onTimeOut, onError, onWarn } from "../../utils/callback.js";
+import { onError, onWarn } from "../../utils/callback.js";
 import GaodeMap from "./gaode-map";
 import GoogleMap from "./google-map";
 let pointerObj = {};
@@ -121,39 +121,30 @@ export default {
         pageSize: 999999999,
         bindingStatus: ""
       };
-      GetDeviceList(pageObj)
-        .then(res => {
-          console.log(res);
-          if (res.data.code === 1) {
-            onTimeOut(this.$router);
+      GetDeviceList(pageObj).then(res => {
+        console.log(res);
+
+        if (res.data.code === 0) {
+          let result = res.data.data.data;
+          this.allDevice = result.length;
+          pointerObj = {};
+          if (result.length > 0) {
+            result.forEach(key => {
+              if (key.longitude && key.latitude && key.onlineStatus === 1) {
+                pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
+                this.sendData.param.push(key.deviceId);
+              }
+            });
+            console.log(pointerObj);
+            this.propData.data = pointerObj;
+            // this.mapInit(pointerObj);
+            this.propData.type = "http";
+            this.sockets(this.sendData);
+          } else {
+            onWarn("暂无设备, 请先注册设备");
           }
-          if (res.data.code === 0) {
-            let result = res.data.data.data;
-            this.allDevice = result.length;
-            pointerObj = {};
-            if (result.length > 0) {
-              result.forEach(key => {
-                if (key.longitude && key.latitude && key.onlineStatus === 1) {
-                  pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
-                  this.sendData.param.push(key.deviceId);
-                }
-              });
-              console.log(pointerObj);
-              this.propData.data = pointerObj;
-              // this.mapInit(pointerObj);
-              this.propData.type = "http";
-              this.sockets(this.sendData);
-            } else {
-              onWarn("暂无设备, 请先注册设备");
-            }
-          }
-          if (res.data.code === -1) {
-            onError(res.data.msg);
-          }
-        })
-        .catch(() => {
-          onError("服务器请求超时，请稍后重试");
-        });
+        }
+      });
     },
     /*
       websockets 请求
