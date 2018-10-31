@@ -1,9 +1,9 @@
 <template>
   <div id="outer-box">
-    <!-- <div id="positions" class="positioned"></div> -->
-    <v-gaode :mapData='markerData' :mapCenter='mapCenterPoniter'></v-gaode>
+    <div id="positions" v-loading="maploading" class="positioned"></div>
+    <!-- <v-gaode :mapData='markerData' :mapCenter='mapCenterPoniter'></v-gaode> -->
     <div id="panel">
-      <div class="panelTop">
+      <div class="panelTop" v-loading="loading">
         <div id="intro" class="intro">
           <h3>
             <span>{{titles}}</span>
@@ -29,6 +29,7 @@
 <style>
 .list_warp {
   border-top: 1px solid #f0f0f0;
+  min-height: 510px;
 }
 .list_warp li {
   position: relative;
@@ -123,20 +124,23 @@ import AMap from "AMap";
 // import AMapUI from "AMapUI";
 import { websockets, GetDeviceList } from "../../api/index.js";
 import { trakTimeformat, nowDate } from "../../utils/transition.js";
-import { onError } from "../../utils/callback";
-import gaodeMap from "./gaode-map";
+// import { onError } from "../../utils/callback";
+// import gaodeMap from "./gaode-map";
 
-// let map;
-// let infoWindow;
+let map;
+let infoWindow;
 let ponterIndex;
 let batteryIdArr = {};
 let pointerObj = {};
+let geocoder;
 export default {
-  components: {
-    "v-gaode": gaodeMap
-  },
+  // components: {
+  //   "v-gaode": gaodeMap
+  // },
   data() {
     return {
+      loading: true,
+      maploading: false,
       pointerArr: [],
       devicelabel: "",
       active: true,
@@ -148,6 +152,7 @@ export default {
       deviceShow: false,
       pathParams: "", // url 中设备id 参数
       mapCenterPoniter: "",
+      markers: [],
       markerData: {
         data: "",
         type: ""
@@ -161,10 +166,18 @@ export default {
       this.getListData();
     },
     init() {
-      // map = new AMap.Map("positions", {
-      //   resizeEnable: true,
-      //   zoom: 15
-      // });
+      const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
+      map = new AMap.Map("positions", {
+        resizeEnable: true,
+        lang: lang,
+        zoom: 15
+      });
+      geocoder = new AMap.Geocoder({
+        city: "", // 城市设为北京，默认：“全国”
+        lang: lang,
+        batch: false,
+        radius: 500 // 范围，默认：500
+      });
       this.getListData();
     },
     // 获取列表数据
@@ -178,9 +191,10 @@ export default {
       } else {
         pageObj.bindingStatus = 1;
       }
+      this.loading = true;
       GetDeviceList(pageObj).then(res => {
         console.log(res.data);
-
+        this.loading = false;
         if (res.data.code === 0) {
           this.pointerArr = [];
           let result = res.data.data.data;
@@ -217,8 +231,6 @@ export default {
             } else {
               this.mapInit(result);
             }
-          } else {
-            onError("暂无设备, 请先注册设备");
           }
         }
       });
@@ -254,24 +266,23 @@ export default {
                   nextObj[item] = pointerObj[item];
                 }
               });
-              this.markerData = {
-                data: nextObj,
-                type: "fromClick"
-              };
-              // this.GaoDeMap(nextObj, "fromClick");
+              // this.markerData = {
+              //   data: nextObj,
+              //   type: "fromClicks"
+              // };
+              this.GaoDeMap(nextObj, "fromClick");
             } else {
-              this.markerData = {
-                data: pointerObj,
-                type: ""
-              };
-              console.log(this.markerData);
-              // this.GaoDeMap(pointerObj, "fromWs");
+              // this.markerData = {
+              //   data: pointerObj,
+              //   type: ""
+              // };
+              // console.log(this.markerData);
+              this.GaoDeMap(pointerObj, "fromWs");
             }
           }
         };
         ws.onerror = () => {
           console.log("onerror...");
-          onError("服务器繁忙，请稍后重试。");
           this.over();
         };
         ws.onclose = () => {
@@ -310,11 +321,11 @@ export default {
       });
       // console.log("mapInit ===>>>", pointerObj);
       this.sockets(JSON.stringify(sendData));
-      // this.GaoDeMap(pointerObj);
-      this.markerData = {
-        data: pointerObj,
-        type: "http"
-      };
+      this.GaoDeMap(pointerObj);
+      // this.markerData = {
+      //   data: pointerObj,
+      //   type: "http"
+      // };
     },
     /*
     * @params deviceId 电池列表 获取的设备id。
@@ -339,42 +350,128 @@ export default {
           }
         });
         console.log(selectObj);
-        // this.GaoDeMap(selectObj, "fromClick");
-        this.markerData = {
-          data: selectObj,
-          type: "fromClick"
-        };
+        this.GaoDeMap(selectObj, "fromClick");
+        // this.markerData = {
+        //   data: selectObj,
+        //   type: "fromClick"
+        // };
       }
+    },
+    GaoDeMap(data, fromWs) {
+      this.markers && map.remove(this.markers);
+      let allmarkerArr = Object.values(data);
+      let markerkeys = Object.keys(data);
+      for (let i = 0; i < allmarkerArr.length; i++) {
+        var lngs = allmarkerArr[i].toString().split(",");
+        if (lngs[0].length > 6 && lngs[1].length > 6 && lngs[4] === "1") {
+          var marker = new AMap.Marker({
+            position: [lngs[0], lngs[1]],
+            offset: new AMap.Pixel(-12, -12),
+            zIndex: 101,
+            extData: {
+              position: `${lngs[0]},${lngs[1]}`,
+              center: new AMap.LngLat(lngs[0], lngs[1]),
+              times: lngs[2]
+            },
+            map: map
+          });
+          if (lngs[5] === "0") {
+            marker.setIcon("../../../static/img/gray.png");
+          } else {
+            marker.setIcon(
+              `http://webapi.amap.com/theme/v1.3/markers/n/mark_b${i + 1}.png`
+            );
+          }
+          if (fromWs === "fromClick") {
+            map.setCenter(new AMap.LngLat(lngs[0], lngs[1]));
+            marker.setIcon(
+              `http://webapi.amap.com/theme/v1.3/markers/n/mark_r${lngs[6]}.png`
+            );
+          }
+          let voltage = lngs[7];
+          let content;
+          if (voltage === "null") {
+            content = `${this.$t("positions.batteryCode")}：${
+              lngs[3]
+            }<br/>${this.$t("positions.deviceCode")}：${markerkeys[i]}`;
+          } else {
+            content = `${this.$t(
+              "positions.voltage"
+            )}：${voltage}<br/>${this.$t("positions.batteryCode")}：${
+              lngs[3]
+            }<br/>${this.$t("positions.deviceCode")}：${markerkeys[i]}`;
+          }
+          marker.setLabel({
+            offset: new AMap.Pixel(15, 20),
+            content: content
+          });
+          this.markers.push(marker);
+        }
+      }
+      if (!fromWs) {
+        map.setFitView(); // 自适应地图
+      }
+      if (this.markers.length > 0) {
+        this.markers.forEach((key, index) => {
+          key.on("click", () => {
+            let pointerData = key.getExtData();
+            // console.log(key);
+            const self = this;
+            geocoder.getAddress(pointerData.center, function(status, result) {
+              if (status === "complete" && result.regeocode) {
+                let address = result.regeocode.formattedAddress;
+                console.log(result);
+                var info = [];
+                info.push(
+                  `<div><div>${self.$t("positions.updateTime")}：${
+                    pointerData.times
+                  }</div>`
+                );
+                info.push(
+                  `<div style="font-size:14px;">${self.$t(
+                    "positions.address"
+                  )} :${address}</div></div>`
+                );
+                infoWindow = new AMap.InfoWindow({
+                  content: info.join("<br/>"), // 信息窗体框，显示信息内容
+                  autoMove: false,
+                  offset: new AMap.Pixel(0, -10)
+                });
+                infoWindow.open(map, pointerData.center);
+              }
+            });
+          });
+        });
+      }
+      map.on("click", () => {
+        infoWindow && infoWindow.close();
+      });
     },
     // 查看所有点
     showAllPionter() {
       this.devicelabel = null;
       this.deviceId = null;
-      // this.GaoDeMap(pointerObj, "fromWs");
-      this.markerData = {
-        data: pointerObj,
-        type: ""
-      };
+      this.GaoDeMap(pointerObj);
+      // this.markerData = {
+      //   data: pointerObj,
+      //   type: ""
+      // };
     },
     // 查看历史轨迹。路由传参 设备id
     HistoryTrack(batteryId) {
-      this.$router.push({
-        path: "googleHis",
-        query: { batteryId: batteryId }
-      });
-      // let userData = JSON.parse(sessionStorage.getItem("loginData"));
-      // if (userData.mapType === 0) {
-      //   this.$router.push({
-      //     path: "history",
-      //     query: { batteryId: batteryId }
-      //   });
-      // }
-      // if (userData.mapType === 1) {
-      //   this.$router.push({
-      //     path: "googleHis",
-      //     query: { batteryId: batteryId }
-      //   });
-      // }
+      let userData = JSON.parse(sessionStorage.getItem("loginData"));
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "history",
+          query: { batteryId: batteryId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googleHis",
+          query: { batteryId: batteryId }
+        });
+      }
     }
   },
   /*

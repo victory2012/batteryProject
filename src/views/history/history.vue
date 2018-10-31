@@ -27,8 +27,9 @@
         </el-slider>
       </div>
       <div id="mapcontainer" class="map"></div>
+      <div class="HisMask" v-show="mapLoading" v-loading="mapLoading"></div>
     </div>
-    <div class="panels">
+    <div class="panels" v-loading="loading">
       <h2>{{$t('history.batteryList')}}</h2>
       <div class="panelTop">
         <ul class="list_warp">
@@ -76,6 +77,8 @@ export default {
     return {
       activeName: "list",
       trajectory: false,
+      loading: false,
+      mapLoading: true,
       active: true,
       navg: null,
       map: null,
@@ -100,6 +103,22 @@ export default {
     this.init();
   },
   methods: {
+    init() {
+      const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
+      map = new AMap.Map("mapcontainer", {
+        resizeEnable: true,
+        lang: lang,
+        zoom: 15
+      });
+      AMap.plugin(["AMap.Heatmap"], () => {
+        // 初始化heatmap对象
+        heatmap = new AMap.Heatmap(map, {
+          radius: 12, // 给定半径
+          opacity: [0, 1] // 透明度
+        });
+      });
+      this.getHisData();
+    },
     /* 点击小格子 事件 */
     showThisData(key, index, event) {
       // console.log(this.$refs.blockInfo)
@@ -245,7 +264,9 @@ export default {
     },
     /* 获取数据 */
     getData(params) {
+      this.mapLoading = true;
       GetTrajectory(params).then(res => {
+        this.mapLoading = false;
         if (res.data && res.data.code === 0) {
           let result = res.data.data;
           this.gridData = [];
@@ -294,6 +315,7 @@ export default {
       if (this.markerArr.length > 0) {
         map.remove(this.markerArr);
       }
+      this.mapLoading = true;
       this.trajectory = false;
       this.active = true;
       if (this.gridData.length > 0) {
@@ -303,24 +325,10 @@ export default {
         });
         heatmap.show();
         pathSimplifierIns && pathSimplifierIns.hide();
+        this.mapLoading = false;
       }
     },
-    init() {
-      const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
-      map = new AMap.Map("mapcontainer", {
-        resizeEnable: true,
-        lang: lang,
-        zoom: 15
-      });
-      AMap.plugin(["AMap.Heatmap"], () => {
-        // 初始化heatmap对象
-        heatmap = new AMap.Heatmap(map, {
-          radius: 12, // 给定半径
-          opacity: [0, 1] // 透明度
-        });
-      });
-      this.getHisData();
-    },
+
     // 获取列表数据
     getHisData() {
       let pageObj = {
@@ -328,9 +336,10 @@ export default {
         pageSize: 10,
         bindingStatus: "1"
       };
+      this.loading = true;
       GetDeviceList(pageObj).then(res => {
         console.log("GetDeviceList", res);
-
+        this.loading = false;
         if (res.data && res.data.code === 0) {
           let result = res.data.data.data;
           this.total = res.data.data.total;
@@ -377,6 +386,7 @@ export default {
       if (this.lineArr.length < 1) {
         return;
       }
+      this.mapLoading = true;
       const self = this;
       AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
         AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
@@ -486,12 +496,14 @@ export default {
           icon: "https://webapi.amap.com/theme/v1.3/markers/n/end.png",
           zIndex: 10
         });
+        this.mapLoading = false;
         this.markerArr.push(start);
         this.markerArr.push(end);
       });
     },
     // 列表点击事件
     checkItem(item) {
+      this.mapLoading = true;
       this.activePointer = [];
       this.blockArr = [];
       let params = {
@@ -556,6 +568,15 @@ export default {
       height: 100%;
       width: 100%;
     }
+    .HisMask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 999;
+      // background: rgba(0, 0, 0, 0.4);
+    }
     .control {
       position: absolute;
       top: 5px;
@@ -609,6 +630,7 @@ export default {
       overflow-x: hidden;
       background: #ffffff;
       .list_warp {
+        min-height: 510px;
         li {
           height: 40px;
           border-bottom: 1px solid #f0f0f0;

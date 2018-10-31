@@ -22,11 +22,6 @@ export default {
         this.MapInit(val.data, val.type);
       },
       deep: true
-    },
-    mapCenter: {
-      handler: function(val) {
-        this.setMapCenter(val);
-      }
     }
   },
   methods: {
@@ -38,7 +33,8 @@ export default {
         lang: lang
       });
       geocoder = new AMap.Geocoder({
-        lang: lang,
+        city: "", // 城市设为北京，默认：“全国”
+        lang: "en",
         batch: false,
         radius: 500 // 范围，默认：500
       });
@@ -55,11 +51,11 @@ export default {
       //   });
       // });
     },
-    setMapCenter(center) {
-      if (typeof center === "object") {
-        map && map.setCenter(center);
-      }
-    },
+    // setMapCenter(center) {
+    //   if (typeof center === "object") {
+    //     map && map.setCenter(center);
+    //   }
+    // },
     MapInit(data, type) {
       // console.log("watch ===>>>", data);
       this.markers && map.remove(this.markers);

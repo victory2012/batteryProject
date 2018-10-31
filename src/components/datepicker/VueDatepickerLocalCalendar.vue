@@ -389,7 +389,7 @@ export default {
 }
 
 .calendar-foot {
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .calendar-hour {

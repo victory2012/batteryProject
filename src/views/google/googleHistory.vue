@@ -19,8 +19,9 @@
         </el-slider>
       </div>
       <div id="mapcontainer" class="map"></div>
+      <div class="HisMask" v-show="mapLoading" v-loading="mapLoading"></div>
     </div>
-    <div class="panel">
+    <div class="panel" v-loading="loading">
       <h2>{{$t('history.batteryList')}}</h2>
       <div class="panelTop">
         <ul class="list_warp">
@@ -66,6 +67,8 @@ let pointArr = [];
 export default {
   data() {
     return {
+      mapLoading: false,
+      loading: false,
       trajectory: false,
       active: true,
       navg: null,
@@ -219,9 +222,10 @@ export default {
     },
     /* 获取数据 */
     getData(params) {
+      this.mapLoading = true;
       GetTrajectory(params).then(res => {
         console.log(res);
-
+        this.mapLoading = false;
         if (res.data.code === 0) {
           let result = res.data.data;
           // console.log(result);
@@ -251,6 +255,7 @@ export default {
       });
     },
     heatmap() {
+      this.mapLoading = true;
       this.trajectory = false;
       this.active = true;
       this.clearMap();
@@ -278,6 +283,7 @@ export default {
           "rgba(255, 0, 0, 1)"
         ]
       });
+      this.mapLoading = false;
       // heatmapData.set("gradient", gradient);
     },
     init() {
@@ -349,9 +355,10 @@ export default {
         pageSize: 10,
         bindingStatus: "1"
       };
+      this.loading = true;
       GetDeviceList(pageObj).then(res => {
         console.log("GetDeviceList", res);
-
+        this.loading = false;
         if (res.data && res.data.code === 0) {
           let result = res.data.data.data;
           this.total = res.data.data.total;
@@ -412,6 +419,7 @@ export default {
       this.trajectory = true;
       this.active = false;
       this.clearMap();
+      this.mapLoading = true;
       line = new google.maps.Polyline({
         icons: [
           {
@@ -449,6 +457,7 @@ export default {
         },
         map: map
       });
+      this.mapLoading = false;
       this.markerPointer.sdPointer.push(start);
       this.markerPointer.sdPointer.push(end);
     },
@@ -511,6 +520,15 @@ export default {
     .map {
       height: 100%;
       width: 100%;
+    }
+    .HisMask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 999;
+      // background: rgba(0, 0, 0, 0.4);
     }
     .control {
       position: absolute;

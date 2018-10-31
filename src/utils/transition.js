@@ -172,7 +172,7 @@ export function getTime(start, end) {
 }
 
 export function yesTody() {
-  let yesDate = new Date(new Date().toLocaleDateString()).getTime();
+  let yesDate = new Date().getTime();
   let result = yesDate - 86400000;
   let str = new Date(result);
   let yy = str.getFullYear();

@@ -1,7 +1,7 @@
 <template>
   <div class="login_page fillcontain">
     <div class="login-head">
-      <el-dropdown class="user-name" @command="handleCommand">
+      <el-dropdown class="user-name" trigger="click" @command="handleCommand">
         <span class="el-dropdown-link">
           {{localLanguge}}
           <i class="el-icon-caret-bottom"></i>
@@ -180,6 +180,9 @@ export default {
 
 <style lang="less" scoped>
 // @import "../../style/mixin";
+.el-dropdown-link {
+  cursor: pointer;
+}
 .login_page {
   position: relative;
   height: 100%;

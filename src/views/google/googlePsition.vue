@@ -2,7 +2,7 @@
   <div id="outer-box">
     <div id="positions" class="positioned"></div>
     <div id="panel">
-      <div class="panelTop">
+      <div class="panelTop" v-loading="loading">
         <div id="intro" class="intro">
           <h3>
             <span>{{titles}}</span>
@@ -130,6 +130,7 @@ let pointerObj = {};
 export default {
   data() {
     return {
+      loading: false,
       pointerArr: [],
       lnglat: "",
       devicelabel: "",
@@ -184,9 +185,10 @@ export default {
       } else {
         pageObj.bindingStatus = 1;
       }
+      this.loading = true;
       GetDeviceList(pageObj).then(res => {
         console.log(res.data);
-
+        this.loading = false;
         if (res.data.code === 0) {
           this.pointerArr = [];
           let center = res.data.data;
@@ -236,8 +238,6 @@ export default {
             } else {
               this.mapInit(result);
             }
-          } else {
-            onError("暂无设备, 请先注册设备");
           }
         }
       });
@@ -262,10 +262,12 @@ export default {
             }
             let obj = data.data.split(",");
             let battery = batteryIdArr[obj[0]]; // 从电池id 字典中获取电池id，obj[0] 为设备id。
+            let pointerObjKeys = Object.keys(pointerObj);
+            let ponterIndexs = pointerObjKeys.indexOf(obj[0]);
             obj.forEach(() => {
               pointerObj[obj[0]] = `${obj[1]},${
                 obj[2]
-              },${nowDate()},${battery},1,1,${obj[3]}`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
+              },${nowDate()},${battery},1,1,${ponterIndexs + 1},${obj[3]}`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
             });
             if (this.deviceId || this.pathParams) {
               let keys = Object.keys(pointerObj);
@@ -483,23 +485,23 @@ export default {
     },
     // 查看历史轨迹。路由传参 设备id
     HistoryTrack(batteryId) {
-      this.$router.push({
-        path: "googleHis",
-        query: { batteryId: batteryId }
-      });
-      // let userData = JSON.parse(sessionStorage.getItem("loginData"));
-      // if (userData.mapType === 0) {
-      //   this.$router.push({
-      //     path: "history",
-      //     query: { batteryId: batteryId }
-      //   });
-      // }
-      // if (userData.mapType === 1) {
-      //   this.$router.push({
-      //     path: "googleHis",
-      //     query: { batteryId: batteryId }
-      //   });
-      // }
+      // this.$router.push({
+      //   path: "googleHis",
+      //   query: { batteryId: batteryId }
+      // });
+      let userData = JSON.parse(sessionStorage.getItem("loginData"));
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "history",
+          query: { batteryId: batteryId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googleHis",
+          query: { batteryId: batteryId }
+        });
+      }
     }
   },
   /*
