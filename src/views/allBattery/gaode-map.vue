@@ -63,7 +63,7 @@ export default {
       }
     },
     init() {
-      const lang = localStorage.getItem("locale") === "EN" ? "en" : "zh_cn";
+      const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
       map = new AMap.Map("container", {
         resizeEnable: true,
         zoom: 10,

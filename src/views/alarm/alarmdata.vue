@@ -66,7 +66,7 @@ export default {
   },
   methods: {
     init() {
-      let alarmdataPage = localStorage.getItem("alarmdataPage");
+      let alarmdataPage = sessionStorage.getItem("alarmdataPage");
       if (alarmdataPage) {
         this.currentPage2 = alarmdataPage;
       }
@@ -101,10 +101,20 @@ export default {
     },
     checkPosition(index, data) {
       // 查看位置
-      this.$router.push({
-        path: "googleAbno",
-        query: { grid: data[index].grid, deviceId: data[index].deviceId }
-      });
+      let deviceId = data[index];
+      let userData = JSON.parse(sessionStorage.getItem("loginData"));
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "abnormal",
+          query: { grid: data[index].grid, deviceId: deviceId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googleAbno",
+          query: { grid: data[index].grid, deviceId: deviceId }
+        });
+      }
     },
     handleSizeChange(index) {
       // index为选中的页数
@@ -130,7 +140,7 @@ export default {
     this.init();
   },
   beforeDestroy() {
-    // localStorage.removeItem("alarmdataPage");
+    // sessionStorage.removeItem("alarmdataPage");
   }
 };
 </script>

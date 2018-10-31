@@ -52,7 +52,8 @@ module.exports = {
     batteryList: '电池列表',
     alarm: '告警数据',
     userManage: "用户管理",
-    device: '设备管理'
+    device: '设备管理',
+    policy: '电压阈值'
   },
   overview: {
     total: '全部',
@@ -73,7 +74,8 @@ module.exports = {
     intersection: '路口',
     latLng: '坐标',
     address: '地址',
-    getAdressErr: "地址获取失败"
+    getAdressErr: "地址获取失败",
+    voltage: '设备电压'
   },
   history: {
     startTime: '选择开始时间',
@@ -86,14 +88,17 @@ module.exports = {
     TrackReplay: '轨迹回放',
     times: '时间',
     batteryList: '电池列表',
-
     online: '上线',
     offLine: '下线',
     checkErr: '开始时间应小于结束时间',
     noData: "此设备当前时间段内，暂无数据",
     noDevice: '暂无设备, 请先注册设备',
     latLng: '坐标',
-    address: '地址'
+    address: '地址',
+    No: '第',
+    point: '点',
+    junction: '路口',
+    track: '轨迹'
   },
   pageBtn: {
     previous: '上一页',
@@ -175,7 +180,7 @@ module.exports = {
     customer: '客户企业名称',
     deviceCode: '监测设备编号',
     grid: '设备坐标',
-    position: '查看位置',
+    position: '查看告警位置',
     location: '查看告警位置'
   },
   useMsg: {
@@ -202,7 +207,7 @@ module.exports = {
       phone: '手机号码',
       email: '邮箱（选填）',
       enterpriseName: '企业名称',
-      nature: '企业性质',
+      nature: '用户范围',
       manufacturer: '创建生产企业管理员',
       customer: '添加客户企业管理员',
       manuProduct: '添加生产企业普通管理员',
@@ -218,7 +223,7 @@ module.exports = {
       phone: '请输入手机号码',
       phoneCheck: '手机号格式错误',
       enterprise: '请输入企业名称',
-      nature: '请选择企业性质'
+      nature: '请选用户范围'
     },
     success: '创建成功！',
     no: '无'
@@ -235,7 +240,7 @@ module.exports = {
     batteryCode: '电池编号',
     onlineStatus: '在线状态',
     device: '监测设备',
-    location: '查看告警位置',
+    location: '查看位置',
     addDevice: '添加设备',
     nobind: '未绑定',
     hasbind: '已绑定',
@@ -285,5 +290,12 @@ module.exports = {
     OUT: 'OUT',
     Geofence: '超出围栏点',
     nowPosition: '当前实时位置'
+  },
+  policy: {
+    title: '电压告警值',
+    btns: '修改阈值',
+    placeholder: '请输入电压阈值',
+    success: '修改成功',
+    voltageCheck: '请输入数字'
   }
 };

@@ -142,23 +142,23 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item :label="$t('useMsg.add.enterpriseName')" prop="enterpriseName">
-                <el-input v-model="manAdminForm.enterpriseName" auto-complete="off"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row :gutter="40">
-            <el-col :span="12">
-              <el-form-item :label="$t('useMsg.add.email')" prop="email">
-                <el-input v-model="manAdminForm.email" auto-complete="off"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.nature')" prop="nature">
                 <el-select v-model="manAdminForm.nature" :placeholder="$t('useMsg.add.nature')" style="width:240px;">
                   <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
                   </el-option>
                 </el-select>
+              </el-form-item>
+            </el-col>
+            <!-- <el-col :span="12">
+              <el-form-item :label="$t('useMsg.add.enterpriseName')" prop="enterpriseName">
+                <el-input v-model="manAdminForm.enterpriseName" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col> -->
+          </el-row>
+          <el-row :gutter="40">
+            <el-col :span="12">
+              <el-form-item :label="$t('useMsg.add.email')" prop="email">
+                <el-input v-model="manAdminForm.email" auto-complete="off"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -191,18 +191,6 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item :label="$t('useMsg.add.enterpriseName')" prop="enterpriseName">
-                <el-input v-model="CustormAdminForm.enterpriseName" auto-complete="off"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row :gutter="40">
-            <el-col :span="12">
-              <el-form-item :label="$t('useMsg.add.email')" prop="email">
-                <el-input v-model="CustormAdminForm.email" auto-complete="off"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.nature')" prop="nature">
                 <el-select v-model="CustormAdminForm.nature" :placeholder="$t('useMsg.add.nature')" style="width:240px;">
                   <el-option v-for="item in natureOptions" :key="item.value" :label="item.label" :value="item.value">
@@ -210,6 +198,19 @@
                 </el-select>
               </el-form-item>
             </el-col>
+            <!-- <el-col :span="12">
+              <el-form-item :label="$t('useMsg.add.enterpriseName')" prop="enterpriseName">
+                <el-input v-model="CustormAdminForm.enterpriseName" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col> -->
+          </el-row>
+          <el-row :gutter="40">
+            <el-col :span="12">
+              <el-form-item :label="$t('useMsg.add.email')" prop="email">
+                <el-input v-model="CustormAdminForm.email" auto-complete="off"></el-input>
+              </el-form-item>
+            </el-col>
+
           </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -383,18 +384,18 @@ export default {
     };
   },
   created() {
-    let userData = JSON.parse(localStorage.getItem("loginData"));
-    if (userData.userRole === "plat_super_admin") {
+    this.userData = JSON.parse(sessionStorage.getItem("loginData"));
+    if (this.userData.userRole === "plat_super_admin") {
       this.manufacturer = true;
       this.customer = false;
       this.manufacturerAdmin = false;
       this.customerAdmin = false;
-    } else if (userData.userRole === "super_admin") {
+    } else if (this.userData.userRole === "manufacturer_super_admin") {
       this.manufacturer = false;
       this.customer = true;
       this.manufacturerAdmin = true;
       this.customerAdmin = false;
-    } else if (userData.userRole === "customer_super_admin") {
+    } else if (this.userData.userRole === "customer_super_admin") {
       this.manufacturer = false;
       this.customer = false;
       this.customerAdmin = true;
@@ -418,8 +419,8 @@ export default {
             phoneNumber: this.customerForm.phoneNumber,
             email: this.customerForm.email || "",
             enterpriseName: this.customerForm.enterpriseName,
-            mapType: "1"
-            // mapType: this.customerForm.nature
+            // mapType: "1"
+            mapType: this.customerForm.nature
           };
           addCustomer(paramsAdmin).then(res => {
             console.log(res.data);
@@ -447,8 +448,8 @@ export default {
             phoneNumber: this.adminForm.phoneNumber,
             enterpriseName: this.adminForm.enterpriseName,
             email: this.adminForm.email || "",
-            mapType: "1"
-            // mapType: this.adminForm.nature
+            // mapType: "1"
+            mapType: this.adminForm.nature
           };
           console.log(paramsAdmin);
           // 添加生产企业超级管理员
@@ -474,10 +475,10 @@ export default {
             userName: this.manAdminForm.userName,
             password: this.manAdminForm.password,
             phoneNumber: this.manAdminForm.phoneNumber,
-            enterpriseName: this.manAdminForm.enterpriseName,
+            enterpriseName: this.userData.enterpriseName,
             email: this.manAdminForm.email || "",
-            mapType: "1"
-            // mapType: this.manAdminForm.nature
+            // mapType: "1"
+            mapType: this.manAdminForm.nature
           };
           console.log(paramsAdmin);
           // 添加生产企业普通管理员
@@ -490,8 +491,6 @@ export default {
               this.resetManufacturer("manAdminForm");
             }
           });
-        } else {
-          return false;
         }
       });
     },
@@ -502,10 +501,10 @@ export default {
             userName: this.CustormAdminForm.userName,
             password: this.CustormAdminForm.password,
             phoneNumber: this.CustormAdminForm.phoneNumber,
-            enterpriseName: this.CustormAdminForm.enterpriseName,
+            enterpriseName: this.userData.enterpriseName,
             email: this.CustormAdminForm.email || "",
-            mapType: "1"
-            // mapType: this.CustormAdminForm.nature
+            // mapType: "1"
+            mapType: this.CustormAdminForm.nature
           };
           console.log(paramsAdmin);
           addCustomerAdmin(paramsAdmin).then(res => {

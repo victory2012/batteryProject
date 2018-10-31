@@ -94,34 +94,34 @@ export default {
           map: map
         });
         this.markers.push(marker);
-        marker.addListener("click", e => {
-          var latLngData =
-            e.latLng.lat().toFixed(6) + "," + e.latLng.lng().toFixed(6);
-          this.$.ajax({
-            type: "post",
-            url:
-              "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
-              latLngData +
-              "&key=AIzaSyC8IXpNgfA7uD-Xb0jEqhkEdB7j3gbgOiE",
-            async: true,
-            success: function(data) {
-              console.log(data);
-              var site =
-                "坐标：" +
-                latLngData +
-                "<br />" +
-                "地址：" +
-                data.results[0].formatted_address;
-              var infowindow = new google.maps.InfoWindow({
-                content: site
-              });
-              infowindow.open(map, marker); // 弹出信息提示窗口
-              map.addListener("click", () => {
-                infowindow.close();
-              });
-            }
-          });
-        });
+        // marker.addListener("click", e => {
+        //   var latLngData =
+        //     e.latLng.lat().toFixed(6) + "," + e.latLng.lng().toFixed(6);
+        //   this.$.ajax({
+        //     type: "post",
+        //     url:
+        //       "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
+        //       latLngData +
+        //       "&key=AIzaSyC8IXpNgfA7uD-Xb0jEqhkEdB7j3gbgOiE",
+        //     async: true,
+        //     success: function(data) {
+        //       console.log(data);
+        //       var site =
+        //         "坐标：" +
+        //         latLngData +
+        //         "<br />" +
+        //         "地址：" +
+        //         data.results[0].formatted_address;
+        //       var infowindow = new google.maps.InfoWindow({
+        //         content: site
+        //       });
+        //       infowindow.open(map, marker); // 弹出信息提示窗口
+        //       map.addListener("click", () => {
+        //         infowindow.close();
+        //       });
+        //     }
+        //   });
+        // });
       });
       if (type) {
         var bounds = new google.maps.LatLngBounds();
@@ -135,7 +135,7 @@ export default {
       http请求 获取全部电池设备
      */
     narmleHttp() {
-      // let loginData = JSON.parse(localStorage.getItem("loginData"));
+      // let loginData = JSON.parse(sessionStorage.getItem("loginData"));
       let pageObj = {
         pageNum: 1,
         pageSize: 999999999,

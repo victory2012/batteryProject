@@ -221,3 +221,11 @@ export function singleDeviceId(deviceId) {
 export function timeList(param) {
   return http.post(`/device_login/list`, param)
 };
+
+export function getPolicy() {
+  return http.post(`/event_policy/get`)
+};
+
+export function updatePolicy(param) {
+  return http.post(`/event_policy/update`, param)
+};

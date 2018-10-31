@@ -116,7 +116,8 @@ export default {
           },
           {
             pattern: /^1[3|4|5|7|8][0-9]\d{8}$/,
-            message: this.$t("user.phoneCheck")
+            message: this.$t("user.phoneCheck"),
+            trigger: "change"
           }
         ]
       }

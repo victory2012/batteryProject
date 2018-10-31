@@ -4,7 +4,7 @@ import {
 } from 'element-ui';
 import i18n from "@/i18n";
 let BaseUrl = "http://47.98.232.46:8181";
-// let BaseUrl = "http://192.168.1.135:8181";
+// let BaseUrl = "http://192.168.1.140:8181";
 Axios.defaults.withCredentials = true; // 让ajax携带cookie
 
 Axios.interceptors.request.use(config => {
@@ -96,7 +96,7 @@ function switchCode(code) {
     case 6023:
       return Message.warning(`${i18n.t('responseCode.UnableGecfence')}`)
     case -1:
-      return Message.warning(`${i18n.t('responseCode.UnableGecfence')}`)
+      return Message.warning(`${i18n.t('connectErr')}`)
     default:
       break;
   }

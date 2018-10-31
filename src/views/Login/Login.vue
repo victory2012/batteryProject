@@ -76,12 +76,12 @@ export default {
       if (cammand === "zh") {
         this.localLanguge = "中文";
         this.$i18n.locale = "zh";
-        localStorage.setItem("locale", "zh");
+        sessionStorage.setItem("locale", "zh");
       }
       if (cammand === "en") {
         this.localLanguge = "English";
         this.$i18n.locale = "en";
-        localStorage.setItem("locale", "en");
+        sessionStorage.setItem("locale", "en");
       }
       this.rules = {
         userName: [
@@ -109,13 +109,16 @@ export default {
             this.isLogin = false;
             console.log(res);
             if (res.data && res.data.code === 0) {
-              localStorage.setItem("loginData", JSON.stringify(res.data.data));
+              sessionStorage.setItem(
+                "loginData",
+                JSON.stringify(res.data.data)
+              );
               this.$store.commit(
                 "SET_USER_DATA",
                 JSON.stringify(res.data.data)
               );
               this.$store.commit("SET_MAP_TYPE", res.data.data.mapType);
-              localStorage.setItem("mapType", res.data.data.mapType);
+              sessionStorage.setItem("mapType", res.data.data.mapType);
               localStorage.setItem("account", this.loginForm.userName);
               localStorage.setItem("password", this.loginForm.password);
               this.$router.push("/home");
@@ -148,7 +151,7 @@ export default {
     }
   },
   created() {
-    let locallanguage = localStorage.getItem("locale");
+    let locallanguage = sessionStorage.getItem("locale");
     if (locallanguage) {
       this.localLanguge = locallanguage === "zh" ? "中文" : "English";
     } else {
@@ -159,11 +162,11 @@ export default {
       }
       if (currentLang === "zh-CN") {
         this.localLanguge = "中文";
-        localStorage.setItem("locale", "zh");
+        sessionStorage.setItem("locale", "zh");
         this.$i18n.locale = "zh";
       } else {
         this.localLanguge = "English";
-        localStorage.setItem("locale", "en");
+        sessionStorage.setItem("locale", "en");
         this.$i18n.locale = "en";
       }
     }

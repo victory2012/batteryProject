@@ -33,7 +33,7 @@
         </el-table-column>
         <el-table-column align="center" :label="$t('device.device')">
           <template slot-scope="scope">
-            <el-button @click.native.prevent="MonitorDevice(scope.$index, tableData)" type="text" size="small">
+            <el-button :disabled="scope.row.onlineStatus === 0" @click.native.prevent="MonitorDevice(scope.$index, tableData)" type="text" size="small">
               {{$t('device.location')}}
             </el-button>
           </template>
@@ -264,23 +264,23 @@ export default {
     },
     MonitorDevice(index, data) {
       let deviceId = data[index];
-      this.$router.push({
-        path: "googlePos",
-        query: { deviceId: deviceId.deviceId }
-      });
-      // let userData = JSON.parse(localStorage.getItem("loginData"));
-      // if (userData.mapType === 0) {
-      //   this.$router.push({
-      //     path: "position",
-      //     query: { deviceId: deviceId.deviceId }
-      //   });
-      // }
-      // if (userData.mapType === 1) {
-      //   this.$router.push({
-      //     path: "googlePos",
-      //     query: { deviceId: deviceId.deviceId }
-      //   });
-      // }
+      // this.$router.push({
+      //   path: "googlePos",
+      //   query: { deviceId: deviceId.deviceId }
+      // });
+      let userData = JSON.parse(sessionStorage.getItem("loginData"));
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "position",
+          query: { deviceId: deviceId.deviceId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googlePos",
+          query: { deviceId: deviceId.deviceId }
+        });
+      }
     }
   },
   mounted() {

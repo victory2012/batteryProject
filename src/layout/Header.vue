@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     username() {
-      let userData = JSON.parse(localStorage.getItem("loginData"));
+      let userData = JSON.parse(sessionStorage.getItem("loginData"));
       return userData ? `${userData.enterpriseName}-${userData.userName}` : "";
     }
   },
@@ -55,7 +55,7 @@ export default {
     handleCommand(command) {
       console.log(command);
       if (command === "loginout") {
-        localStorage.removeItem("loginData");
+        sessionStorage.removeItem("loginData");
         this.$router.push("/login");
       }
       if (command === "userMsg") {

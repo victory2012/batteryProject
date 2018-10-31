@@ -401,7 +401,7 @@ export default {
         icons[0].offset = (count / this.gridData.length) * 100 + "%";
         line.set("icons", icons);
         console.log(count, icons[0].offset);
-        // // //终点停车
+        // // //终点
         if (count >= this.gridData.length) {
           clearInterval(animate1);
         }

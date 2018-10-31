@@ -49,7 +49,8 @@ module.exports = {
     batteryList: 'Battery Profiles',
     alarm: 'Battery Alarms',
     userManage: "User Management",
-    device: 'Device Management'
+    device: 'Device Management',
+    policy: 'Voltage Threshold'
   },
   overview: {
     total: 'All',
@@ -70,7 +71,8 @@ module.exports = {
     intersection: 'Road junction',
     latLng: 'Coordinate',
     address: 'Address',
-    getAdressErr: "Address acquisition failed."
+    getAdressErr: "Address acquisition failed.",
+    voltage: 'Voltage'
   },
   history: {
     startTime: 'Please enter start time.',
@@ -90,7 +92,11 @@ module.exports = {
     noData: "This device has no data during the current time period.",
     noDevice: 'There is no corresponding device, please register first.',
     latLng: 'Coordinate',
-    address: 'Address'
+    address: 'Address',
+    No: 'No',
+    point: 'point',
+    junction: 'Road junction',
+    track: 'Track'
   },
   timeBtn: {
     cancle: "Cancel",
@@ -192,7 +198,7 @@ module.exports = {
       phone: 'Mobile',
       email: 'Email(optional)',
       enterpriseName: 'Company Name',
-      nature: 'Company Type',
+      nature: 'Region',
       manufacturer: 'New Manufacturer Administrator.',
       customer: 'New Customer Administrator.',
       manuProduct: 'New Manufacturer User.',
@@ -208,7 +214,7 @@ module.exports = {
       phone: 'Please enter mobile number.',
       phoneCheck: 'Wrong format of mobile number entered.',
       enterprise: 'Please eneter name of company.',
-      nature: 'Please choose nature of company.'
+      nature: 'Region.'
     },
     success: 'Created Successfully.',
     no: 'No Data'
@@ -264,9 +270,9 @@ module.exports = {
   password: {
     new: 'new password',
     placeholder: 'Please enter password.',
-    changeBtn: 'Change password',
+    changeBtn: 'Change Password',
     error: 'Please enter password.',
-    success: 'Changed successfully.',
+    success: 'Changed Successfully.',
     passwordLimit: 'Password length is 3 to 10 characters.'
   },
   googleAbno: {
@@ -275,5 +281,12 @@ module.exports = {
     OUT: 'OUT',
     Geofence: 'Out of the Geofence.',
     nowPosition: 'Current Location'
+  },
+  policy: {
+    title: 'Voltage alarm value',
+    btns: 'Changed Threshold',
+    placeholder: 'Please enter voltage.',
+    success: 'Changed Successfully',
+    voltageCheck: 'Please enter number.'
   }
 };

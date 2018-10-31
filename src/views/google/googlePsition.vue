@@ -10,7 +10,7 @@
           </h3>
         </div>
         <ul class="list_warp">
-          <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '', item.onlineStatus === 0? 'off': '', devicelabel == item.batteryId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item.deviceId, index)">
+          <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '', item.onlineStatus === 0? 'off': '', devicelabel == item.batteryId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item, index)">
             <p>{{index + 1}}、{{deviceShow? item.deviceId : item.batteryId}}</p>
             <el-badge :value="item.onLine" class="item">
               <el-button @click.prevent.stop="HistoryTrack(item.batteryId)" size="mini">{{$t('positions.track')}}</el-button>
@@ -195,13 +195,13 @@ export default {
           let sendData = { api: "bind", param: [] };
           pointerObj = {};
           if (result.length > 0) {
-            if (this.pathParams) {
+            if (this.pathParams && this.pageNum === 1) {
               result.forEach((key, index) => {
                 pointerObj[key.deviceId] = `${key.latitude},${
                   key.longitude
                 },${trakTimeformat(key.pushTime)},${key.batteryId},${
                   key.onlineStatus
-                }`;
+                },0,${key.voltage}`;
                 if (key.onlineStatus === 1) {
                   key.onLine = this.$t("positions.onLine");
                   if (key.batteryId) {
@@ -222,12 +222,12 @@ export default {
                   key.onLine = this.$t("positions.offline");
                 }
                 if (this.pathParams === key.deviceId) {
-                  let opts = {
-                    deviceId: this.pathParams,
-                    longitude: key.longitude,
-                    latitude: key.latitude
-                  };
-                  this.checkItem(opts, index);
+                  // let opts = {
+                  //   deviceId: this.pathParams,
+                  //   longitude: key.longitude,
+                  //   latitude: key.latitude
+                  // };
+                  this.checkItem(key, index);
                 }
                 this.pointerArr.push(key);
               });
@@ -265,7 +265,7 @@ export default {
             obj.forEach(() => {
               pointerObj[obj[0]] = `${obj[1]},${
                 obj[2]
-              },${nowDate()},${battery},1,1`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
+              },${nowDate()},${battery},1,1,${obj[3]}`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
             });
             if (this.deviceId || this.pathParams) {
               let keys = Object.keys(pointerObj);
@@ -301,13 +301,13 @@ export default {
     mapInit(data) {
       pointerObj = {};
       let sendData = { api: "bind", param: [] };
-      console.log(data);
+      // console.log(data);
       data.forEach((key, index) => {
         pointerObj[key.deviceId] = `${key.latitude},${
           key.longitude
         },${trakTimeformat(key.pushTime)},${key.batteryId},${
           key.onlineStatus
-        },0`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
+        },0,${key.voltage}`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
         if (key.onlineStatus === 1) {
           // onlineStatus 判断是否在线的标识。1 在线。0 离线；
           key.onLine = this.$t("positions.onLine");
@@ -342,13 +342,26 @@ export default {
         var lngs = allmarkerArr[i].toString().split(",");
         if (lngs[0].length > 6 && lngs[1].length > 6 && lngs[4] === "1") {
           let obj = {};
+          let content;
           var latLng = new google.maps.LatLng(lngs[0], lngs[1]);
+
+          obj.voltage = lngs[7] || 0;
+          if (obj.voltage) {
+            content = `${this.$t("positions.batteryCode")}：${
+              lngs[3]
+            }\n${this.$t("positions.deviceCode")}：${markerkeys[i]}\n${this.$t(
+              "positions.voltage"
+            )}：${obj.voltage}`;
+          } else {
+            content = `${this.$t("positions.batteryCode")}：${
+              lngs[3]
+            }\n${this.$t("positions.deviceCode")}：${markerkeys[i]}`;
+          }
+
           var marker = new google.maps.Marker({
             position: latLng,
             label: `${i + 1}`,
-            title: `${this.$t("positions.batteryCode")}：${lngs[3]}\n${this.$t(
-              "positions.deviceCode"
-            )}：${markerkeys[i]}`,
+            title: content,
             map: map
           });
           if (fromWs === "fromClick") {
@@ -364,39 +377,60 @@ export default {
       }
       this.markerTime.forEach(key => {
         const self = this;
+        let voltage = key.voltage;
         key.pointer.addListener("click", e => {
-          var latLngData =
+          let latLngData =
             e.latLng.lat().toFixed(6) + "," + e.latLng.lng().toFixed(6);
-          this.$.ajax({
-            type: "post",
-            url:
-              "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
-              latLngData +
-              "&location_type=ROOFTOP&result_type=street_address&key=AIzaSyC8IXpNgfA7uD-Xb0jEqhkEdB7j3gbgOiE",
-            async: true,
-            success: function(data) {
-              let address;
-              if (data.status === "OK") {
-                address = data.results[0].formatted_address;
-              } else {
-                address = `${self.$t("positions.getAdressErr")}`;
-              }
-              let site = `${self.$t("positions.updateTime")}：${
-                key.times
-              }<br />${self.$t(
-                "positions.latLng"
-              )}：${latLngData}<br />${self.$t(
-                "positions.address"
-              )}：${address}`;
-              this.infowindow = new google.maps.InfoWindow({
-                content: site
-              });
-              this.infowindow.open(map, key.pointer); // 弹出信息提示窗口
-              map.addListener("click", () => {
-                this.infowindow.close();
-              });
-            }
+          let site;
+          if (key.voltage) {
+            site = `${self.$t("positions.updateTime")}：${
+              key.times
+            }<br />${self.$t("positions.latLng")}：${latLngData}<br />${self.$t(
+              "positions.voltage"
+            )}：${voltage}`;
+          } else {
+            site = `${self.$t("positions.updateTime")}：${
+              key.times
+            }<br />${self.$t("positions.latLng")}：${latLngData}`;
+          }
+          this.infowindow = new google.maps.InfoWindow({
+            content: site
           });
+          this.infowindow.open(map, key.pointer); // 弹出信息提示窗口
+          map.addListener("click", () => {
+            this.infowindow.close();
+          });
+
+          // this.$.ajax({
+          //   type: "post",
+          //   url:
+          //     "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
+          //     latLngData +
+          //     "&location_type=ROOFTOP&result_type=street_address&key=AIzaSyC8IXpNgfA7uD-Xb0jEqhkEdB7j3gbgOiE",
+          //   async: true,
+          //   success: function(data) {
+          //     let address;
+          //     if (data.status === "OK") {
+          //       address = data.results[0].formatted_address;
+          //     } else {
+          //       address = `${self.$t("positions.getAdressErr")}`;
+          //     }
+          //     let site = `${self.$t("positions.updateTime")}：${
+          //       key.times
+          //     }<br />${self.$t(
+          //       "positions.latLng"
+          //     )}：${latLngData}<br />${self.$t(
+          //       "positions.address"
+          //     )}：${address}`;
+          //     this.infowindow = new google.maps.InfoWindow({
+          //       content: site
+          //     });
+          //     this.infowindow.open(map, key.pointer); // 弹出信息提示窗口
+          //     map.addListener("click", () => {
+          //       this.infowindow.close();
+          //     });
+          //   }
+          // });
         });
       });
       // 只有从概览中获取marker点的时候 才需要自适应显示；
@@ -415,7 +449,9 @@ export default {
      */
     checkItem(item, index) {
       if (item.onlineStatus === 0) return;
-      map.setCenter(new google.maps.LatLng(item.latitude, item.longitude));
+      if (item.latitude && item.longitude) {
+        map.setCenter(new google.maps.LatLng(item.latitude, item.longitude));
+      }
       this.devicelabel = item.deviceId;
       this.deviceId = item.deviceId;
       ponterIndex = index + 1;
@@ -451,7 +487,7 @@ export default {
         path: "googleHis",
         query: { batteryId: batteryId }
       });
-      // let userData = JSON.parse(localStorage.getItem("loginData"));
+      // let userData = JSON.parse(sessionStorage.getItem("loginData"));
       // if (userData.mapType === 0) {
       //   this.$router.push({
       //     path: "history",

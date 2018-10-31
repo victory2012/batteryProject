@@ -237,7 +237,7 @@ export default {
   },
   computed: {
     limeted() {
-      let loginData = JSON.parse(localStorage.getItem("loginData"));
+      let loginData = JSON.parse(sessionStorage.getItem("loginData"));
       return loginData.userRole !== "plat_super_admin";
     }
   },
@@ -257,7 +257,7 @@ export default {
       this.CreatDatefirst = date;
     },
     doCreatBattery() {
-      let loginData = JSON.parse(localStorage.getItem("loginData"));
+      let loginData = JSON.parse(sessionStorage.getItem("loginData"));
       this.creatBattery = true;
       this.customerList = loginData.customer;
       this.BatteryForm.enterpriseName = loginData.enterpriseName;
@@ -267,7 +267,7 @@ export default {
     regBattery(form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          let loginData = JSON.parse(localStorage.getItem("loginData"));
+          let loginData = JSON.parse(sessionStorage.getItem("loginData"));
           if (loginData.customer.length > 0) {
             this.BatteryForm.customerId = loginData.customer.customerId;
             this.BatteryForm.customerName = loginData.customer.customerName;
@@ -362,24 +362,24 @@ export default {
      * 查看运行状态
      */
     examine(index, tableData) {
-      // let userData = JSON.parse(localStorage.getItem("loginData"));
+      let userData = JSON.parse(sessionStorage.getItem("loginData"));
       let deviceId = tableData[index];
-      this.$router.push({
-        path: "googlePos",
-        query: { deviceId: deviceId.deviceId }
-      });
-      // if (userData.mapType === 0) {
-      //   this.$router.push({
-      //     path: "position",
-      //     query: { deviceId: deviceId.deviceId }
-      //   });
-      // }
-      // if (userData.mapType === 1) {
-      //   this.$router.push({
-      //     path: "googlePos",
-      //     query: { deviceId: deviceId.deviceId }
-      //   });
-      // }
+      // this.$router.push({
+      //   path: "googlePos",
+      //   query: { deviceId: deviceId.deviceId }
+      // });
+      if (userData.mapType === 0) {
+        this.$router.push({
+          path: "position",
+          query: { deviceId: deviceId.deviceId }
+        });
+      }
+      if (userData.mapType === 1) {
+        this.$router.push({
+          path: "googlePos",
+          query: { deviceId: deviceId.deviceId }
+        });
+      }
     },
     /*
     * 改变每页显示的条数

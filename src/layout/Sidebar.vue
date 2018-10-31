@@ -39,13 +39,19 @@ export default {
   },
   methods: {
     sideBarData() {
-      const loginData = JSON.parse(localStorage.getItem("loginData"));
+      const loginData = JSON.parse(sessionStorage.getItem("loginData"));
       if (loginData && loginData.mapType === 0) {
         this.items = menuList();
       } else {
         this.items = GoogleList();
       }
-
+      if (loginData && loginData.enterpriseRole === "manufacturer") {
+        this.items.push({
+          icon: "el-icon-edit-outline",
+          index: "policy",
+          title: "policy"
+        });
+      }
       if (loginData && loginData.userRole === "plat_super_admin") {
         this.items.push({
           icon: "el-icon-setting",
@@ -61,7 +67,6 @@ export default {
           });
         }
       });
-      console.log("this.items", this.items);
     }
   },
   mounted() {

@@ -141,7 +141,7 @@ export default {
             this.propData.type = "http";
             this.sockets(this.sendData);
           } else {
-            onWarn("暂无设备, 请先注册设备");
+            onWarn(this.$t("history.noDevice"));
           }
         }
       });
@@ -200,7 +200,7 @@ export default {
     }
   },
   mounted() {
-    let batteryMap = localStorage.mapType;
+    let batteryMap = sessionStorage.mapType;
     console.log(batteryMap);
     if (batteryMap.toString() === "0") {
       this.amapsType = true;
@@ -209,8 +209,8 @@ export default {
       this.amapsType = false;
       this.googlemapsType = true;
     }
-    this.$store.commit("SET_USER_DATA", localStorage.loginData);
-    this.$store.commit("SET_MAP_TYPE", localStorage.mapType);
+    this.$store.commit("SET_USER_DATA", sessionStorage.loginData);
+    this.$store.commit("SET_MAP_TYPE", sessionStorage.mapType);
     this.init();
   },
   computed: {

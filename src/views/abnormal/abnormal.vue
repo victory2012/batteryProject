@@ -2,9 +2,9 @@
   <div class="outer-box">
     <div id="AddContainer" class="fenceContainer"></div>
     <div class="HandleBtn">
-      <el-button @click="goBack" type="primary">返回</el-button>
+      <el-button @click="goBack" type="primary">{{$t('googleAbno.return')}}</el-button>
     </div>
-    <div class="localPosition" @click="localPosition" title="查看设备当前位置">
+    <div class="localPosition" @click="localPosition" :title="$t('googleAbno.title')">
       <img src="../../../static/img/local_normal.png" alt="">
     </div>
   </div>
@@ -12,7 +12,7 @@
 <script>
 import AMap from "AMap";
 import { getFence, websockets, singleDeviceId } from "../../api/index.js";
-import { onWarn, onError } from "../../utils/callback.js";
+import { onWarn } from "../../utils/callback.js";
 let map;
 let grid;
 let polygonArr = [];
@@ -100,9 +100,11 @@ export default {
     init() {
       if (grid) {
         let point = grid.split(";");
+        const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
         map = new AMap.Map("AddContainer", {
           center: [point[0], point[1]],
           resizeEnable: true,
+          lang: lang,
           zoom: 5
         });
         console.log(point);
@@ -111,7 +113,7 @@ export default {
           position: new AMap.LngLat(point[0], point[1]),
           icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
           label: {
-            content: "超出围栏点",
+            content: `${this.$t("googleAbno.Geofence")}`,
             offset: new AMap.Pixel(20, 20)
           }
         });
@@ -139,7 +141,7 @@ export default {
         });
         marker.setLabel({
           offset: new AMap.Pixel(20, 20),
-          content: "当前实时位置"
+          content: `${this.$t("googleAbno.nowPosition")}`
         });
         this.markers.push(marker);
       });
@@ -167,7 +169,6 @@ export default {
         };
         ws.onerror = () => {
           console.log("onerror...");
-          onError("服务器繁忙，请稍后重试。");
           this.over();
         };
         this.over = () => {
@@ -191,7 +192,7 @@ export default {
               ws.send(JSON.stringify(this.sendData));
             }, 1000);
           } else {
-            onWarn("暂无设备, 请先注册设备");
+            onWarn(`${this.$t("history.noDevice")}`);
           }
         }
       });

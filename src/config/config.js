@@ -20,6 +20,7 @@ export function menuList() {
       index: "fence",
       title: "fence"
     },
+
     {
       icon: "el-icon-setting",
       index: "3",
@@ -36,6 +37,7 @@ export function menuList() {
         }
       ]
     },
+
     {
       icon: "el-icon-tickets",
       index: "userManage",
@@ -64,6 +66,7 @@ export function GoogleList() {
       index: "googleFence",
       title: "fence"
     },
+
     {
       icon: "el-icon-setting",
       index: "3",

@@ -67,7 +67,7 @@ import {
   yesTody,
   getTime
 } from "../../utils/transition.js";
-import { onWarn, onError } from "../../utils/callback.js";
+import { onWarn } from "../../utils/callback.js";
 var map, navg, heatmap, pathSimplifierIns;
 let infoWindow;
 let pointArr = [];
@@ -137,11 +137,10 @@ export default {
               key.dateFormat = timeFormats(key.createTime);
               key.pre = new Date(key.createTime) - new Date(this.starts);
               key.index = Math.ceil(key.pre / perBlock); // 得出此时间是处于第几个格子； 向上取整；
-              if (key.status === 0) {
-                key.onlineStatus = "下线";
-              } else {
-                key.onlineStatus = "上线";
-              }
+              key.onlineStatus =
+                key.status === 0
+                  ? this.$t("history.offLine")
+                  : this.$t("history.online");
               // key.onlineStatus = key.status === 0 ? "下线" : "上线";
               pointArr.push(key);
             });
@@ -225,15 +224,15 @@ export default {
     /* 时间确认按钮 */
     selectedDate(date) {
       if (!this.starts) {
-        onWarn("请选择开始时间");
+        onWarn(`${this.$t("history.startTime")}`);
         return;
       }
       if (!this.endtime) {
-        onWarn("请选择结束时间");
+        onWarn(`${this.$t("history.endTime")}`);
         return;
       }
       if (Number(this.starts) > Number(this.endtime)) {
-        onWarn("开始时间应小于结束时间");
+        onWarn(`${this.$t("history.checkErr")}`);
         return;
       }
       let opts = {
@@ -285,12 +284,9 @@ export default {
               pathSimplifierIns.setData();
               this.track();
             }
-            onWarn("此设备当前时间段内，暂无数据");
+            onWarn(`${this.$t("history.noData")}`);
             heatmap.hide();
           }
-        }
-        if (res.data.code === -1) {
-          onError(res.data.msg);
         }
       });
     },
@@ -310,9 +306,10 @@ export default {
       }
     },
     init() {
+      const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
       map = new AMap.Map("mapcontainer", {
         resizeEnable: true,
-        // mapStyle: 'amap://styles/macaron',
+        lang: lang,
         zoom: 15
       });
       AMap.plugin(["AMap.Heatmap"], () => {
@@ -364,7 +361,7 @@ export default {
             }
             this.getTimeList(this.queryDevice);
           } else {
-            onWarn("暂无设备, 请先注册设备");
+            onWarn(`${this.$t("history.noDevice")}`);
           }
         }
       });
@@ -380,11 +377,8 @@ export default {
       if (this.lineArr.length < 1) {
         return;
       }
+      const self = this;
       AMapUI.load(["ui/misc/PathSimplifier"], PathSimplifier => {
-        if (!PathSimplifier.supportCanvas) {
-          alert("当前环境不支持 Canvas！");
-          return;
-        }
         AMapUI.loadUI(["misc/PositionPicker"], PositionPicker => {
           let positionPicker = new PositionPicker({
             mode: "dragMarker",
@@ -400,7 +394,9 @@ export default {
             map: map,
             getHoverTitle: function(pathData, pathIndex, pointIndex) {
               if (pointIndex >= 0) {
-                return "第" + pointIndex + "个点";
+                return `${self.$t("history.No")} ${pointIndex} ${self.$t(
+                  "history.point"
+                )}`;
               }
             },
             getPath: function(pathData, pathIndex) {
@@ -427,14 +423,18 @@ export default {
             positionPicker.start(position);
             positionPicker.on("success", result => {
               var info = [];
-              info.push(`<div><div>时间：${trakTimeformat(point[2])}</div>`);
               info.push(
-                `<div style="font-size:14px;">路口 :${
+                `<div><div>${self.$t("history.times")}：${trakTimeformat(
+                  point[2]
+                )}</div>`
+              );
+              info.push(
+                `<div style="font-size:14px;">${self.$t("history.junction")} :${
                   result.nearestJunction
                 }</div>`
               );
               info.push(
-                `<div style="font-size:14px;">地址 :${
+                `<div style="font-size:14px;">${self.$t("history.address")} :${
                   result.address
                 }</div></div>`
               );
@@ -450,11 +450,10 @@ export default {
           window.pathSimplifierIns = pathSimplifierIns;
           pathSimplifierIns.setData([
             {
-              name: "轨迹",
+              name: this.$t("history.track"),
               path: this.lineArr
             }
           ]);
-          console.log("this.lineArr", this.lineArr);
           let distance = Number(this.alldistance) / 1000; // 米转成千米
           let times = Number(this.timeSeconds) / 3600; // 秒转成小时
           let speeds = Math.ceil(distance / times); // 最终得到的速度是 km/h

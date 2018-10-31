@@ -2,15 +2,15 @@
   <div class="outer-box">
     <div id="AddContainer" class="fenceContainer"></div>
     <div class="HandleBtn" v-if="addFence">
-      <span class="Tiptext">Tip：选择区域后，鼠标右键结束选区</span>
-      <el-button @click="cancelSetings" type="info">取消设置</el-button>
-      <el-button @click="doAddFence" type="primary">确定设置</el-button>
-      <el-button @click="goBack" type="warning">返回</el-button>
+      <span class="Tiptext">Tips：{{$t('fence.tipMsg.morePointer')}}</span>
+      <el-button @click="cancelSetings" type="info">{{$t('fence.cancelSeting')}}</el-button>
+      <el-button @click="doAddFence" type="primary">{{$t('fence.sureSeting')}}</el-button>
+      <el-button @click="goBack" type="warning">{{$t('fence.back')}}</el-button>
       <p></p>
     </div>
     <div class="HandleBtn" v-else>
-      <el-button @click="ToAddFence" type="primary">添加围栏</el-button>
-      <el-button @click="ToDeleteFence" type="danger">删除围栏</el-button>
+      <el-button @click="ToAddFence" type="primary">{{$t('fence.addBtn')}}</el-button>
+      <el-button @click="ToDeleteFence" type="danger">{{$t('fence.delBtn')}}</el-button>
     </div>
   </div>
 </template>
@@ -123,14 +123,14 @@ export default {
         gpsList: this.json.substring(0, this.json.length - 1)
       };
       if (!gpsObj.gpsList) {
-        onError("请选区围栏点");
+        onError(`${this.$t("fence.tipMsg.addPointer")}`);
         return;
       }
       addFence(gpsObj).then(res => {
         // console.log(res);
 
         if (res.data.code === 0) {
-          onSuccess("添加成功");
+          onSuccess(`${this.$t("fence.tipMsg.addSuccess")}`);
           this.cancelSetings();
           this.getData();
         }
@@ -152,12 +152,12 @@ export default {
     /* 删除围栏 */
     ToDeleteFence() {
       if (!this.fenceId) {
-        onWarn("请先选择要删除的围栏");
+        onWarn(`${this.$t("fence.tipMsg.selectToDel")}`);
         return;
       }
       delFence(this.fenceId).then(res => {
         if (res.data.code === 0) {
-          onSuccess("删除成功");
+          onSuccess(`${this.$t("fence.tipMsg.delSuccess")}`);
           this.polygon.setMap(null);
         }
       });
@@ -210,8 +210,10 @@ export default {
       this.buildFence();
     },
     init() {
+      const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
       map = new AMap.Map("AddContainer", {
         resizeEnable: true,
+        lang: lang,
         zoom: 5
       });
       this.getData();

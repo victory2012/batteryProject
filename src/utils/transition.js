@@ -106,7 +106,7 @@ export function timeFormatSort(time) {
 export function timeFormats(time) {
   if (!time) return;
   let timeDate = new Date(time);
-  let year = timeDate.getFullYear()
+  let year = timeDate.getFullYear();
   let mounth = timeDate.getMonth() + 1;
   let day = timeDate.getDate();
   let hours = timeDate.getHours();
@@ -117,12 +117,14 @@ export function timeFormats(time) {
   hours = hours < 10 ? "0" + hours : hours;
   minute = minute < 10 ? "0" + minute : minute;
   second = second < 10 ? "0" + second : second;
-  return year + "-" + mounth + "-" + day + "  " + hours + ":" + minute + ":" + second;
+  return (
+    year + "-" + mounth + "-" + day + "  " + hours + ":" + minute + ":" + second
+  );
 }
 
 export function nowDate() {
   let timeDate = new Date();
-  let year = timeDate.getFullYear()
+  let year = timeDate.getFullYear();
   let mounth = timeDate.getMonth() + 1;
   let day = timeDate.getDate();
   let hours = timeDate.getHours();
@@ -133,11 +135,13 @@ export function nowDate() {
   hours = hours < 10 ? "0" + hours : hours;
   minute = minute < 10 ? "0" + minute : minute;
   second = second < 10 ? "0" + second : second;
-  return year + "-" + mounth + "-" + day + "  " + hours + ":" + minute + ":" + second;
+  return (
+    year + "-" + mounth + "-" + day + "  " + hours + ":" + minute + ":" + second
+  );
 }
 
 export function userData() {
-  let data = JSON.parse(localStorage.getItem("loginData"));
+  let data = JSON.parse(sessionStorage.getItem("loginData"));
   if (data.userRole === "palt_super_admin") {
     return {};
   }
@@ -214,8 +218,8 @@ export function companyRole(str) {
   }
 }
 export function sortGps(str) {
-  if (!str) return
-  let pos = str.toString().split('.');
+  if (!str) return;
+  let pos = str.toString().split(".");
   let las = pos[1].substring(0, 6);
-  return `${pos[0]}.${las}`
+  return `${pos[0]}.${las}`;
 }
