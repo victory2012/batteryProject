@@ -1,3 +1,4 @@
+// import qs from "qs";
 import http from "./http";
 
 let socketUrl = 'ws://47.98.232.46:8081/gps';
@@ -218,14 +219,14 @@ export function singleDeviceId(deviceId) {
   return http.post(`/device/${deviceId}/gps/get`)
 };
 
-export function timeList(param) {
-  return http.post(`/device_login/list`, param)
+export function timeList(params) {
+  return http.post(`/device_login/list`, params)
 };
 
 export function getPolicy() {
   return http.post(`/event_policy/get`)
 };
 
-export function updatePolicy(param) {
-  return http.post(`/event_policy/update`, param)
+export function updatePolicy(params) {
+  return http.post(`/event_policy/update`, params)
 };

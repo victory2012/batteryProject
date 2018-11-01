@@ -174,17 +174,7 @@ export function getTime(start, end) {
 export function yesTody() {
   let yesDate = new Date().getTime();
   let result = yesDate - 86400000;
-  let str = new Date(result);
-  let yy = str.getFullYear();
-  let mm = str.getMonth() + 1;
-  let day = str.getDate();
-  mm = mm < 10 ? "0" + mm : mm;
-  day = day < 10 ? "0" + day : day;
-  // let hours = str.getHours();
-  // let minute = str.getMinutes();
-  // let second = str.getSeconds();
-  // return `${yy}-${mm}-${day} ${hours}:${minute}:${second}`;
-  return `${yy}-${mm}-${day} 00:00:00`;
+  return new Date(result);
 }
 
 export function userRole(str) {

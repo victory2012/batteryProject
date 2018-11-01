@@ -1,10 +1,13 @@
 import Axios from "axios";
+import promise from 'es6-promise';
 import {
   Message
 } from 'element-ui';
 import i18n from "@/i18n";
 let BaseUrl = "http://47.98.232.46:8181";
 // let BaseUrl = "http://192.168.1.140:8181";
+
+promise.polyfill();
 Axios.defaults.withCredentials = true; // 让ajax携带cookie
 
 Axios.interceptors.request.use(config => {
@@ -28,25 +31,8 @@ Axios.interceptors.response.use(response => {
 
 function checkStatus(response) {
   // 如果http状态码正常，则直接返回数据
-
+  console.log(response);
   if (response && (response.status === 200 || response.status === 304 || response.status === 400)) {
-    console.log('response', response); // if (response.data.code === 1) {
-    //   // code = 1时 登录超时
-    //   return {
-    //     status: 300,
-    //     msg: response.data.msg
-    //   };
-    // } else if (response.data.code === -1) {
-    //   // code = -1时 请求失败
-    //   // Message.error(response.data.msg);
-    //   return {
-    //     status: 404,
-    //     msg: response.data.msg
-    //   };
-    // } else if (response.data.code === 0 || response.data.code === 2) {
-    //   // code = 0时 请求正常，正常返回
-    //   return response;
-    // }
     return response;
   } else {
     // 异常状态下，把错误信息返回去
@@ -60,6 +46,7 @@ function checkStatus(response) {
 
 function checkCode(res) {
   // 如果code异常(这里已经包括网络错误，服务器错误，后端抛出的错误)，可以弹出一个错误提示，告诉用户
+  console.log('res', res);
   let status = res.data.code;
   if (status !== 0) {
     Message.error(switchCode(status))
@@ -81,6 +68,8 @@ function switchCode(code) {
       return Message.warning(`${i18n.t('responseCode.accountNotExist')}`)
     case 1003:
       return Message.warning(`${i18n.t('responseCode.accountOperation')}`)
+    case 1004: // 账户密码错误
+      return Message.warning(`${i18n.t('responseCode.accountPwdErr')}`);
     case 4003:
       return Message.warning(`${i18n.t('responseCode.UnableDevice')}`)
     case 4001:

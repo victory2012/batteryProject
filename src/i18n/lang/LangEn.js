@@ -11,6 +11,7 @@ module.exports = {
     sessionOut: 'Current session has expired.', // 会话过期
     accountExists: "This user account already exists.", // 账号已存在
     accountNotExist: "This user account does not exist.", // 账号不存在
+    accountPwdErr: "Account or password error", // 1004
     accountOperation: "Operation cannot be performed by current user account.", // 账号操作失败
     UnableDevice: 'Unable to operate on this device.', // 设备操作失败
     hasdevice: 'This device already exists.', // 设备已存在

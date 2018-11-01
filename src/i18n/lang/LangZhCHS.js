@@ -13,6 +13,7 @@ module.exports = {
     accountExists: "账号已存在", // 1001
     accountNotExist: "账号不存在", // 1002
     accountOperation: "账号操作失败", // 1003
+    accountPwdErr: "账户或密码错误", // 1004
     UnableDevice: '设备操作失败', // 4003
     hasdevice: '设备已存在', // 4001
     notFindDevice: '设备未找到', // 4002
