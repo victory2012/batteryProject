@@ -10,7 +10,7 @@ export function GetList(params) {
   return http.post('/battery/list', params)
 };
 
-/* 获取统计数控机 */
+/* 获取统计数 */
 export function GetCount() {
   return http.post('/device/count');
 }
@@ -229,4 +229,9 @@ export function getPolicy() {
 
 export function updatePolicy(params) {
   return http.post(`/event_policy/update`, params)
+};
+
+/* 根据电池id和设备id 获取围栏 */
+export function getFenceById(params) {
+  return http.post(`/fence/get`, params)
 };

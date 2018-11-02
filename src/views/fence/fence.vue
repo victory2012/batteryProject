@@ -1,22 +1,54 @@
 <template>
   <div class="outer-box">
-    <div id="AddContainer" class="fenceContainer"></div>
-    <div class="HandleBtn" v-if="addFence">
-      <span class="Tiptext">Tips：{{$t('fence.tipMsg.morePointer')}}</span>
-      <el-button @click="cancelSetings" type="info">{{$t('fence.cancelSeting')}}</el-button>
-      <el-button @click="doAddFence" type="primary">{{$t('fence.sureSeting')}}</el-button>
-      <el-button @click="goBack" type="warning">{{$t('fence.back')}}</el-button>
-      <p></p>
+    <div class="mapCenter">
+      <div id="AddContainer" class="fenceContainer"></div>
+      <div class="HandleBtn" v-if="addFence">
+        <span class="Tiptext">Tips：{{$t('fence.tipMsg.morePointer')}}</span>
+        <el-button @click="cancelSetings" type="info">{{$t('fence.cancelSeting')}}</el-button>
+        <el-button @click="doAddFence" type="primary">{{$t('fence.sureSeting')}}</el-button>
+        <el-button @click="goBack" type="warning">{{$t('fence.back')}}</el-button>
+        <p></p>
+      </div>
+      <div class="HandleBtn" v-else>
+        <el-button @click="ToAddFence" type="primary">{{$t('fence.addBtn')}}</el-button>
+        <el-button @click="ToDeleteFence" type="danger">{{$t('fence.delBtn')}}</el-button>
+      </div>
     </div>
-    <div class="HandleBtn" v-else>
-      <el-button @click="ToAddFence" type="primary">{{$t('fence.addBtn')}}</el-button>
-      <el-button @click="ToDeleteFence" type="danger">{{$t('fence.delBtn')}}</el-button>
+    <div class="listCenter">
+      <div id="panel">
+        <div class="panelTop" v-loading="loading">
+          <div id="intro" class="intro">
+            <h3>
+              <span>{{$t("positions.title1")}}</span>
+              <!-- <el-button type="text" mini>{{$t('positions.lookAll')}}</el-button> -->
+            </h3>
+          </div>
+          <ul class="list_warp">
+            <li v-for="(item, index) in pointerArr" :class="{'selected': chooseId === item.batteryId }" :key="item.deviceId" @click="checkItem(item)">
+              <p>{{index + 1}}、{{item.batteryId}}</p>
+              <!-- <el-badge :value="item.onLine" class="item">
+                <el-button @click.prevent.stop="HistoryTrack(item.batteryId)" size="mini">{{$t('positions.track')}}</el-button>
+              </el-badge> -->
+            </li>
+          </ul>
+        </div>
+        <div class="page">
+          <el-pagination @current-change="pageChange" :current-page.sync="pageNum" small layout="prev, pager, next" :total="total">
+          </el-pagination>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script>
 import AMap from "AMap";
-import { getFence, addFence, delFence } from "../../api/index.js";
+import {
+  // getFence,
+  addFence,
+  delFence,
+  GetDeviceList,
+  getFenceById
+} from "../../api/index.js";
 import { onError, onWarn, onSuccess } from "../../utils/callback.js";
 let map;
 let marker;
@@ -28,15 +60,71 @@ let polygonArr = [];
 export default {
   data() {
     return {
+      chooseId: "",
+      total: 0,
+      pageNum: 1,
+      loading: false,
       addFence: false,
+      pointerArr: [],
       json: "",
       fenceId: "",
       polygon: null
     };
   },
   methods: {
+    init() {
+      const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
+      map = new AMap.Map("AddContainer", {
+        resizeEnable: true,
+        lang: lang,
+        zoom: 5
+      });
+
+      this.getListData();
+    },
+    pageChange(val) {
+      this.pageNum = val;
+      this.getListData();
+    },
+    checkItem(item) {
+      this.clickItme = item;
+      this.addFence = false;
+      this.chooseId = this.clickItme.batteryId;
+      this.cancelSetings();
+      this.getFenceData({
+        batteryId: this.clickItme.batteryId,
+        deviceId: this.clickItme.deviceId
+      });
+    },
+    // 获取列表数据
+    getListData() {
+      let pageObj = {
+        pageNum: this.pageNum,
+        pageSize: 10,
+        bindingStatus: 1
+      };
+      this.loading = true;
+      GetDeviceList(pageObj).then(res => {
+        console.log(res.data);
+        this.loading = false;
+        if (res.data.code === 0) {
+          this.pointerArr = [];
+          let result = res.data.data;
+          this.total = result.total;
+          this.pointerArr = [...result.data];
+          if (this.pointerArr.length > 0) {
+            this.clickItme = this.pointerArr[0];
+            this.chooseId = this.clickItme.batteryId;
+            this.getFenceData({
+              batteryId: this.clickItme.batteryId,
+              deviceId: this.clickItme.deviceId
+            });
+          }
+        }
+      });
+    },
     // 没有设置过围栏
-    buildFence(obj) {
+    buildFence() {
       this.addFence = true;
       map.plugin(["AMap.MouseTool"], () => {
         mouseTool = new AMap.MouseTool(map);
@@ -120,6 +208,8 @@ export default {
     // 确认设置 添加围栏
     doAddFence() {
       let gpsObj = {
+        deviceId: this.clickItme.deviceId,
+        batteryId: this.clickItme.batteryId,
         gpsList: this.json.substring(0, this.json.length - 1)
       };
       if (!gpsObj.gpsList) {
@@ -132,7 +222,10 @@ export default {
         if (res.data.code === 0) {
           onSuccess(`${this.$t("fence.tipMsg.addSuccess")}`);
           this.cancelSetings();
-          this.getData();
+          this.getFenceData({
+            batteryId: this.clickItme.batteryId,
+            deviceId: this.clickItme.deviceId
+          });
         }
       });
     },
@@ -140,7 +233,7 @@ export default {
     cancelSetings() {
       this.json = "";
       markers && map.remove(markers); // 清除marker点
-      mouseTool.close(true); // 清除多边形
+      mouseTool && mouseTool.close(true); // 清除多边形
       markers = [];
       mouseTool = null;
       /*
@@ -169,27 +262,41 @@ export default {
       map.setDefaultCursor(); // 手势
       map.off("click", this.callBackFn); // 移除地图点击事件
       mouseTool.close(false); // 移除 画多边形的功能
-      this.getData();
+      this.getFenceData({
+        batteryId: this.clickItme.batteryId,
+        deviceId: this.clickItme.deviceId
+      });
     },
-    getData() {
-      getFence().then(res => {
-        // console.log(res);
-
+    /*
+      参数 data {"batteryId":1,"deviceId":2}
+     */
+    getFenceData(data) {
+      getFenceById(data).then(res => {
+        console.log("getFenceById", res);
         if (res.data.code === 0) {
-          if (res.data.data.length > 0) {
-            let result = res.data.data;
-            result.forEach(key => {
-              let gpsList = key.gpsList;
-              let id = key.id;
-              this.hasFence(gpsList, id);
-            });
+          this.json = "";
+          map.clearMap();
+          // markers && map.remove(markers); // 清除marker点
+          // mouseTool && mouseTool.close(true); // 清除多边形
+          // markers = [];
+          let result = res.data.data;
+          if (result) {
+            map.setDefaultCursor(); // 手势
+            map.off("click", this.callBackFn); // 移除地图点击事件
+            mouseTool && mouseTool.close(false); // 移除 画多边形的功能
+            this.hasFenced = true;
+            let gpsList = result.gpsList;
+            let id = result.id;
+            this.hasFence(gpsList, id);
           } else {
-            this.buildFence();
+            this.hasFenced = false;
+            // this.buildFence();
           }
         }
       });
     },
     ToAddFence() {
+      if (this.hasFenced) return;
       this.addFence = true;
       markers = [];
       // console.log(mouseToolArr);
@@ -208,15 +315,6 @@ export default {
       mouseToolArr = [];
       polygonArr = [];
       this.buildFence();
-    },
-    init() {
-      const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
-      map = new AMap.Map("AddContainer", {
-        resizeEnable: true,
-        lang: lang,
-        zoom: 5
-      });
-      this.getData();
     }
   },
   mounted() {
@@ -229,10 +327,74 @@ export default {
 </script>
 <style lang="less" scoped>
 .outer-box {
-  position: relative;
+  display: flex;
   height: 100%;
   // padding-right: 320px;
 }
+
+.mapCenter {
+  position: relative;
+  flex: 1;
+}
+.listCenter {
+  flex: 0 0 270px;
+  background: #fff;
+}
+.list_warp {
+  border-top: 1px solid #f0f0f0;
+  min-height: 510px;
+}
+.list_warp li {
+  position: relative;
+  height: 50px;
+  border-bottom: 1px solid #f0f0f0;
+  line-height: 50px;
+  font-size: 14px;
+  color: #303133;
+  cursor: pointer;
+  padding-left: 10px;
+}
+.list_warp li.off {
+  cursor: not-allowed;
+}
+.off .el-badge__content {
+  background: #f0f0f0;
+  color: #b3b2b2;
+}
+.list_warp .el-badge__content.is-fixed {
+  top: 13px;
+  right: 12px;
+}
+.list_warp li .item {
+  position: absolute;
+  top: 0;
+  right: 34px;
+}
+.list_warp li p {
+  width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.list_warp .selected {
+  background: rgb(112, 191, 255);
+  color: #fff;
+}
+.intro h3 {
+  position: relative;
+  text-align: center;
+  font-weight: normal;
+  font-size: 16px;
+  margin: 10px 0;
+  height: 30px;
+  line-height: 30px;
+}
+.page {
+  padding-top: 20px;
+  text-align: right;
+}
+
 .Tiptext {
   color: red;
   font-size: 14px;

@@ -65,7 +65,7 @@
   font-size: 12px;
 }
 .list_warp .selected {
-  background: green;
+  background: rgb(112, 191, 255);
   color: #fff;
 }
 .positioned {
@@ -160,8 +160,9 @@ export default {
     };
   },
   methods: {
-    pageChange() {
+    pageChange(val) {
       this.over();
+      this.pageNum = val;
       // this.markers && map.remove(this.markers);
       this.getListData();
     },

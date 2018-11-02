@@ -471,13 +471,13 @@ export default {
             loop: true,
             speed: speeds,
             pathNavigatorStyle: {
-              width: 12,
-              height: 18,
+              width: 30,
+              height: 30,
               strokeStyle: null,
               fillStyle: null,
               // 使用图片
               content: PathSimplifier.Render.Canvas.getImageContent(
-                "../../../../static/img/car.png"
+                "../../../../static/img/0181102120349.png"
               )
             }
           });

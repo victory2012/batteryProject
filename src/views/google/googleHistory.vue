@@ -1,6 +1,5 @@
 <template>
   <div class="all">
-
     <div class="mapcontainer">
       <div class="control">
         <div class="date">
