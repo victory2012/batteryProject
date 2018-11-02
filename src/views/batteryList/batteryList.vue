@@ -124,13 +124,13 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('batteryList.createDate')" prop="createDate">
-                <el-date-picker v-model="BatteryForm.createDate" style="width:238px" type="date" value-format="yyyy-MM-dd" @change="formatCreatDate" :placeholder="$t('batteryList.createDate')">
+                <el-date-picker v-model="BatteryForm.createDate" style="width:238px" type="date" value-format="yyyy-MM-dd HH:mm:ss" @change="formatCreatDate" :placeholder="$t('batteryList.createDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item :label="$t('batteryList.manufactureDate')" prop="manufactureDate">
-                <el-date-picker v-model="BatteryForm.manufactureDate" style="width:238px" type="date" value-format="yyyy-MM-dd" :placeholder="$t('batteryList.manufactureDate')">
+                <el-date-picker v-model="BatteryForm.manufactureDate" style="width:238px" type="date" value-format="yyyy-MM-dd HH:mm:ss" :placeholder="$t('batteryList.manufactureDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>
@@ -138,7 +138,7 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('batteryList.warrantyDate')" prop="warrantyDate">
-                <el-date-picker v-model="BatteryForm.warrantyDate" style="width:238px" type="date" value-format="yyyy-MM-dd" :placeholder="$t('batteryList.warrantyDate')">
+                <el-date-picker v-model="BatteryForm.warrantyDate" style="width:238px" type="date" value-format="yyyy-MM-dd HH:mm:ss" :placeholder="$t('batteryList.warrantyDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>

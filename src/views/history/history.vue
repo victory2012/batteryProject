@@ -315,10 +315,11 @@ export default {
       if (this.markerArr.length > 0) {
         map.remove(this.markerArr);
       }
-      this.mapLoading = true;
+      // this.mapLoading = true;
       this.trajectory = false;
       this.active = true;
       if (this.gridData.length > 0) {
+        this.mapLoading = true;
         map.setCenter([this.gridData[0].lng, this.gridData[0].lat]);
         heatmap.setDataSet({
           data: this.gridData // 热力图数据
@@ -327,6 +328,7 @@ export default {
         pathSimplifierIns && pathSimplifierIns.hide();
         this.mapLoading = false;
       }
+      // this.mapLoading = false;
     },
 
     // 获取列表数据
@@ -640,7 +642,7 @@ export default {
           cursor: pointer;
           padding-left: 10px;
           &.selected {
-            background: green;
+            background: rgb(112, 191, 255);
             color: #fff;
           }
         }

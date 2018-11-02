@@ -591,7 +591,7 @@ export default {
           cursor: pointer;
           padding-left: 10px;
           &.selected {
-            background: green;
+            background: rgb(112, 191, 255);
             color: #fff;
           }
         }
