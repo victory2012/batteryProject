@@ -52,8 +52,8 @@
 </style>
 <script>
 import { alarmList } from "../../api/index.js";
-import { timeFormat, sortGps } from "../../utils/transition.js";
-// import { onError } from "../../utils/callback.js";
+import { sortGps } from "../../utils/transition.js";
+
 export default {
   data() {
     return {
@@ -78,7 +78,7 @@ export default {
     },
     getData(pageObj) {
       alarmList(pageObj).then(res => {
-        console.log(res);
+        console.log("alarmdataPage", res);
 
         if (res.data.code === 0) {
           let result = res.data.data;
@@ -87,7 +87,8 @@ export default {
           if (result.data.length > 0) {
             result.data.forEach(key => {
               var obj = {};
-              obj.startTime = timeFormat(key.alarmedTime);
+              // obj.startTime = timeFormat(key.alarmedTime);
+              obj.startTime = key.alarmedTime;
               obj.batteryId = key.batteryId; // 电池id
               obj.deviceId = key.deviceId; // 设备id
               obj.content = key.msg; // 告警内容

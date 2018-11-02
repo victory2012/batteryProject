@@ -258,7 +258,7 @@ export default {
               },${nowDate()},${battery},1,1,${ponterIndexs + 1},${obj[3]}`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、
               // 依次顺序为 经度、纬度、时间、电池id、在线状态、推送数据标志, 电压
             });
-            if (this.deviceId || this.pathParams) {
+            if ((this.deviceId || this.pathParams) && !this.viewAll) {
               let keys = Object.keys(pointerObj);
               let nextObj = {};
               keys.forEach((item, index) => {
@@ -266,17 +266,8 @@ export default {
                   nextObj[item] = pointerObj[item];
                 }
               });
-              // this.markerData = {
-              //   data: nextObj,
-              //   type: "fromClicks"
-              // };
               this.GaoDeMap(nextObj, "fromClick");
             } else {
-              // this.markerData = {
-              //   data: pointerObj,
-              //   type: ""
-              // };
-              // console.log(this.markerData);
               this.GaoDeMap(pointerObj, "fromWs");
             }
           }
@@ -337,6 +328,7 @@ export default {
       if (item.longitude && item.latitude) {
         this.mapCenterPoniter = new AMap.LngLat(item.longitude, item.latitude);
       }
+      this.viewAll = false;
       this.devicelabel = item.deviceId;
       this.deviceId = item.deviceId;
       ponterIndex = index + 1;
@@ -449,6 +441,7 @@ export default {
     },
     // 查看所有点
     showAllPionter() {
+      this.viewAll = true;
       this.devicelabel = null;
       this.deviceId = null;
       this.GaoDeMap(pointerObj);

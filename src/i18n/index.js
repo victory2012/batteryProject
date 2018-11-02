@@ -15,7 +15,7 @@ const messages = {
 
 const i18n = new VueI18n({
   // locale: 'zh',
-  locale: sessionStorage.getItem('locale') || 'en',
+  locale: sessionStorage.getItem('locale') || 'zh',
   // fallbackLocale: 'CN',
   messages
 })

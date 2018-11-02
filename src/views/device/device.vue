@@ -101,7 +101,7 @@ import {
   enterpriseList,
   enterpriseCustomer
 } from "../../api/index.js";
-import { timeFormats } from "../../utils/transition.js";
+// import { timeFormats } from "../../utils/transition.js";
 // import { onError } from "../../utils/callback.js";
 export default {
   data() {
@@ -163,7 +163,7 @@ export default {
                 key.onlineStatus === 0
                   ? this.$t("device.offline")
                   : this.$t("device.online");
-              key.createTime = timeFormats(key.createTime);
+              // key.createTime = key.createTime;
               key.status = key.status === 0 ? true : false;
               this.tableData.push(key);
             });

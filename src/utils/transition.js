@@ -79,9 +79,7 @@ export function timeFormat(time) {
   hours = hours < 10 ? "0" + hours : hours;
   minute = minute < 10 ? "0" + minute : minute;
   second = second < 10 ? "0" + second : second;
-  return (
-    year + "-" + mounth + "-" + day + " " + hours + ":" + minute + ":" + second
-  );
+  return `${year}-${mounth}-${day} ${hours}:${minute}:${second}`;
 }
 
 export function timeFormatSort(time) {

@@ -1,5 +1,5 @@
 import Axios from "axios";
-import promise from 'es6-promise';
+
 import {
   Message
 } from 'element-ui';
@@ -7,7 +7,6 @@ import i18n from "@/i18n";
 let BaseUrl = "http://47.98.232.46:8181";
 // let BaseUrl = "http://192.168.1.140:8181";
 
-promise.polyfill();
 Axios.defaults.withCredentials = true; // 让ajax携带cookie
 
 Axios.interceptors.request.use(config => {
@@ -31,7 +30,7 @@ Axios.interceptors.response.use(response => {
 
 function checkStatus(response) {
   // 如果http状态码正常，则直接返回数据
-  console.log(response);
+  // console.log(response);
   if (response && (response.status === 200 || response.status === 304 || response.status === 400)) {
     return response;
   } else {
