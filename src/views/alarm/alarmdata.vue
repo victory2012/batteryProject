@@ -20,7 +20,7 @@
       </el-table-column> -->
       <el-table-column align="center" :label="$t('alarmList.handle')" width="160">
         <template slot-scope="scope">
-          <el-button @click.native.prevent="checkPosition(scope.$index, tableData)" type="text" size="small">
+          <el-button @click.native.prevent="checkPosition(scope.row, tableData)" type="text" size="small">
             {{$t('alarmList.position')}}
           </el-button>
         </template>
@@ -87,7 +87,7 @@ export default {
           if (result.data.length > 0) {
             result.data.forEach(key => {
               var obj = {};
-              // obj.startTime = timeFormat(key.alarmedTime);
+              obj.efence = key.efence;
               obj.startTime = key.alarmedTime;
               obj.batteryId = key.batteryId; // 电池id
               obj.deviceId = key.deviceId; // 设备id
@@ -100,20 +100,22 @@ export default {
         }
       });
     },
-    checkPosition(index, data) {
+    checkPosition(data) {
+      console.log(data);
       // 查看位置
-      let deviceId = data[index];
+      let deviceId = data.deviceId;
+      let efence = data.efence;
       let userData = JSON.parse(sessionStorage.getItem("loginData"));
       if (userData.mapType === 0) {
         this.$router.push({
           path: "abnormal",
-          query: { grid: data[index].grid, deviceId: deviceId }
+          query: { grid: data.grid, deviceId: deviceId, efence }
         });
       }
       if (userData.mapType === 1) {
         this.$router.push({
           path: "googleAbno",
-          query: { grid: data[index].grid, deviceId: deviceId }
+          query: { grid: data.grid, deviceId: deviceId, efence }
         });
       }
     },

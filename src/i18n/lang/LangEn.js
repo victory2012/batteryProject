@@ -9,10 +9,10 @@ module.exports = {
   responseCode: {
     timeOut: 'Login time out, please try again later.',
     sessionOut: 'Current session has expired.', // 会话过期
-    accountExists: "This user account already exists.", // 账号已存在
-    accountNotExist: "This user account does not exist.", // 账号不存在
-    accountPwdErr: "Account or password error", // 1004
-    accountOperation: "Operation cannot be performed by current user account.", // 账号操作失败
+    accountExists: 'This user account already exists.', // 账号已存在
+    accountNotExist: 'This user account does not exist.', // 账号不存在
+    accountPwdErr: 'Account or password error', // 1004
+    accountOperation: 'Operation cannot be performed by current user account.', // 账号操作失败
     UnableDevice: 'Unable to operate on this device.', // 设备操作失败
     hasdevice: 'This device already exists.', // 设备已存在
     notFindDevice: 'This device was not found.', // 设备未找到
@@ -41,7 +41,8 @@ module.exports = {
     pasword: 'Change Password',
     logOut: 'Logout'
   },
-  menu: { // 菜单列表
+  menu: {
+    // 菜单列表
     overview: 'Overview',
     realposition: 'Real Location',
     history: 'Motion Track',
@@ -49,7 +50,7 @@ module.exports = {
     batteryManage: 'Battery Management',
     batteryList: 'Battery Profiles',
     alarm: 'Battery Alarms',
-    userManage: "User Management",
+    userManage: 'User Management',
     device: 'Device Management',
     policy: 'Voltage Threshold'
   },
@@ -72,7 +73,7 @@ module.exports = {
     intersection: 'Road junction',
     latLng: 'Coordinate',
     address: 'Address',
-    getAdressErr: "Address acquisition failed.",
+    getAdressErr: 'Address acquisition failed.',
     voltage: 'Voltage'
   },
   history: {
@@ -90,7 +91,7 @@ module.exports = {
     online: 'Online',
     offLine: 'Offline',
     checkErr: 'Start time must before end time.',
-    noData: "This device has no data during the current time period.",
+    noData: 'This device has no data during the current time period.',
     noDevice: 'There is no corresponding device, please register first.',
     latLng: 'Coordinate',
     address: 'Address',
@@ -100,7 +101,7 @@ module.exports = {
     track: 'Track'
   },
   timeBtn: {
-    cancle: "Cancel",
+    cancle: 'Cancel',
     sure: 'Submit'
   },
   fence: {
@@ -114,7 +115,8 @@ module.exports = {
       delSuccess: 'Removed Successfully.',
       addPointer: 'Please select the geofence point on map.',
       selectToDel: 'Please choose the geofence you want remove on map.',
-      morePointer: 'Select 10 points at most.'
+      morePointer: 'Select 10 points at most.',
+      less: 'Select 3 points at least.'
     }
   },
   batteryList: {
@@ -156,8 +158,8 @@ module.exports = {
       warrantyDate: 'Warranty',
       deviceId: 'Please enter device id.'
     },
-    success: "Created Successfully.",
-    delSuccess: "Deleted Successfully."
+    success: 'Created Successfully.',
+    delSuccess: 'Deleted Successfully.'
   },
   alarmList: {
     serial: 'No.',
@@ -247,7 +249,7 @@ module.exports = {
     Customer: 'Customer',
     createBtn: 'Submit',
     noData: 'No Data',
-    errorTip: "Please enter devicd id.",
+    errorTip: 'Please enter devicd id.',
     manufacturerErr: 'Please choose Manufacturer',
     success: 'Created successfully.'
   },

@@ -10,7 +10,7 @@ let map;
 let infoWindow;
 let geocoder;
 export default {
-  props: ["mapData"],
+  props: ["mapData", "test", "testaa"],
   data() {
     return {
       markers: []
@@ -22,6 +22,12 @@ export default {
         this.MapInit(val.data, val.type);
       },
       deep: true
+    },
+    testaa: {
+      handler: function(val) {
+        console.log("val", val);
+        console.log("testtesttest", this.test);
+      }
     }
   },
   methods: {
@@ -237,6 +243,7 @@ export default {
     }
   },
   mounted() {
+    console.log("testtesttesttesttesttest", this.test);
     this.init();
   }
 };

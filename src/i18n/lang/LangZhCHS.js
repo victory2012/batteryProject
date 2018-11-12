@@ -10,10 +10,10 @@ module.exports = {
     timeOut: '登录超时，请重新登录',
     // timeOut: 'Login time out, please try again later.',
     sessionOut: '会话过期', // 1
-    accountExists: "账号已存在", // 1001
-    accountNotExist: "账号不存在", // 1002
-    accountOperation: "账号操作失败", // 1003
-    accountPwdErr: "账户或密码错误", // 1004
+    accountExists: '账号已存在', // 1001
+    accountNotExist: '账号不存在', // 1002
+    accountOperation: '账号操作失败', // 1003
+    accountPwdErr: '账户或密码错误', // 1004
     UnableDevice: '设备操作失败', // 4003
     hasdevice: '设备已存在', // 4001
     notFindDevice: '设备未找到', // 4002
@@ -44,7 +44,8 @@ module.exports = {
     pasword: '修改密码',
     logOut: '退出登录'
   },
-  menu: { // 菜单列表
+  menu: {
+    // 菜单列表
     overview: '电池总览',
     realposition: '实时位置',
     history: '历史轨迹',
@@ -52,7 +53,7 @@ module.exports = {
     batteryManage: '电池管理',
     batteryList: '电池列表',
     alarm: '告警数据',
-    userManage: "用户管理",
+    userManage: '用户管理',
     device: '设备管理',
     policy: '电压阈值'
   },
@@ -75,7 +76,7 @@ module.exports = {
     intersection: '路口',
     latLng: '坐标',
     address: '地址',
-    getAdressErr: "地址获取失败",
+    getAdressErr: '地址获取失败',
     voltage: '设备电压'
   },
   history: {
@@ -92,7 +93,7 @@ module.exports = {
     online: '上线',
     offLine: '下线',
     checkErr: '开始时间应小于结束时间',
-    noData: "此设备当前时间段内，暂无数据",
+    noData: '此设备当前时间段内，暂无数据',
     noDevice: '暂无设备, 请先注册设备',
     latLng: '坐标',
     address: '地址',
@@ -106,11 +107,11 @@ module.exports = {
     next: '下一页'
   },
   toggleTip: {
-    open: "展开",
+    open: '展开',
     close: '收起'
   },
   timeBtn: {
-    cancle: "取消",
+    cancle: '取消',
     sure: '确定'
   },
   fence: {
@@ -124,7 +125,8 @@ module.exports = {
       delSuccess: '删除成功',
       addPointer: '请选区围栏点',
       selectToDel: '请点击要删除的围栏',
-      morePointer: '最多选区10个点'
+      morePointer: '最多选取10个点',
+      less: '最少选取3个点'
     }
   },
   batteryList: {
@@ -165,8 +167,8 @@ module.exports = {
       warrantyDate: '请选择质保期',
       deviceId: '请选择设备编号'
     },
-    success: "创建成功",
-    delSuccess: "删除成功"
+    success: '创建成功',
+    delSuccess: '删除成功'
   },
   alarmList: {
     serial: '序号',
@@ -256,7 +258,7 @@ module.exports = {
     Customer: '客户',
     createBtn: '确认',
     noData: '暂无数据',
-    errorTip: "请填写设备编号",
+    errorTip: '请填写设备编号',
     manufacturerErr: '请选择生产商',
     success: '创建成功'
   },

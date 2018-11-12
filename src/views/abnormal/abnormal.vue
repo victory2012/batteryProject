@@ -1,11 +1,16 @@
 <template>
   <div class="outer-box">
-    <div id="AddContainer" class="fenceContainer"></div>
+    <div id="AddContainer"
+      class="fenceContainer"></div>
     <div class="HandleBtn">
-      <el-button @click="goBack" type="primary">{{$t('googleAbno.return')}}</el-button>
+      <el-button @click="goBack"
+        type="primary">{{$t('googleAbno.return')}}</el-button>
     </div>
-    <div class="localPosition" @click="localPosition" :title="$t('googleAbno.title')">
-      <img src="../../../static/img/local_normal.png" alt="">
+    <div class="localPosition"
+      @click="localPosition"
+      :title="$t('googleAbno.title')">
+      <img src="../../../static/img/local_normal.png"
+        alt="">
     </div>
   </div>
 </template>
@@ -14,12 +19,12 @@ import AMap from "AMap";
 import { getFence, websockets, singleDeviceId } from "../../api/index.js";
 import { onWarn } from "../../utils/callback.js";
 let map;
-let grid;
 let polygonArr = [];
 let pointerObj = {};
 export default {
-  data() {
+  data () {
     return {
+      grid: "",
       json: "",
       fenceId: "",
       polygon: null,
@@ -28,78 +33,9 @@ export default {
     };
   },
   methods: {
-    // 已经添加了围栏，根据围栏坐标 画出围栏
-    hasFence(gpsList, id) {
-      let poi = gpsList.split(";");
-      let allPointers = [];
-      poi.forEach(res => {
-        let item = res.split(",");
-        let arr = [item[0], item[1]];
-        allPointers.push(arr);
-      });
-      /** 画多边形 */
-      var polygons = new AMap.Polygon({
-        map: map,
-        strokeColor: "#0000ff",
-        strokeWeight: 2,
-        fillColor: "#f5deb3",
-        fillOpacity: 0.6,
-        extData: id,
-        cursor: "pointer"
-      });
-      polygons.setPath(allPointers);
-      polygonArr.push(polygons);
-      polygons.on("click", e => {
-        console.log("e", e);
-        if (polygonArr.length > 0) {
-          polygonArr.forEach(key => {
-            // console.log("key", key);
-            key.setOptions({
-              strokeColor: "#0000ff",
-              fillColor: "#f5deb3",
-              fillOpacity: 0.6,
-              cursor: "pointer"
-            });
-            if (e.target.getExtData() === key.G.extData) {
-              this.polygon = key;
-            }
-          });
-        }
-        e.target.setOptions({
-          strokeColor: "#0000ff",
-          fillColor: "red",
-          fillOpacity: 0.6
-        });
-        this.fenceId = e.target.getExtData();
-        console.log(e.target.getExtData());
-        // console.log(e.target.getPath());
-      });
-      map.setFitView(); // 地图自适应
-    },
-    /* goBack 返回 */
-    goBack() {
-      this.$router.push({
-        path: "alarmdata"
-      });
-    },
-    getData() {
-      getFence().then(res => {
-        if (res.data.code === 0) {
-          if (res.data.data.length > 0) {
-            let result = res.data.data;
-            result.forEach(key => {
-              // console.log("key", key);
-              let gpsList = key.gpsList;
-              let id = key.id;
-              this.hasFence(gpsList, id);
-            });
-          }
-        }
-      });
-    },
-    init() {
-      if (grid) {
-        let point = grid.split(";");
+    init () {
+      if (this.grid) {
+        let point = this.grid.split(";");
         const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
         map = new AMap.Map("AddContainer", {
           center: [point[0], point[1]],
@@ -123,9 +59,67 @@ export default {
           zoom: 5
         });
       }
-      this.getData();
+      if (this.efence) {
+        this.hasFence(this.efence);
+      }
+      // this.getData();
     },
-    mapInit(obj) {
+    // 已经添加了围栏，根据围栏坐标 画出围栏
+    hasFence (gpsList) {
+      console.log('gpsList ===>>>', gpsList);
+      let poi = gpsList.split(";");
+      let allPointers = [];
+      poi.forEach((res, index) => {
+        let item = res.split(",");
+        let arr = [item[0], item[1]];
+        new AMap.Marker({
+          icon: new AMap.Icon({
+            image: `http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png`,
+            size: new AMap.Size(20, 35)
+          }),
+          position: arr,
+          zIndex: 101,
+          clickable: true,
+          map: map
+        });
+        allPointers.push(arr);
+      });
+      /** 画多边形 */
+      var polygons = new AMap.Polygon({
+        map: map,
+        strokeColor: "#0000ff",
+        strokeWeight: 2,
+        fillColor: "#f5deb3",
+        fillOpacity: 0.6,
+        // extData: id,
+        cursor: "pointer"
+      });
+      polygons.setPath(allPointers);
+      polygonArr.push(polygons);
+      map.setFitView(); // 地图自适应
+    },
+    /* goBack 返回 */
+    goBack () {
+      this.$router.push({
+        path: "alarmdata"
+      });
+    },
+    getData () {
+      getFence().then(res => {
+        if (res.data.code === 0) {
+          if (res.data.data.length > 0) {
+            let result = res.data.data;
+            result.forEach(key => {
+              // console.log("key", key);
+              let gpsList = key.gpsList;
+              let id = key.id;
+              this.hasFence(gpsList, id);
+            });
+          }
+        }
+      });
+    },
+    mapInit (obj) {
       let allmarkerArr = Object.values(obj);
       allmarkerArr.forEach(key => {
         var lngs = key.toString().split(",");
@@ -146,7 +140,7 @@ export default {
         this.markers.push(marker);
       });
     },
-    localPosition() {
+    localPosition () {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
@@ -176,12 +170,12 @@ export default {
         };
       });
     },
-    singleDevice(ws) {
+    singleDevice (ws) {
       let NowDeviceId = this.$route.query.deviceId;
       singleDeviceId(NowDeviceId).then(res => {
         if (res.data.code === 0) {
           let result = res.data.data;
-          console.log(result);
+          // console.log(result);
           if (result) {
             pointerObj[result.deviceId] = `${result.longitude},${
               result.latitude
@@ -198,11 +192,12 @@ export default {
       });
     }
   },
-  mounted() {
-    grid = this.$route.query.grid;
+  mounted () {
+    this.grid = this.$route.query.grid;
+    this.efence = this.$route.query.efence; // 围栏
     this.init();
   },
-  beforeDestroy() {
+  beforeDestroy () {
     if (typeof this.over === "function") {
       this.over();
     }

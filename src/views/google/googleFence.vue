@@ -1,30 +1,43 @@
 <template>
   <div class="outer-box">
     <div class="mapCenter">
-      <div id="AddContainer" class="fenceContainer"></div>
-      <div class="HandleBtn" v-if="addFence">
+      <div id="AddContainer"
+        class="fenceContainer"></div>
+      <div class="HandleBtn"
+        v-if="addFence">
         <span class="Tiptext">Tips：{{$t('fence.tipMsg.morePointer')}}</span>
-        <el-button @click="cancelSetings" type="info">{{$t('fence.cancelSeting')}}</el-button>
-        <el-button @click="doAddFence" type="primary">{{$t('fence.sureSeting')}}</el-button>
-        <el-button @click="goBack" type="warning">{{$t('fence.back')}}</el-button>
+        <el-button @click="cancelSetings"
+          type="info">{{$t('fence.cancelSeting')}}</el-button>
+        <el-button @click="doAddFence"
+          type="primary">{{$t('fence.sureSeting')}}</el-button>
+        <el-button @click="goBack"
+          type="warning">{{$t('fence.back')}}</el-button>
         <p></p>
       </div>
-      <div class="HandleBtn" v-else>
-        <el-button @click="ToAddFence" type="primary">{{$t('fence.addBtn')}}</el-button>
-        <el-button @click="ToDeleteFence" type="danger">{{$t('fence.delBtn')}}</el-button>
+      <div class="HandleBtn"
+        v-else>
+        <el-button @click="ToAddFence"
+          type="primary">{{$t('fence.addBtn')}}</el-button>
+        <el-button @click="ToDeleteFence"
+          type="danger">{{$t('fence.delBtn')}}</el-button>
       </div>
     </div>
     <div class="listCenter">
       <div id="panel">
-        <div class="panelTop" v-loading="loading">
-          <div id="intro" class="intro">
+        <div class="panelTop"
+          v-loading="loading">
+          <div id="intro"
+            class="intro">
             <h3>
-              <span>{{$t("positions.title1")}}</span>
+              <span>{{$t("history.batteryList")}}</span>
               <!-- <el-button type="text" mini>{{$t('positions.lookAll')}}</el-button> -->
             </h3>
           </div>
           <ul class="list_warp">
-            <li v-for="(item, index) in pointerArr" :class="{'selected': chooseId === item.batteryId }" :key="item.deviceId" @click="checkItem(item)">
+            <li v-for="(item, index) in pointerArr"
+              :class="{'selected': chooseId === item.batteryId }"
+              :key="item.deviceId"
+              @click="checkItem(item)">
               <p>{{index + 1}}、{{item.batteryId}}</p>
               <!-- <el-badge :value="item.onLine" class="item">
                 <el-button @click.prevent.stop="HistoryTrack(item.batteryId)" size="mini">{{$t('positions.track')}}</el-button>
@@ -33,7 +46,11 @@
           </ul>
         </div>
         <div class="page">
-          <el-pagination @current-change="pageChange" :current-page.sync="pageNum" small layout="prev, pager, next" :total="total">
+          <el-pagination @current-change="pageChange"
+            :current-page.sync="pageNum"
+            small
+            layout="prev, pager, next"
+            :total="total">
           </el-pagination>
         </div>
       </div>
@@ -55,7 +72,7 @@ let bermudaTriangleArr = [];
 // let drawingManager = null;
 
 export default {
-  data() {
+  data () {
     return {
       chooseId: "",
       total: 0,
@@ -71,7 +88,7 @@ export default {
     };
   },
   methods: {
-    init() {
+    init () {
       try {
         map = new google.maps.Map(document.getElementById("AddContainer"), {
           center: {
@@ -85,11 +102,11 @@ export default {
         onError(`${this.$t("mapError")}`);
       }
     },
-    pageChange(val) {
+    pageChange (val) {
       this.pageNum = val;
       this.getListData();
     },
-    checkItem(item) {
+    checkItem (item) {
       this.label = 1;
       this.clickItme = item;
       this.addFence = false;
@@ -102,7 +119,7 @@ export default {
       });
     },
     // 获取列表数据
-    getListData() {
+    getListData () {
       let pageObj = {
         pageNum: this.pageNum,
         pageSize: 10,
@@ -129,7 +146,7 @@ export default {
       });
     },
     // 没有设置过围栏
-    buildFence() {
+    buildFence () {
       this.addFence = true;
       this.label = 1;
       this.markers = [];
@@ -152,7 +169,7 @@ export default {
       });
     },
     // 已经添加了围栏，根据围栏坐标 画出围栏
-    hasFence(gpsList, id) {
+    hasFence (gpsList, id) {
       this.addFence = false;
       let poi = gpsList.substring(0, gpsList.length - 1).split(";");
       let allPointers = [];
@@ -188,43 +205,53 @@ export default {
       });
     },
     // 确认设置 添加围栏
-    doAddFence() {
+    doAddFence () {
+      if (!this.fencePonter) {
+        onError(`${this.$t("fence.tipMsg.addPointer")}`);
+        return;
+      }
+      let gpsList = this.fencePonter.substring(0, this.fencePonter.length - 1);
+      let pointer = gpsList.split(';');
+      if (pointer.length < 3) {
+        onError(`${this.$t("fence.tipMsg.less")}`);
+        return;
+      }
       let gpsObj = {
         deviceId: this.clickItme.deviceId,
-        batteryId: this.clickItme.batteryId
+        batteryId: this.clickItme.batteryId,
+        gpsList: gpsList
       };
-      // let str = "";
-      console.log(this.fencePonter);
-      if (this.fencePonter.length > 0) {
-        gpsObj.gpsList = this.fencePonter.substring(
-          0,
-          this.fencePonter.length - 1
-        );
-        addFence(gpsObj).then(res => {
-          console.log(res);
-
-          if (res.data.code === 0) {
-            google.maps.event.clearListeners(map, "click");
-            if (this.markers.length > 0) {
-              this.markers.forEach(key => {
-                key.setMap(null);
-              });
-              this.markers = [];
-            }
-            // drawingManager.setDrawingMode(null);
-            onSuccess(`${this.$t("fence.tipMsg.addSuccess")}`);
-            this.getData({
-              batteryId: this.clickItme.batteryId,
-              deviceId: this.clickItme.deviceId
+      addFence(gpsObj).then(res => {
+        console.log(res);
+        if (res.data.code === 0) {
+          google.maps.event.clearListeners(map, "click");
+          if (this.markers.length > 0) {
+            this.markers.forEach(key => {
+              key.setMap(null);
             });
+            this.markers = [];
           }
-        });
-      } else {
-        onError(`${this.$t("fence.tipMsg.addPointer")}`);
-      }
+          // drawingManager.setDrawingMode(null);
+          onSuccess(`${this.$t("fence.tipMsg.addSuccess")}`);
+          this.getData({
+            batteryId: this.clickItme.batteryId,
+            deviceId: this.clickItme.deviceId
+          });
+        }
+      });
+      // console.log(this.fencePonter);
+      // if (this.fencePonter.length > 0) {
+      //   gpsObj.gpsList = this.fencePonter.substring(
+      //     0,
+      //     this.fencePonter.length - 1
+      //   );
+
+      // } else {
+      //   onError(`${this.$t("fence.tipMsg.addPointer")}`);
+      // }
     },
     /* 取消设置 */
-    cancelSetings() {
+    cancelSetings () {
       this.addFence = true;
       this.fencePonter = "";
       this.label = 1;
@@ -238,7 +265,7 @@ export default {
       this.buildFence();
     },
     /* 删除围栏 */
-    ToDeleteFence() {
+    ToDeleteFence () {
       if (!this.fenceId) {
         onWarn(`${this.$t("fence.tipMsg.selectToDel")}`);
         return;
@@ -256,7 +283,7 @@ export default {
       });
     },
     /* goBack 返回 */
-    goBack() {
+    goBack () {
       this.addFence = false;
       this.fencePonter = "";
       if (this.markers.length > 0) {
@@ -272,7 +299,7 @@ export default {
         deviceId: this.clickItme.deviceId
       });
     },
-    getData(data) {
+    getData (data) {
       getFenceById(data).then(res => {
         console.log(res);
 
@@ -295,12 +322,12 @@ export default {
         }
       });
     },
-    ToAddFence() {
+    ToAddFence () {
       this.addFence = true;
       this.buildFence();
     }
   },
-  mounted() {
+  mounted () {
     this.init();
   }
 };

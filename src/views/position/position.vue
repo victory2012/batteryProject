@@ -1,26 +1,41 @@
 <template>
   <div id="outer-box">
-    <div id="positions" v-loading="maploading" class="positioned"></div>
+    <div id="positions"
+      v-loading="maploading"
+      class="positioned"></div>
     <!-- <v-gaode :mapData='markerData' :mapCenter='mapCenterPoniter'></v-gaode> -->
     <div id="panel">
-      <div class="panelTop" v-loading="loading">
-        <div id="intro" class="intro">
+      <div class="panelTop"
+        v-loading="loading">
+        <div id="intro"
+          class="intro">
           <h3>
             <span>{{titles}}</span>
-            <el-button @click="showAllPionter" type="text" mini>{{$t('positions.lookAll')}}</el-button>
+            <el-button @click="showAllPionter"
+              type="text"
+              mini>{{$t('positions.lookAll')}}</el-button>
           </h3>
         </div>
         <ul class="list_warp">
-          <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.deviceId ? 'selected': '', item.onlineStatus === 0? 'off': '', devicelabel == item.batteryId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item, index)">
+          <li v-for="(item, index) in pointerArr"
+            :class="[ devicelabel == item.deviceId ? 'selected': '', item.onlineStatus === 0? 'off': '', devicelabel == item.batteryId ? 'selected': '' ]"
+            :key="item.deviceId"
+            @click="checkItem(item, index)">
             <p>{{index + 1}}、{{deviceShow? item.deviceId : item.batteryId}}</p>
-            <el-badge :value="item.onLine" class="item">
-              <el-button @click.prevent.stop="HistoryTrack(item.batteryId)" size="mini">{{$t('positions.track')}}</el-button>
+            <el-badge :value="item.onLine"
+              class="item">
+              <el-button @click.prevent.stop="HistoryTrack(item.batteryId)"
+                size="mini">{{$t('positions.track')}}</el-button>
             </el-badge>
           </li>
         </ul>
       </div>
       <div class="page">
-        <el-pagination @current-change="pageChange" :current-page.sync="pageNum" small layout="prev, pager, next" :total="total">
+        <el-pagination @current-change="pageChange"
+          :current-page.sync="pageNum"
+          small
+          layout="prev, pager, next"
+          :total="total">
         </el-pagination>
       </div>
     </div>
@@ -137,7 +152,7 @@ export default {
   // components: {
   //   "v-gaode": gaodeMap
   // },
-  data() {
+  data () {
     return {
       loading: true,
       maploading: false,
@@ -160,13 +175,13 @@ export default {
     };
   },
   methods: {
-    pageChange(val) {
+    pageChange (val) {
       this.over();
       this.pageNum = val;
       // this.markers && map.remove(this.markers);
       this.getListData();
     },
-    init() {
+    init () {
       const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
       map = new AMap.Map("positions", {
         resizeEnable: true,
@@ -182,7 +197,7 @@ export default {
       this.getListData();
     },
     // 获取列表数据
-    getListData() {
+    getListData () {
       let pageObj = {
         pageNum: this.pageNum,
         pageSize: 10
@@ -237,7 +252,7 @@ export default {
       });
     },
     // websockets 请求
-    sockets(data) {
+    sockets (data) {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
@@ -289,7 +304,7 @@ export default {
      @params batteryIdArr 为电池ID对象 key为设备id，value为电池id
      @params pointerObj 电池坐标点对象，key为设备id，value为一个字符串，依次顺序为经度、纬度、时间、电池id。以逗号隔开
      */
-    mapInit(data) {
+    mapInit (data) {
       // console.log("data ===>>>", data);
       pointerObj = {};
       let sendData = { api: "bind", param: [] };
@@ -323,7 +338,7 @@ export default {
     * @params deviceId 电池列表 获取的设备id。
     * @params index 为列表的索引。这里取这个索引是为了让地图的mark点 显示点的是第几个。
      */
-    checkItem(item, index) {
+    checkItem (item, index) {
       if (item.onlineStatus === 0) return;
       console.log(item);
       if (item.longitude && item.latitude) {
@@ -350,7 +365,7 @@ export default {
         // };
       }
     },
-    GaoDeMap(data, fromWs) {
+    GaoDeMap (data, fromWs) {
       this.markers && map.remove(this.markers);
       let allmarkerArr = Object.values(data);
       let markerkeys = Object.keys(data);
@@ -390,7 +405,7 @@ export default {
           } else {
             content = `${this.$t(
               "positions.voltage"
-            )}：${voltage}<br/>${this.$t("positions.batteryCode")}：${
+            )}：${voltage} V<br/>${this.$t("positions.batteryCode")}：${
               lngs[3]
             }<br/>${this.$t("positions.deviceCode")}：${markerkeys[i]}`;
           }
@@ -410,7 +425,7 @@ export default {
             let pointerData = key.getExtData();
             // console.log(key);
             const self = this;
-            geocoder.getAddress(pointerData.center, function(status, result) {
+            geocoder.getAddress(pointerData.center, function (status, result) {
               if (status === "complete" && result.regeocode) {
                 let address = result.regeocode.formattedAddress;
                 console.log(result);
@@ -441,7 +456,7 @@ export default {
       });
     },
     // 查看所有点
-    showAllPionter() {
+    showAllPionter () {
       this.viewAll = true;
       this.devicelabel = null;
       this.deviceId = null;
@@ -452,7 +467,7 @@ export default {
       // };
     },
     // 查看历史轨迹。路由传参 设备id
-    HistoryTrack(batteryId) {
+    HistoryTrack (batteryId) {
       let userData = JSON.parse(sessionStorage.getItem("loginData"));
       if (userData.mapType === 0) {
         this.$router.push({
@@ -472,7 +487,7 @@ export default {
   * 用beforeRouteEnter 这个路由钩子函数 来判断是从哪个路由跳转过来的
   * 以此来处理列表显示内容
   */
-  beforeRouteEnter(to, from, next) {
+  beforeRouteEnter (to, from, next) {
     next(vm => {
       if (from.name === "device" && vm.pathParams) {
         vm.titles = vm.$t("positions.title1");
@@ -484,13 +499,13 @@ export default {
       }
     });
   },
-  mounted() {
+  mounted () {
     this.init();
   },
-  created() {
+  created () {
     this.pathParams = this.$route.query.deviceId; // 路由参数
   },
-  beforeDestroy() {
+  beforeDestroy () {
     this.over();
   }
 };

@@ -1,9 +1,11 @@
 <template>
   <div>
     <div>
-      <el-row :gutter="20" class="mgb20">
+      <el-row :gutter="20"
+        class="mgb20">
         <el-col :span="6">
-          <el-card shadow="hover" :body-style="{padding: '0px'}">
+          <el-card shadow="hover"
+            :body-style="{padding: '0px'}">
             <div class="grid-content grid-con-1">
               <i class="grid-con-icon iconfont">&#xe644;</i>
               <div class="grid-cont-right">
@@ -14,7 +16,8 @@
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" :body-style="{padding: '0px'}">
+          <el-card shadow="hover"
+            :body-style="{padding: '0px'}">
             <div class="grid-content grid-con-2">
               <i class="grid-con-icon iconfont">&#xe656;</i>
               <div class="grid-cont-right">
@@ -25,7 +28,8 @@
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" :body-style="{padding: '0px'}">
+          <el-card shadow="hover"
+            :body-style="{padding: '0px'}">
             <div class="grid-content grid-con-3">
               <i class="grid-con-icon iconfont">&#xe6a8;</i>
               <div class="grid-cont-right">
@@ -36,7 +40,8 @@
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" :body-style="{padding: '0px'}">
+          <el-card shadow="hover"
+            :body-style="{padding: '0px'}">
             <div class="grid-content grid-con-4">
               <i class="grid-con-icon iconfont">&#xe6f5;</i>
               <div class="grid-cont-right">
@@ -49,8 +54,10 @@
       </el-row>
     </div>
     <!-- <component :is="mapType" :propData="propData"></component> -->
-    <amaps v-if="amapsType" :propData="propData"></amaps>
-    <googlemaps v-if="googlemapsType" :propData="propData"></googlemaps>
+    <amaps v-if="amapsType"
+      :propData="propData"></amaps>
+    <googlemaps v-if="googlemapsType"
+      :propData="propData"></googlemaps>
   </div>
 </template>
 <script>
@@ -71,7 +78,7 @@ export default {
     googlemaps: GoogleMap
   },
   name: "battery",
-  data() {
+  data () {
     return {
       count: {},
       // onLine: 0,
@@ -96,12 +103,12 @@ export default {
     };
   },
   methods: {
-    init() {
+    init () {
       this.getTocalsData();
       this.narmleHttp();
     },
     /* 获取统计数据 */
-    getTocalsData() {
+    getTocalsData () {
       GetCount().then(res => {
         console.log("GetCount", res);
         if (res.data && res.data.code === 0) {
@@ -115,7 +122,7 @@ export default {
     /*
       http请求 获取全部电池设备
      */
-    narmleHttp() {
+    narmleHttp () {
       let pageObj = {
         pageNum: 1,
         pageSize: 999999999,
@@ -149,7 +156,7 @@ export default {
     /*
       websockets 请求
      */
-    sockets(result) {
+    sockets (result) {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
@@ -194,12 +201,13 @@ export default {
           this.over();
         };
         this.over = () => {
+          console.log('close');
           ws.close();
         };
       });
     }
   },
-  mounted() {
+  mounted () {
     let batteryMap = sessionStorage.mapType;
     console.log(batteryMap);
     if (batteryMap.toString() === "0") {
@@ -217,11 +225,8 @@ export default {
     // ...mapState(["mapType"]),
     ...mapState(["loginData"])
   },
-  beforeDestroy() {
-    console.log(this.over);
-    if (typeof this.over === "function") {
-      this.over();
-    }
+  beforeDestroy () {
+    this.over();
   }
 };
 </script>

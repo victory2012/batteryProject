@@ -119,6 +119,9 @@ export default new Router({
         path: '/policy',
         name: "policy",
         component: resolve => require(['../views/policy/index.vue'], resolve)
+      }, {
+        path: '/test',
+        component: resolve => require(['../views/realPosition/index.vue'], resolve)
       }
     ]
   }, {

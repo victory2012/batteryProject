@@ -1,11 +1,16 @@
 <template>
   <div class="outer-box">
-    <div id="AddContainer" class="fenceContainer"></div>
+    <div id="AddContainer"
+      class="fenceContainer"></div>
     <div class="HandleBtn">
-      <el-button @click="goBack" type="primary">{{$t('googleAbno.return')}}</el-button>
+      <el-button @click="goBack"
+        type="primary">{{$t('googleAbno.return')}}</el-button>
     </div>
-    <div class="localPosition" @click="singleDevice" :title="$t('googleAbno.title')">
-      <img src="../../../static/img/local_normal.png" alt="">
+    <div class="localPosition"
+      @click="singleDevice"
+      :title="$t('googleAbno.title')">
+      <img src="../../../static/img/local_normal.png"
+        alt="">
     </div>
   </div>
 </template>
@@ -14,12 +19,13 @@ import google from "google";
 import { getFence, websockets, singleDeviceId } from "../../api/index.js";
 import { onError } from "../../utils/callback.js";
 let map;
-let grid;
 let pointerObj = {};
 export default {
-  data() {
+  data () {
     return {
       json: "",
+      grid: "",
+      efence: "",
       fenceId: "",
       polygon: null,
       sendData: { api: "bind", param: [] },
@@ -27,17 +33,51 @@ export default {
     };
   },
   methods: {
+    init () {
+      try {
+        map = new google.maps.Map(document.getElementById("AddContainer"), {
+          center: {
+            lat: 0,
+            lng: 0
+          },
+          zoom: 15
+        });
+        if (this.grid) {
+          let point = this.grid.split(";");
+          let outPointer = new google.maps.LatLng(point[1], point[0]);
+          map.setCenter(outPointer);
+          let marker = new google.maps.Marker({
+            position: outPointer,
+            label: "out",
+            title: `${this.$t("googleAbno.Geofence")}`,
+            map: map
+          });
+          this.markers.push(marker);
+        }
+        if (this.efence) {
+          this.hasFence(this.efence);
+        }
+      } catch (err) {
+        onError(`${this.$t("mapError")}`);
+      }
+    },
     // 已经添加了围栏，根据围栏坐标 画出围栏
-    hasFence(gpsList, id) {
+    hasFence (gpsList) {
       let poi = gpsList.substring(0, gpsList.length - 1).split(";");
       let allPointers = [];
-      poi.forEach(res => {
+      poi.forEach((res, index) => {
         let item = res.split(",");
         let arr = new google.maps.LatLng(item[1], item[0]);
+        let marker = new google.maps.Marker({
+          position: arr,
+          // label: `${index + 1}`,
+          map: map
+        });
+        this.markers.push(marker);
         allPointers.push(arr);
       });
-      var bermudaTriangle = new google.maps.Polygon({
-        paths: [allPointers],
+      let bermudaTriangle = new google.maps.Polygon({
+        paths: [...allPointers],
         strokeColor: "blue",
         strokeOpacity: 1,
         strokeWeight: 1,
@@ -45,14 +85,19 @@ export default {
         fillOpacity: 0.6
       });
       bermudaTriangle.setMap(map);
+      let bounds = new google.maps.LatLngBounds();
+      for (var i = 0; i < this.markers.length; i++) {
+        bounds.extend(this.markers[i].getPosition());
+      }
+      map.fitBounds(bounds);
     },
     /* goBack 返回 */
-    goBack() {
+    goBack () {
       this.$router.push({
         path: "alarmdata"
       });
     },
-    getData() {
+    getData () {
       getFence().then(res => {
         if (res.data.code === 0) {
           if (res.data.data.length > 0) {
@@ -67,32 +112,8 @@ export default {
         }
       });
     },
-    init() {
-      try {
-        map = new google.maps.Map(document.getElementById("AddContainer"), {
-          center: {
-            lat: 0,
-            lng: 0
-          },
-          zoom: 15
-        });
-        if (grid) {
-          let point = grid.split(";");
-          let outPointer = new google.maps.LatLng(point[1], point[0]);
-          map.setCenter(outPointer);
-          new google.maps.Marker({
-            position: outPointer,
-            label: "out",
-            title: `${this.$t("googleAbno.Geofence")}`,
-            map: map
-          });
-        }
-        this.getData();
-      } catch (err) {
-        onError(`${this.$t("mapError")}`);
-      }
-    },
-    mapInit(obj) {
+
+    mapInit (obj) {
       let allmarkerArr = Object.values(obj);
       allmarkerArr.forEach(key => {
         var lngs = key.toString().split(",");
@@ -105,7 +126,7 @@ export default {
         this.markers.push(marker);
       });
     },
-    localPosition(data) {
+    localPosition (data) {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
@@ -139,7 +160,7 @@ export default {
         };
       });
     },
-    singleDevice() {
+    singleDevice () {
       let NowDeviceId = this.$route.query.deviceId;
       singleDeviceId(NowDeviceId).then(res => {
         if (res.data.code === 0) {
@@ -163,11 +184,12 @@ export default {
       });
     }
   },
-  mounted() {
-    grid = this.$route.query.grid;
+  mounted () {
+    this.grid = this.$route.query.grid;
+    this.efence = this.$route.query.efence;
     this.init();
   },
-  beforeDestroy() {
+  beforeDestroy () {
     if (typeof this.over === "function") {
       this.over();
     }
