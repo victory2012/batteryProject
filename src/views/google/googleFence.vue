@@ -84,7 +84,8 @@ export default {
       fenceId: "",
       markers: [],
       polygon: null,
-      fencePonter: ""
+      fencePonter: "",
+      selectPonter: []
     };
   },
   methods: {
@@ -150,17 +151,19 @@ export default {
       this.addFence = true;
       this.label = 1;
       this.markers = [];
-      this.fencePonter = "";
+      this.selectPonter = [];
       google.maps.event.addListener(map, "click", event => {
         var marker = new google.maps.Marker({
           position: event.latLng,
           label: `${this.label++}`,
           map: map
         });
-        this.fencePonter += `${event.latLng
+        // this.fencePonter += `${event.latLng
+        //   .lng()
+        //   .toFixed(6)},${event.latLng.lat().toFixed(6)};`;
+        this.selectPonter.push(`${event.latLng
           .lng()
-          .toFixed(6)},${event.latLng.lat().toFixed(6)};`;
-        // str += `${event.latLng}`
+          .toFixed(6)},${event.latLng.lat().toFixed(6)}`);
         console.log(this.fencePonter);
         this.markers.push(marker);
         if (this.label > 10) {
@@ -204,18 +207,24 @@ export default {
         });
       });
     },
+    unique (arr) {
+      return Array.from(new Set(arr))
+    },
     // 确认设置 添加围栏
     doAddFence () {
-      if (!this.fencePonter) {
+      let pointer = this.unique(this.selectPonter);
+      if (pointer.length === 0) {
         onError(`${this.$t("fence.tipMsg.addPointer")}`);
         return;
       }
-      let gpsList = this.fencePonter.substring(0, this.fencePonter.length - 1);
-      let pointer = gpsList.split(';');
       if (pointer.length < 3) {
         onError(`${this.$t("fence.tipMsg.less")}`);
         return;
       }
+      let gpsList = '';
+      pointer.forEach(key => {
+        gpsList += key + ';'
+      })
       let gpsObj = {
         deviceId: this.clickItme.deviceId,
         batteryId: this.clickItme.batteryId,
@@ -239,21 +248,11 @@ export default {
           });
         }
       });
-      // console.log(this.fencePonter);
-      // if (this.fencePonter.length > 0) {
-      //   gpsObj.gpsList = this.fencePonter.substring(
-      //     0,
-      //     this.fencePonter.length - 1
-      //   );
-
-      // } else {
-      //   onError(`${this.$t("fence.tipMsg.addPointer")}`);
-      // }
     },
     /* 取消设置 */
     cancelSetings () {
       this.addFence = true;
-      this.fencePonter = "";
+      this.selectPonter = [];
       this.label = 1;
       google.maps.event.clearListeners(map, "click");
       if (this.markers.length > 0) {
@@ -285,7 +284,7 @@ export default {
     /* goBack 返回 */
     goBack () {
       this.addFence = false;
-      this.fencePonter = "";
+      this.selectPonter = [];
       if (this.markers.length > 0) {
         this.markers.forEach(key => {
           key.setMap(null);
@@ -302,7 +301,7 @@ export default {
     getData (data) {
       getFenceById(data).then(res => {
         console.log(res);
-
+        this.selectPonter = [];
         if (res.data.code === 0) {
           if (bermudaTriangleArr.length > 0) {
             bermudaTriangleArr.forEach(key => {
@@ -312,7 +311,7 @@ export default {
           let result = res.data.data;
           if (result) {
             this.hasFenced = true;
-            let gpsList = result.gpsList;
+            let gpsList = result.gpsList.substring(0, result.gpsList.length - 1);
             let id = result.id;
             this.hasFence(gpsList, id);
           } else {

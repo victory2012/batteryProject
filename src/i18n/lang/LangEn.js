@@ -156,7 +156,9 @@ module.exports = {
       createDate: 'Date of production',
       manufactureDate: 'Date of manufacture',
       warrantyDate: 'Warranty',
-      deviceId: 'Please enter device id.'
+      deviceId: 'Please enter device id.',
+      CheckmanufactureDate: '出厂日期应大于生产日期',
+      CheckWarrantyDate: '质保期应大于出厂日期'
     },
     success: 'Created Successfully.',
     delSuccess: 'Deleted Successfully.'
@@ -211,13 +213,15 @@ module.exports = {
     },
     warn: {
       userName: 'Please enter user id.',
+      nameCheck: 'Wrong format of user id entered.',
       nameLimit: 'The user id at least 4 characters.',
       password: 'Please enter password.',
       passwordLimit: 'The password at least 6 characters.',
       phone: 'Please enter mobile number.',
       phoneCheck: 'Wrong format of mobile number entered.',
       enterprise: 'Please eneter name of company.',
-      nature: 'Region.'
+      nature: 'Region.',
+      emailCheck: 'Wrong format of mailbox entered.'
     },
     success: 'Created Successfully.',
     no: 'No Data'

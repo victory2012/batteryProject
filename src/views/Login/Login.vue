@@ -1,7 +1,9 @@
 <template>
   <div class="login_page fillcontain">
     <div class="login-head">
-      <el-dropdown class="user-name" trigger="click" @command="handleCommand">
+      <el-dropdown class="user-name"
+        trigger="click"
+        @command="handleCommand">
         <span class="el-dropdown-link">
           {{localLanguge}}
           <i class="el-icon-caret-bottom"></i>
@@ -9,29 +11,45 @@
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="zh">
             <i class="iconfont icon-user"></i>中文</el-dropdown-item>
-          <el-dropdown-item divided command="en">
+          <el-dropdown-item divided
+            command="en">
             <i class="el-icon-setting"></i>English</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
-    <transition name="form-fade" mode="in-out">
-      <section class="form_contianer" v-show="showLogin">
+    <transition name="form-fade"
+      mode="in-out">
+      <section class="form_contianer"
+        v-show="showLogin">
         <div class="manage_tip">
           <p>{{$t("loginMsg.projectName")}}</p>
         </div>
-        <el-form :model="loginForm" :rules="rules" ref="loginForm">
+        <el-form :model="loginForm"
+          :rules="rules"
+          ref="loginForm">
           <el-form-item prop="userName">
-            <el-input v-model="loginForm.userName" size="small" :placeholder="$t('loginMsg.accountPlace')"></el-input>
+            <el-input v-model="loginForm.userName"
+              size="small"
+              :placeholder="$t('loginMsg.accountPlace')"></el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input type="password" :placeholder="$t('loginMsg.passwordPlace')" size="small" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')"></el-input>
+            <el-input type="password"
+              :placeholder="$t('loginMsg.passwordPlace')"
+              size="small"
+              v-model="loginForm.password"
+              @keyup.enter.native="submitForm('loginForm')"></el-input>
           </el-form-item>
           <el-form-item prop="checkBox">
-            <el-checkbox style="float:left" v-model="account">{{$t("loginMsg.RMaccount")}}</el-checkbox>
-            <el-checkbox style="float:right" v-model="pwd">{{$t("loginMsg.RMpassword")}}</el-checkbox>
+            <el-checkbox style="float:left"
+              v-model="account">{{$t("loginMsg.RMaccount")}}</el-checkbox>
+            <el-checkbox style="float:right"
+              v-model="pwd">{{$t("loginMsg.RMpassword")}}</el-checkbox>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm('loginForm')" :loading="isLogin" class="submit_btn">{{$t("loginMsg.loginBtn")}}</el-button>
+            <el-button type="primary"
+              @click="submitForm('loginForm')"
+              :loading="isLogin"
+              class="submit_btn">{{$t("loginMsg.loginBtn")}}</el-button>
           </el-form-item>
         </el-form>
       </section>
@@ -42,7 +60,7 @@
 <script>
 import { getAdminInfo } from "../../api/index.js";
 export default {
-  data() {
+  data () {
     return {
       account: false,
       pwd: false,
@@ -72,7 +90,7 @@ export default {
     };
   },
   methods: {
-    handleCommand(cammand) {
+    handleCommand (cammand) {
       if (cammand === "zh") {
         this.localLanguge = "中文";
         this.$i18n.locale = "zh";
@@ -100,7 +118,7 @@ export default {
         ]
       };
     },
-    submitForm(params) {
+    submitForm (params) {
       // this.$i18n.locale = "en";
       this.$refs[params].validate(valid => {
         if (valid) {
@@ -119,22 +137,27 @@ export default {
               );
               this.$store.commit("SET_MAP_TYPE", res.data.data.mapType);
               sessionStorage.setItem("mapType", res.data.data.mapType);
-              localStorage.setItem("account", this.loginForm.userName);
-              localStorage.setItem("password", this.loginForm.password);
+              if (this.account) {
+                localStorage.setItem("account", this.loginForm.userName);
+              }
+              if (this.pwd) {
+                localStorage.setItem("password", this.loginForm.password);
+              }
+
               this.$router.push("/home");
             }
           });
         }
       });
     },
-    changLocalLang() {
+    changLocalLang () {
       if (this.langs === "en") {
         this.$i18n.locale = "zh";
       } else {
         this.$i18n.locale = "en";
       }
     },
-    init() {
+    init () {
       let account = localStorage.getItem("account");
       let pwd = localStorage.getItem("password");
       if (account) {
@@ -150,7 +173,7 @@ export default {
       }, 300);
     }
   },
-  created() {
+  created () {
     let locallanguage = sessionStorage.getItem("locale");
     if (locallanguage) {
       this.localLanguge = locallanguage === "zh" ? "中文" : "English";
@@ -171,7 +194,7 @@ export default {
       }
     }
   },
-  mounted() {
+  mounted () {
     console.log(this.$i18n.locale);
     this.init();
   }

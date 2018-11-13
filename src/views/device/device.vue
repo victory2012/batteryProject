@@ -1,7 +1,9 @@
 <template>
   <div class="batterylist">
     <div class="headerBtn flex">
-      <el-button size="medium" @click="addBox=true" type="primary">{{$t('addDevice.title')}}
+      <el-button size="medium"
+        @click="addBox=true"
+        type="primary">{{$t('addDevice.title')}}
         <i class="el-icon-circle-plus-outline"></i>
       </el-button>
       <!-- <el-input placeholder="设备编号" v-model="input10" style="width:10%;margin-left:10px;height:32px;" clearable></el-input>
@@ -19,21 +21,41 @@
       </div> -->
     </div>
     <div class="table">
-      <el-table v-loading="loading" :data="tableData" style="width: 100%" max-height="750">
-        <el-table-column type="index" width="50" align="center" :label="$t('device.serial')"></el-table-column>
-        <el-table-column prop="deviceId" align="center" :label="$t('device.deviceCode')">
+      <el-table v-loading="loading"
+        :data="tableData"
+        style="width: 100%"
+        max-height="750">
+        <el-table-column type="index"
+          width="50"
+          align="center"
+          :label="$t('device.serial')"></el-table-column>
+        <el-table-column prop="deviceId"
+          align="center"
+          :label="$t('device.deviceCode')">
         </el-table-column>
-        <el-table-column prop="manufacturerName" align="center" :label="$t('device.manufacturerName')">
+        <el-table-column prop="manufacturerName"
+          align="center"
+          :label="$t('device.manufacturerName')">
         </el-table-column>
-        <el-table-column align="center" prop="createTime" :label="$t('device.createTime')">
+        <el-table-column align="center"
+          prop="createTime"
+          :label="$t('device.createTime')">
         </el-table-column>
-        <el-table-column prop="bindingName" align="center" :label="$t('device.bindStatus')">
+        <el-table-column prop="bindingName"
+          align="center"
+          :label="$t('device.bindStatus')">
         </el-table-column>
-        <el-table-column prop="online" align="center" :label="$t('device.runStatus')">
+        <el-table-column prop="online"
+          align="center"
+          :label="$t('device.runStatus')">
         </el-table-column>
-        <el-table-column align="center" :label="$t('device.device')">
+        <el-table-column align="center"
+          :label="$t('device.device')">
           <template slot-scope="scope">
-            <el-button :disabled="scope.row.onlineStatus === 0" @click.native.prevent="MonitorDevice(scope.$index, tableData)" type="text" size="small">
+            <el-button :disabled="scope.row.onlineStatus === 0"
+              @click.native.prevent="MonitorDevice(scope.$index, tableData)"
+              type="text"
+              size="small">
               {{$t('device.location')}}
             </el-button>
           </template>
@@ -53,37 +75,65 @@
         </el-table-column> -->
       </el-table>
       <div class="block">
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-sizes="handleSizeData" :page-size="handleSize" layout="sizes, prev, pager, next" :total="totalPage">
+        <el-pagination @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page.sync="currentPage"
+          :page-sizes="handleSizeData"
+          :page-size="handleSize"
+          layout="sizes, prev, pager, next"
+          :total="totalPage">
         </el-pagination>
       </div>
     </div>
     <div>
       <transition name="el-fade-in-linear">
-        <div v-show="addBox" class="transition-box">
+        <div v-show="addBox"
+          class="transition-box">
           <div class="box">
             <div class="box-head">
               <h3>{{$t('addDevice.title')}}</h3>
-              <i @click="closeBox" class="el-icon-close"></i>
+              <i @click="closeBox"
+                class="el-icon-close"></i>
             </div>
             <div class="formWarrp">
-              <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="200px" class="demo-ruleForm">
-                <el-form-item :label="$t('addDevice.deviceCode')" prop="deviceId">
-                  <el-input v-model="ruleForm.deviceId" style="width:200px;" :placeholder="$t('device.deviceCode')"></el-input>
+              <el-form :model="ruleForm"
+                :rules="rules"
+                ref="ruleForm"
+                label-width="200px"
+                class="demo-ruleForm">
+                <el-form-item :label="$t('addDevice.deviceCode')"
+                  prop="deviceId">
+                  <el-input v-model.trim="ruleForm.deviceId"
+                    style="width:200px;"
+                    :placeholder="$t('device.deviceCode')"></el-input>
                 </el-form-item>
-                <el-form-item :label="$t('addDevice.manufacturer')" prop="manufacturerId">
-                  <el-select v-model="ruleForm.manufacturerId" :placeholder="$t('addDevice.manufacturer')" style="width:200px;">
-                    <el-option v-for="item in manufacturerOptions" :key="item.id" :label="item.name" :value="item.id">
+                <el-form-item :label="$t('addDevice.manufacturer')"
+                  prop="manufacturerId">
+                  <el-select v-model="ruleForm.manufacturerId"
+                    :placeholder="$t('addDevice.manufacturer')"
+                    style="width:200px;">
+                    <el-option v-for="item in manufacturerOptions"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id">
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item :label="$t('addDevice.Customer')" prop="customerId">
-                  <el-select v-model="ruleForm.customerId" :placeholder="$t('addDevice.Customer')" style="width:200px;">
-                    <el-option v-for="item in customerOptions" :key="item.id" :label="item.name" :value="item.id">
+                <el-form-item :label="$t('addDevice.Customer')"
+                  prop="customerId">
+                  <el-select v-model="ruleForm.customerId"
+                    :placeholder="$t('addDevice.Customer')"
+                    style="width:200px;">
+                    <el-option v-for="item in customerOptions"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id">
                     </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary" @click="submitForm('ruleForm')">{{$t('addDevice.createBtn')}}</el-button>
+                  <el-button type="primary"
+                    @click="submitForm('ruleForm')">{{$t('addDevice.createBtn')}}</el-button>
                   <el-button @click="resetForm('ruleForm')">{{$t('addDevice.back')}}</el-button>
                 </el-form-item>
               </el-form>
@@ -104,7 +154,7 @@ import {
 // import { timeFormats } from "../../utils/transition.js";
 // import { onError } from "../../utils/callback.js";
 export default {
-  data() {
+  data () {
     return {
       addBox: false,
       formLabelWidth: "120px",
@@ -140,7 +190,7 @@ export default {
     };
   },
   methods: {
-    init() {
+    init () {
       let pageObj = {
         pageNum: this.currentPage,
         pageSize: this.handleSize
@@ -171,15 +221,15 @@ export default {
         }
       });
     },
-    batteryReg() {
+    batteryReg () {
       this.regForm = true;
     },
-    renew() {
+    renew () {
       this.$router.push({
         path: "/blacklist"
       });
     },
-    submitForm(form) {
+    submitForm (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
           console.log(this.ruleForm);
@@ -218,14 +268,14 @@ export default {
         }
       });
     },
-    resetForm(form) {
+    resetForm (form) {
       this.$refs[form].resetFields();
     },
-    closeBox() {
+    closeBox () {
       this.ruleForm = {};
       this.addBox = false;
     },
-    getAddData() {
+    getAddData () {
       // 生产企业列表
       enterpriseList().then(res => {
         if (res.data.code === 0) {
@@ -249,7 +299,7 @@ export default {
     /*
     *  改变每页显示的条数
     */
-    handleSizeChange(index) {
+    handleSizeChange (index) {
       // index为选中的页数
       this.handleSize = index;
       this.init();
@@ -257,12 +307,12 @@ export default {
     /*
     * 显示第几页
     */
-    handleCurrentChange(index) {
+    handleCurrentChange (index) {
       console.log("handleCurrentChange", index);
       this.currentPage = index;
       this.init();
     },
-    MonitorDevice(index, data) {
+    MonitorDevice (index, data) {
       let deviceId = data[index];
       // this.$router.push({
       //   path: "googlePos",
@@ -283,7 +333,7 @@ export default {
       }
     }
   },
-  mounted() {
+  mounted () {
     this.init();
     this.getAddData();
   }

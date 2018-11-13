@@ -165,7 +165,9 @@ module.exports = {
       createDate: '请选择生产日期',
       manufactureDate: '请选择出厂日期',
       warrantyDate: '请选择质保期',
-      deviceId: '请选择设备编号'
+      deviceId: '请选择设备编号',
+      CheckmanufactureDate: '出厂日期应大于生产日期',
+      CheckWarrantyDate: '质保期应大于出厂日期'
     },
     success: '创建成功',
     delSuccess: '删除成功'
@@ -221,12 +223,14 @@ module.exports = {
     warn: {
       userName: '请输入用户名',
       nameLimit: '用户名至少4位',
+      nameCheck: '用户名格式错误',
       password: '请输入密码',
       passwordLimit: '密码至少6位',
       phone: '请输入手机号码',
       phoneCheck: '手机号格式错误',
       enterprise: '请输入企业名称',
-      nature: '请选用户范围'
+      nature: '请选用户范围',
+      emailCheck: '邮箱格式有误'
     },
     success: '创建成功！',
     no: '无'

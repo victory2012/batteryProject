@@ -85,7 +85,8 @@ export default {
       pointerArr: [],
       json: "",
       fenceId: "",
-      polygon: null
+      polygon: null,
+      selectPonter: []
     };
   },
   methods: {
@@ -96,7 +97,6 @@ export default {
         lang: lang,
         zoom: 5
       });
-
       this.getListData();
     },
     pageChange (val) {
@@ -169,7 +169,8 @@ export default {
         map.off("click", this.callBackFn); // 移除地图点击事件
         // mouseTool.close(false); // 移除 画多边形的功能
       } else {
-        this.json += `${e.lnglat.getLng()},${e.lnglat.getLat()};`; // 获取地图点击的jps坐标位置 集合
+        this.selectPonter.push(`${e.lnglat.getLng()},${e.lnglat.getLat()}`);
+        // this.json += `${e.lnglat.getLng()},${e.lnglat.getLat()};`; // 获取地图点击的jps坐标位置 集合
         marker = new AMap.Marker({
           map: map,
           position: [e.lnglat.getLng(), e.lnglat.getLat()]
@@ -224,16 +225,22 @@ export default {
     },
     // 确认设置 添加围栏
     doAddFence () {
-      if (!this.json) {
+      // console.log(this.selectPonter);
+      console.log('unique Array', this.unique(this.selectPonter))
+      let pointer = this.unique(this.selectPonter);
+      if (pointer.length === 0) {
         onError(`${this.$t("fence.tipMsg.addPointer")}`);
         return;
       }
-      let gpsList = this.json.substring(0, this.json.length - 1);
-      let pointer = gpsList.split(';');
       if (pointer.length < 3) {
         onError(`${this.$t("fence.tipMsg.less")}`);
         return;
       }
+      let gpsList = '';
+      pointer.forEach(key => {
+        gpsList += key + ';'
+      })
+      console.log("gpsList", gpsList);
       let gpsObj = {
         deviceId: this.clickItme.deviceId,
         batteryId: this.clickItme.batteryId,
@@ -252,9 +259,12 @@ export default {
         }
       });
     },
+    unique (arr) {
+      return Array.from(new Set(arr))
+    },
     /* 取消设置 */
     cancelSetings () {
-      this.json = "";
+      this.selectPonter = [];
       markers && map.remove(markers); // 清除marker点
       mouseTool && mouseTool.close(true); // 清除多边形
       markers = [];
@@ -273,6 +283,7 @@ export default {
       }
       delFence(this.fenceId).then(res => {
         if (res.data.code === 0) {
+          this.hasFenced = false;
           onSuccess(`${this.$t("fence.tipMsg.delSuccess")}`);
           this.polygon.setMap(null);
         }
@@ -297,7 +308,7 @@ export default {
       getFenceById(data).then(res => {
         console.log("getFenceById", res);
         if (res.data.code === 0) {
-          this.json = "";
+          this.selectPonter = [];
           map.clearMap();
           // markers && map.remove(markers); // 清除marker点
           // mouseTool && mouseTool.close(true); // 清除多边形
@@ -308,7 +319,7 @@ export default {
             map.off("click", this.callBackFn); // 移除地图点击事件
             mouseTool && mouseTool.close(false); // 移除 画多边形的功能
             this.hasFenced = true;
-            let gpsList = result.gpsList;
+            let gpsList = result.gpsList.substring(0, result.gpsList.length - 1);
             let id = result.id;
             this.hasFence(gpsList, id);
           } else {

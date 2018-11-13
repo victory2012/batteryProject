@@ -1,10 +1,14 @@
 <template>
   <div class="userMsg">
     <div class="editorBtn">
-      <el-button type="primary" @click="doEditor" class="editorContent">{{$t('user.edit')}}</el-button>
+      <el-button type="primary"
+        @click="doEditor"
+        class="editorContent">{{$t('user.edit')}}</el-button>
     </div>
     <div class="center">
-      <el-row type="flex" class="row-bg" justify="space-around">
+      <el-row type="flex"
+        class="row-bg"
+        justify="space-around">
         <el-col :span="8">
           <div class="grid-content">
             <div class="sort-content">
@@ -35,7 +39,9 @@
       </el-row>
     </div>
     <div>
-      <el-row type="flex" class="row-bg" justify="space-around">
+      <el-row type="flex"
+        class="row-bg"
+        justify="space-around">
         <el-col :span="8">
           <div class="grid-content">
             <div class="sort-content">
@@ -65,26 +71,39 @@
     </div>
     <div>
       <transition name="el-fade-in-linear">
-        <div v-show="userMsgBox" class="transition-box">
+        <div v-show="userMsgBox"
+          class="transition-box">
           <div class="box">
             <div class="box-head">
               <h3>{{$t('user.userInfo')}}</h3>
-              <i @click="closeMsgBox('ruleForm')" class="el-icon-close"></i>
+              <i @click="closeMsgBox('ruleForm')"
+                class="el-icon-close"></i>
             </div>
             <div class="formWarrp">
-              <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="210px" class="demo-ruleForm">
+              <el-form :model="ruleForm"
+                :rules="rules"
+                ref="ruleForm"
+                label-width="210px"
+                class="demo-ruleForm">
 
-                <el-form-item :label="$t('user.phone')" prop="phoneNum">
-                  <el-input v-model="ruleForm.phoneNum" type="tel" style="width:200px;"></el-input>
+                <el-form-item :label="$t('user.phone')"
+                  prop="phoneNum">
+                  <el-input v-model="ruleForm.phoneNum"
+                    type="tel"
+                    style="width:200px;"></el-input>
                 </el-form-item>
                 <!-- <el-form-item label="用户名" prop="userName">
                   <el-input v-model="ruleForm.userName" style="width:200px;"></el-input>
                 </el-form-item> -->
-                <el-form-item :label="$t('user.email')" prop="email">
-                  <el-input v-model="ruleForm.email" style="width:200px;"></el-input>
+                <el-form-item :label="$t('user.email')"
+                  :error="emailsError"
+                  prop="email">
+                  <el-input v-model.trim="ruleForm.email"
+                    style="width:200px;"></el-input>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary" @click="submitForm('ruleForm')">{{$t('user.save')}}</el-button>
+                  <el-button type="primary"
+                    @click="submitForm('ruleForm')">{{$t('user.save')}}</el-button>
                   <el-button @click="resetForm('ruleForm')">{{$t('user.cancel')}}</el-button>
                 </el-form-item>
               </el-form>
@@ -99,11 +118,13 @@
 import { getUserInfo, changeUserInfo } from "../../api/index.js";
 import { onSuccess } from "../../utils/callback";
 export default {
-  data() {
+  data () {
     return {
       userMsgBox: false,
       userArr: [],
       ruleForm: {},
+      emailsError: '',
+      email: /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/,
       rules: {
         email: [
           { required: false, message: this.$t("user.nameErr"), trigger: "blur" }
@@ -124,7 +145,7 @@ export default {
     };
   },
   methods: {
-    getData() {
+    getData () {
       getUserInfo().then(res => {
         console.log(res.data);
         if (res.data.code === 0) {
@@ -135,7 +156,7 @@ export default {
         }
       });
     },
-    companyRole(str) {
+    companyRole (str) {
       switch (str) {
         case "platform":
           return `${this.$t("platform")}`;
@@ -147,7 +168,7 @@ export default {
           return "";
       }
     },
-    userRole(str) {
+    userRole (str) {
       switch (str) {
         case "plat_super_admin":
           return this.$t("useMsg.superAdministrator");
@@ -163,27 +184,30 @@ export default {
           return "";
       }
     },
-    doEditor() {
+    doEditor () {
       this.userMsgBox = true;
     },
-    closeMsgBox(formName) {
+    closeMsgBox (formName) {
       this.userMsgBox = false;
       this.ruleForm = {};
       this.$refs[formName].resetFields();
     },
-    resetForm(formName) {
+    resetForm (formName) {
       this.$refs[formName].resetFields();
     },
-    submitForm(formName) {
+    submitForm (formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
+          if (this.ruleForm.email && !this.email.test(this.ruleForm.email)) {
+            this.emailsError = this.$t('useMsg.warn.emailCheck'); // "邮箱格式有误";
+            return;
+          }
           let userObj = {
             email: this.ruleForm.email,
             phoneNumber: this.ruleForm.phoneNum
           };
           changeUserInfo(userObj).then(res => {
             console.log(res);
-
             if (res.data.code === 0) {
               this.userMsgBox = false;
               this.ruleForm = {};
@@ -198,7 +222,7 @@ export default {
       });
     }
   },
-  mounted() {
+  mounted () {
     this.getData();
   }
 };

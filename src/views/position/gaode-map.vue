@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div id="positions" class="positioned"></div>
+    <div id="positions"
+      class="positioned"></div>
   </div>
 </template>
 <script>
@@ -11,27 +12,27 @@ let infoWindow;
 let geocoder;
 export default {
   props: ["mapData", "test", "testaa"],
-  data() {
+  data () {
     return {
       markers: []
     };
   },
   watch: {
     mapData: {
-      handler: function(val, oldVal) {
+      handler: function (val, oldVal) {
         this.MapInit(val.data, val.type);
       },
       deep: true
     },
     testaa: {
-      handler: function(val) {
+      handler: function (val) {
         console.log("val", val);
         console.log("testtesttest", this.test);
       }
     }
   },
   methods: {
-    init() {
+    init () {
       const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
       map = new AMap.Map("positions", {
         resizeEnable: true,
@@ -62,7 +63,7 @@ export default {
     //     map && map.setCenter(center);
     //   }
     // },
-    MapInit(data, type) {
+    MapInit (data, type) {
       // console.log("watch ===>>>", data);
       this.markers && map.remove(this.markers);
       let allmarkerArr = Object.values(data);
@@ -124,7 +125,7 @@ export default {
             let pointerData = key.getExtData();
             // console.log(key);
             const self = this;
-            geocoder.getAddress(pointerData.center, function(status, result) {
+            geocoder.getAddress(pointerData.center, function (status, result) {
               if (status === "complete" && result.regeocode) {
                 let address = result.regeocode.formattedAddress;
                 console.log(result);
@@ -242,7 +243,7 @@ export default {
       // });
     }
   },
-  mounted() {
+  mounted () {
     console.log("testtesttesttesttesttest", this.test);
     this.init();
   }

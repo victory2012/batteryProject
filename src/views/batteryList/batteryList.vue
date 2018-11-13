@@ -1,7 +1,10 @@
 <template>
   <div class="batterylist">
     <div class="headerBtn">
-      <el-button size="medium" v-show="limeted" @click="doCreatBattery" type="primary">{{$t('batteryList.batteryAddBtn')}}
+      <el-button size="medium"
+        v-show="limeted"
+        @click="doCreatBattery"
+        type="primary">{{$t('batteryList.batteryAddBtn')}}
         <i class="el-icon-circle-plus-outline"></i>
       </el-button>
       <!-- <el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/" multiple :on-exceed="handleExceed">
@@ -29,25 +32,49 @@
       <el-button size="small">清空</el-button> -->
     </div>
     <div class="table">
-      <el-table v-loading="loading" :data="tableData" style="width: 100%" max-height="750">
-        <el-table-column type="index" width="80" align="center" :label="$t('batteryList.serial')"></el-table-column>
-        <el-table-column prop="batteryId" align="center" :label="$t('batteryList.batteryCode')">
+      <el-table v-loading="loading"
+        :data="tableData"
+        style="width: 100%"
+        max-height="750">
+        <el-table-column type="index"
+          width="80"
+          align="center"
+          :label="$t('batteryList.serial')"></el-table-column>
+        <el-table-column prop="batteryId"
+          align="center"
+          :label="$t('batteryList.batteryCode')">
         </el-table-column>
-        <el-table-column prop="model" align="center" :label="$t('batteryList.model')">
+        <el-table-column prop="model"
+          align="center"
+          :label="$t('batteryList.model')">
         </el-table-column>
-        <el-table-column prop="specification" align="center" :label="$t('batteryList.specif')">
+        <el-table-column prop="specification"
+          align="center"
+          :label="$t('batteryList.specif')">
         </el-table-column>
-        <el-table-column prop="customerName" align="center" :label="$t('batteryList.customer')">
+        <el-table-column prop="customerName"
+          align="center"
+          :label="$t('batteryList.customer')">
         </el-table-column>
-        <el-table-column prop="deviceId" align="center" :label="$t('batteryList.deviceCode')">
+        <el-table-column prop="deviceId"
+          align="center"
+          :label="$t('batteryList.deviceCode')">
         </el-table-column>
-        <el-table-column prop="bindingName" align="center" :label="$t('batteryList.bindStatus')">
+        <el-table-column prop="bindingName"
+          align="center"
+          :label="$t('batteryList.bindStatus')">
         </el-table-column>
-        <el-table-column prop="online" align="center" :label="$t('batteryList.onlineStatus')">
+        <el-table-column prop="online"
+          align="center"
+          :label="$t('batteryList.onlineStatus')">
         </el-table-column>
-        <el-table-column align="center" :label="$t('batteryList.running')">
+        <el-table-column align="center"
+          :label="$t('batteryList.running')">
           <template slot-scope="scope">
-            <el-button @click.native.prevent="examine(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].OLS" size="small">
+            <el-button @click.native.prevent="examine(scope.$index, tableData)"
+              type="text"
+              :disabled="!tableData[scope.$index].OLS"
+              size="small">
               {{$t('batteryList.view')}}
             </el-button>
           </template>
@@ -70,23 +97,42 @@
         </el-table-column> -->
       </el-table>
       <div class="block">
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-sizes="handleSizeData" :page-size="handleSize" layout="sizes, prev, pager, next" :total="totalPage">
+        <el-pagination @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page.sync="currentPage"
+          :page-sizes="handleSizeData"
+          :page-size="handleSize"
+          layout="sizes, prev, pager, next"
+          :total="totalPage">
         </el-pagination>
       </div>
     </div>
     <div>
-      <el-dialog :title="$t('batteryList.batteryAddBtn')" :visible.sync="creatBattery" width="600px">
-        <el-form :model="BatteryForm" :rules="BatteryRules" ref="BatteryForm">
+      <el-dialog :title="$t('batteryList.batteryAddBtn')"
+        :visible.sync="creatBattery"
+        width="600px">
+        <el-form :model="BatteryForm"
+          :rules="BatteryRules"
+          ref="BatteryForm">
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.enterprise')" prop="enterpriseName">
-                <el-input v-model="BatteryForm.enterpriseName" disabled auto-complete="off" :placeholder="$t('batteryList.warn.enterprise')"></el-input>
+              <el-form-item :label="$t('batteryList.enterprise')"
+                prop="enterpriseName">
+                <el-input v-model="BatteryForm.enterpriseName"
+                  disabled
+                  auto-complete="off"
+                  :placeholder="$t('batteryList.warn.enterprise')"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.customerCom')" prop="customer">
-                <el-select v-model="BatteryForm.customer" style="width:238px">
-                  <el-option v-for="item in customerList" :key="item.id" :label="item.name" :value="item.id">
+              <el-form-item :label="$t('batteryList.customerCom')"
+                prop="customer">
+                <el-select v-model="BatteryForm.customer"
+                  style="width:238px">
+                  <el-option v-for="item in customerList"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
                   </el-option>
                 </el-select>
                 <!-- <el-input v-model="BatteryForm.customerId" auto-complete="off"></el-input> -->
@@ -95,26 +141,40 @@
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.batteryNumber')" prop="batteryId">
-                <el-input v-model="BatteryForm.batteryId" auto-complete="off" :placeholder="$t('batteryList.batteryNumber')"></el-input>
+              <el-form-item :label="$t('batteryList.batteryNumber')"
+                prop="batteryId">
+                <el-input v-model.trim="BatteryForm.batteryId"
+                  auto-complete="off"
+                  :placeholder="$t('batteryList.batteryNumber')"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.model')" prop="model">
-                <el-input v-model="BatteryForm.model" auto-complete="off" :placeholder="$t('batteryList.warn.model')"></el-input>
+              <el-form-item :label="$t('batteryList.model')"
+                prop="model">
+                <el-input v-model.trim="BatteryForm.model"
+                  auto-complete="off"
+                  :placeholder="$t('batteryList.warn.model')"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.specif')" prop="specification">
-                <el-input v-model="BatteryForm.specification" auto-complete="off" :placeholder="$t('batteryList.warn.specif')"></el-input>
+              <el-form-item :label="$t('batteryList.specif')"
+                prop="specification">
+                <el-input v-model.trim="BatteryForm.specification"
+                  auto-complete="off"
+                  :placeholder="$t('batteryList.warn.specif')"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.deviceCode')" prop="deviceId">
-                <el-select v-model="BatteryForm.deviceId" style="width:238px">
-                  <el-option v-for="item in deviceIdList" :key="item" :label="item" :value="item">
+              <el-form-item :label="$t('batteryList.deviceCode')"
+                prop="deviceId">
+                <el-select v-model="BatteryForm.deviceId"
+                  style="width:238px">
+                  <el-option v-for="item in deviceIdList"
+                    :key="item"
+                    :label="item"
+                    :value="item">
                   </el-option>
                 </el-select>
                 <!-- <el-input v-model="BatteryForm.deviceId" auto-complete="off" placeholder="请填设备编号"></el-input> -->
@@ -123,30 +183,51 @@
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.createDate')" prop="createDate">
-                <el-date-picker v-model="BatteryForm.createDate" style="width:238px" type="date" value-format="yyyy-MM-dd HH:mm:ss" @change="formatCreatDate" :placeholder="$t('batteryList.createDate')">
+              <el-form-item :label="$t('batteryList.createDate')"
+                prop="createDate">
+                <el-date-picker v-model="BatteryForm.createDate"
+                  style="width:238px"
+                  type="date"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  @change="formatCreatDate"
+                  :placeholder="$t('batteryList.createDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.manufactureDate')" prop="manufactureDate">
-                <el-date-picker v-model="BatteryForm.manufactureDate" style="width:238px" type="date" value-format="yyyy-MM-dd HH:mm:ss" :placeholder="$t('batteryList.manufactureDate')">
+              <el-form-item :label="$t('batteryList.manufactureDate')"
+                :error="manufactureDateError"
+                prop="manufactureDate">
+                <el-date-picker v-model="BatteryForm.manufactureDate"
+                  style="width:238px"
+                  type="date"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  :placeholder="$t('batteryList.manufactureDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="40">
             <el-col :span="12">
-              <el-form-item :label="$t('batteryList.warrantyDate')" prop="warrantyDate">
-                <el-date-picker v-model="BatteryForm.warrantyDate" style="width:238px" type="date" value-format="yyyy-MM-dd HH:mm:ss" :placeholder="$t('batteryList.warrantyDate')">
+              <el-form-item :label="$t('batteryList.warrantyDate')"
+                :error="warrantyDateError"
+                prop="warrantyDate">
+                <el-date-picker v-model="BatteryForm.warrantyDate"
+                  style="width:238px"
+                  type="date"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  :placeholder="$t('batteryList.warrantyDate')">
                 </el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
-        <div slot="footer" class="dialog-footer">
+        <div slot="footer"
+          class="dialog-footer">
           <el-button @click="resetBatteryForm('BatteryForm')">{{$t('batteryList.cancel')}}</el-button>
-          <el-button @click="regBattery('BatteryForm')" :loading="SureReg" type="primary">{{$t('batteryList.sure')}}</el-button>
+          <el-button @click="regBattery('BatteryForm')"
+            :loading="SureReg"
+            type="primary">{{$t('batteryList.sure')}}</el-button>
         </div>
       </el-dialog>
     </div>
@@ -161,8 +242,10 @@ import {
 } from "../../api/index.js";
 import { onSuccess } from "../../utils/callback.js";
 export default {
-  data() {
+  data () {
     return {
+      warrantyDateError: '',
+      manufactureDateError: '',
       totalPage: 1, // 总数
       currentPage: 1, // 当前页
       handleSize: 10, // 每页显示条数
@@ -179,21 +262,21 @@ export default {
           {
             required: true,
             message: this.$t("batteryList.warn.batteryCode"),
-            trigger: "blur"
+            trigger: "change"
           }
         ],
         model: [
           {
             required: true,
             message: this.$t("batteryList.warn.model"),
-            trigger: "blur"
+            trigger: "change"
           }
         ],
         specification: [
           {
             required: true,
             message: this.$t("batteryList.warn.specif"),
-            trigger: "blur"
+            trigger: "change"
           }
         ],
         manufactureDate: [
@@ -236,27 +319,27 @@ export default {
     };
   },
   computed: {
-    limeted() {
+    limeted () {
       let loginData = JSON.parse(sessionStorage.getItem("loginData"));
       return loginData.userRole !== "plat_super_admin";
     }
   },
-  mounted() {
+  mounted () {
     this.getData();
   },
   methods: {
-    batteryReg() {
+    batteryReg () {
       this.regForm = true;
     },
-    renew() {
+    renew () {
       this.$router.push({
         path: "/blacklist"
       });
     },
-    formatCreatDate(date) {
+    formatCreatDate (date) {
       this.CreatDatefirst = date;
     },
-    doCreatBattery() {
+    doCreatBattery () {
       let loginData = JSON.parse(sessionStorage.getItem("loginData"));
       this.creatBattery = true;
       this.customerList = loginData.customer;
@@ -264,19 +347,30 @@ export default {
       this.getDeviceListOnly();
       // this.getCustomerList();
     },
-    regBattery(form) {
+    getTime (date) {
+      return new Date(date).getTime();
+    },
+    regBattery (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
           let loginData = JSON.parse(sessionStorage.getItem("loginData"));
-          if (loginData.customer.length > 0) {
-            this.BatteryForm.customerId = loginData.customer.customerId;
-            this.BatteryForm.customerName = loginData.customer.customerName;
+          // if (loginData.customer.length > 0) {
+          //   this.BatteryForm.customerId = loginData.customer.customerId;
+          //   this.BatteryForm.customerName = loginData.customer.customerName;
+          // }
+          if (this.getTime(this.BatteryForm.manufactureDate) < this.getTime(this.BatteryForm.createDate)) {
+            this.manufactureDateError = this.$t('batteryList.warn.CheckmanufactureDate')
+            return
+          }
+          if (this.getTime(this.BatteryForm.warrantyDate) < this.getTime(this.BatteryForm.manufactureDate)) {
+            this.warrantyDateError = this.$t('batteryList.warn.CheckWarrantyDate')
+            return
           }
           this.BatteryForm.customerId = "";
           this.BatteryForm.customerName = "";
           this.BatteryForm.manufacturerName = loginData.enterpriseName;
           this.BatteryForm.manufacturerId = loginData.enterpriseId;
-          console.log(this.BatteryForm);
+          console.log("BatteryForm", this.BatteryForm);
           addBattery(this.BatteryForm).then(res => {
             console.log(res);
             if (res.data.code === 0) {
@@ -286,15 +380,13 @@ export default {
               this.getData();
             }
           });
-        } else {
-          return false;
         }
       });
     },
-    resetBatteryForm(form) {
+    resetBatteryForm (form) {
       this.$refs[form].resetFields();
     },
-    getDeviceListOnly() {
+    getDeviceListOnly () {
       deviceListOnly().then(res => {
         console.log(res);
         if (res.data.code === 0) {
@@ -303,7 +395,7 @@ export default {
       });
     },
     /* 获取电池列表数据 */
-    getData() {
+    getData () {
       let pageObj = {
         pageSize: this.handleSize,
         pageNum: this.currentPage
@@ -341,7 +433,7 @@ export default {
     /*
     * 删除
     */
-    deleteRow(index, tableData) {
+    deleteRow (index, tableData) {
       // console.log("index", index);
       console.log("data", tableData);
       this.loading = true;
@@ -361,7 +453,7 @@ export default {
     /*
      * 查看运行状态
      */
-    examine(index, tableData) {
+    examine (index, tableData) {
       let userData = JSON.parse(sessionStorage.getItem("loginData"));
       let deviceId = tableData[index];
       // this.$router.push({
@@ -384,7 +476,7 @@ export default {
     /*
     * 改变每页显示的条数
     */
-    handleSizeChange(index) {
+    handleSizeChange (index) {
       // index为选中的页数
       this.handleSize = index;
       this.getData();
@@ -392,7 +484,7 @@ export default {
     /*
     * 显示第几页
     */
-    handleCurrentChange() {
+    handleCurrentChange () {
       this.getData();
     }
   }
