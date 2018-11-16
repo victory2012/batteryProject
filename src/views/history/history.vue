@@ -3,52 +3,104 @@
     <div class="mapcontainer">
       <div class="control">
         <div class="date">
-          <vue-datepicker-local v-model="starts" clearable :placeholder="$t('history.startTime')" format="YYYY-MM-DD HH:mm:ss" show-buttons @confirm="selectedDate" />
-          <vue-datepicker-local v-model="endtime" format="YYYY-MM-DD HH:mm:ss" clearable :placeholder="$t('history.endTime')" show-buttons @confirm="selectedDate" />
-          <el-button v-show="trajectory" size="mini" plain @click="startOnclick" :title="$t('history.start')">
+          <vue-datepicker-local v-model="starts"
+            clearable
+            :placeholder="$t('history.startTime')"
+            format="YYYY-MM-DD HH:mm:ss"
+            show-buttons
+            @confirm="selectedDate" />
+          <vue-datepicker-local v-model="endtime"
+            format="YYYY-MM-DD HH:mm:ss"
+            clearable
+            :placeholder="$t('history.endTime')"
+            show-buttons
+            @confirm="selectedDate" />
+          <el-button v-show="trajectory"
+            size="mini"
+            plain
+            @click="startOnclick"
+            :title="$t('history.start')">
             <i class="iconfont icon-ic_song_next"></i>
           </el-button>
-          <el-button v-show="trajectory" size="mini" plain @click="pauseOnclick" :title="$t('history.pause')">
+          <el-button v-show="trajectory"
+            size="mini"
+            plain
+            @click="pauseOnclick"
+            :title="$t('history.pause')">
             <i class="iconfont icon-artboard25copy"></i>
           </el-button>
-          <el-button v-show="trajectory" size="mini" plain @click="resumeOnclick" :title="$t('history.continue')">
+          <el-button v-show="trajectory"
+            size="mini"
+            plain
+            @click="resumeOnclick"
+            :title="$t('history.continue')">
             <i class="iconfont icon-icons-resume_button"></i>
           </el-button>
-          <el-button v-show="trajectory" size="mini" plain @click="stopOnclick" :title="$t('history.stop')">
+          <el-button v-show="trajectory"
+            size="mini"
+            plain
+            @click="stopOnclick"
+            :title="$t('history.stop')">
             <i class="iconfont icon-stop"></i>
           </el-button>
-          <el-button v-show="trajectory" type="danger" size="small" @click="heatmap">{{$t('history.heatActive')}}</el-button>
-          <el-button v-show="active" type="primary" size="mini" @click="track">{{$t('history.TrackReplay')}}</el-button>
+          <el-button v-show="trajectory"
+            type="danger"
+            size="small"
+            @click="heatmap">{{$t('history.heatActive')}}</el-button>
+          <el-button v-show="active"
+            type="primary"
+            size="mini"
+            @click="track">{{$t('history.TrackReplay')}}</el-button>
         </div>
       </div>
-      <div class="timeRange" v-show="trajectory">
+      <div class="timeRange"
+        v-show="trajectory">
         <span>{{$t('history.times')}}(s)</span>
-        <el-slider v-model="timeSeconds" @change="speedChange" vertical height="200px">
+        <el-slider v-model="timeSeconds"
+          @change="speedChange"
+          vertical
+          height="200px">
         </el-slider>
       </div>
-      <div id="mapcontainer" class="map"></div>
-      <div class="HisMask" v-show="mapLoading" v-loading="mapLoading"></div>
+      <div id="mapcontainer"
+        class="map"></div>
+      <div class="HisMask"
+        v-show="mapLoading"
+        v-loading="mapLoading"></div>
     </div>
-    <div class="panels" v-loading="loading">
+    <div class="panels"
+      v-loading="loading">
       <h2>{{$t('history.batteryList')}}</h2>
       <div class="panelTop">
         <ul class="list_warp">
-          <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item)">
+          <li v-for="(item, index) in pointerArr"
+            :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]"
+            :key="item.deviceId"
+            @click="checkItem(item)">
             <span style="margin-right:5px;">{{index+1}}、{{item.batteryId}}</span>
           </li>
         </ul>
       </div>
       <div class="page">
-        <el-pagination @current-change="pageChange" :current-page.sync="pageNum" small layout="prev, pager, next" :total="total">
+        <el-pagination @current-change="pageChange"
+          :current-page.sync="pageNum"
+          small
+          layout="prev, pager, next"
+          :total="total">
         </el-pagination>
       </div>
       <div class="checkTime">
         <ul>
-          <li v-for="(key, index) in blockArr" @click="showThisData(key, index, $event)" :class="[{'yollew': key.bgColor === 'yellow'},{'gray': key.bgColor === 'gray'},{'green': key.bgColor === 'green'}]" :key="key.id"></li>
+          <li v-for="(key, index) in blockArr"
+            @click="showThisData(key, index, $event)"
+            :class="[{'yollew': key.bgColor === 'yellow'},{'gray': key.bgColor === 'gray'},{'green': key.bgColor === 'green'}]"
+            :key="key.id"></li>
         </ul>
-        <div v-show="showTimeDetail" class="blockInfo">
+        <div v-show="showTimeDetail"
+          class="blockInfo">
           <div class="blockInfo_warp">
-            <div v-for="item in activePointer" :key="item.createTime">{{item.dateFormat}}: {{item.onlineStatus}}</div>
+            <div v-for="item in activePointer"
+              :key="item.createTime">{{item.dateFormat}}: {{item.onlineStatus}}</div>
           </div>
         </div>
       </div>
@@ -73,7 +125,7 @@ var map, navg, heatmap, pathSimplifierIns;
 let infoWindow;
 let pointArr = [];
 export default {
-  data() {
+  data () {
     return {
       activeName: "list",
       trajectory: false,
@@ -99,11 +151,11 @@ export default {
       showTimeDetail: false
     };
   },
-  mounted() {
+  mounted () {
     this.init();
   },
   methods: {
-    init() {
+    init () {
       const lang = sessionStorage.getItem("locale") === "en" ? "en" : "zh_cn";
       map = new AMap.Map("mapcontainer", {
         resizeEnable: true,
@@ -120,7 +172,7 @@ export default {
       this.getHisData();
     },
     /* 点击小格子 事件 */
-    showThisData(key, index, event) {
+    showThisData (key, index, event) {
       // console.log(this.$refs.blockInfo)
       this.activePointer = [];
       pointArr.forEach(key => {
@@ -131,7 +183,7 @@ export default {
       });
     },
     // 通过设备id 来查看对应的上下线时间数据
-    getTimeList(id) {
+    getTimeList (id) {
       let param = {
         deviceId: id,
         startTime: timeFormat(this.starts),
@@ -211,7 +263,7 @@ export default {
       });
     },
     // switch color
-    swichFun(key) {
+    swichFun (key) {
       switch (key) {
         case 0:
           return "green";
@@ -223,7 +275,7 @@ export default {
           break;
       }
     },
-    pageChange() {
+    pageChange () {
       this.blockArr = [];
       let pageObj = {
         pageNum: this.pageNum,
@@ -231,7 +283,7 @@ export default {
       };
       this.getHisData(pageObj);
     },
-    speedChange() {
+    speedChange () {
       if (this.timeSeconds < 1) {
         this.timeSeconds = 1;
       }
@@ -241,7 +293,7 @@ export default {
       navg.setSpeed(speeds);
     },
     /* 时间确认按钮 */
-    selectedDate(date) {
+    selectedDate (date) {
       if (!this.starts) {
         onWarn(`${this.$t("history.startTime")}`);
         return;
@@ -263,7 +315,7 @@ export default {
       this.getData(opts);
     },
     /* 获取数据 */
-    getData(params) {
+    getData (params) {
       this.mapLoading = true;
       GetTrajectory(params).then(res => {
         this.mapLoading = false;
@@ -290,8 +342,10 @@ export default {
               obj.lat = key.latitude;
               obj.pushTime = key.pushTime;
               obj.count = 150;
-              this.lineArr.push([obj.lng, obj.lat, obj.pushTime]);
-              this.gridData.push(obj);
+              if (Number(key.longitude) > 1 && Number(key.latitude) > 1) {
+                this.lineArr.push([obj.lng, obj.lat, obj.pushTime]);
+                this.gridData.push(obj);
+              }
             }
             if (this.trajectory && pathSimplifierIns) {
               pathSimplifierIns.setData();
@@ -311,7 +365,7 @@ export default {
         }
       });
     },
-    heatmap() {
+    heatmap () {
       if (this.markerArr.length > 0) {
         map.remove(this.markerArr);
       }
@@ -332,7 +386,7 @@ export default {
     },
 
     // 获取列表数据
-    getHisData() {
+    getHisData () {
       let pageObj = {
         pageNum: this.pageNum,
         pageSize: 10,
@@ -378,7 +432,7 @@ export default {
       });
     },
     // 历史轨迹 轨迹配置
-    track() {
+    track () {
       this.trajectory = true;
       this.active = false;
       heatmap && heatmap.hide();
@@ -404,14 +458,14 @@ export default {
           pathSimplifierIns = new PathSimplifier({
             zIndex: 100,
             map: map,
-            getHoverTitle: function(pathData, pathIndex, pointIndex) {
+            getHoverTitle: function (pathData, pathIndex, pointIndex) {
               if (pointIndex >= 0) {
                 return `${self.$t("history.No")} ${pointIndex} ${self.$t(
                   "history.point"
                 )}`;
               }
             },
-            getPath: function(pathData, pathIndex) {
+            getPath: function (pathData, pathIndex) {
               return pathData.path;
             },
             renderOptions: {
@@ -427,7 +481,7 @@ export default {
               }
             }
           });
-          pathSimplifierIns.on("pointClick", function(e, info) {
+          pathSimplifierIns.on("pointClick", function (e, info) {
             let pointIndex = info.pointIndex;
             let pathData = info.pathData;
             let point = pathData.path[pointIndex];
@@ -504,7 +558,7 @@ export default {
       });
     },
     // 列表点击事件
-    checkItem(item) {
+    checkItem (item) {
       this.mapLoading = true;
       this.activePointer = [];
       this.blockArr = [];
@@ -519,19 +573,19 @@ export default {
       this.getTimeList(this.queryDevice);
     },
     // 开始运动
-    startOnclick() {
+    startOnclick () {
       navg && navg.start();
     },
     // 暂停运动
-    pauseOnclick() {
+    pauseOnclick () {
       navg && navg.pause();
     },
     // 继续运动
-    resumeOnclick() {
+    resumeOnclick () {
       navg && navg.resume();
     },
     // 停止运动
-    stopOnclick() {
+    stopOnclick () {
       navg && navg.stop();
       // map.clearMap();
     },
@@ -541,16 +595,16 @@ export default {
     * pathSimplifierIns： hide() ---- 隐藏轨迹
     *                     show() ---- 显示轨迹
     */
-    historyShow() {
+    historyShow () {
       pathSimplifierIns.show();
       heatmap.hide();
     },
-    heatShow() {
+    heatShow () {
       pathSimplifierIns.hide();
       heatmap.show();
     }
   },
-  beforeDestroy() {
+  beforeDestroy () {
     map.destroy();
   }
 };

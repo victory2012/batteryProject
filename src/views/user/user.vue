@@ -96,7 +96,6 @@
                   <el-input v-model="ruleForm.userName" style="width:200px;"></el-input>
                 </el-form-item> -->
                 <el-form-item :label="$t('user.email')"
-                  :error="emailsError"
                   prop="email">
                   <el-input v-model.trim="ruleForm.email"
                     style="width:200px;"></el-input>
@@ -127,7 +126,8 @@ export default {
       email: /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/,
       rules: {
         email: [
-          { required: false, message: this.$t("user.nameErr"), trigger: "blur" }
+          { required: false, message: this.$t("user.nameErr"), trigger: "blur" },
+          { type: 'email', message: this.$t('useMsg.warn.emailCheck'), trigger: ['blur', 'change'] }
         ],
         phoneNum: [
           {
@@ -198,10 +198,10 @@ export default {
     submitForm (formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          if (this.ruleForm.email && !this.email.test(this.ruleForm.email)) {
-            this.emailsError = this.$t('useMsg.warn.emailCheck'); // "邮箱格式有误";
-            return;
-          }
+          // if (this.ruleForm.email && !this.email.test(this.ruleForm.email)) {
+          //   this.emailsError = this.$t('useMsg.warn.emailCheck'); // "邮箱格式有误";
+          //   return;
+          // }
           let userObj = {
             email: this.ruleForm.email,
             phoneNumber: this.ruleForm.phoneNum

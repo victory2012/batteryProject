@@ -225,8 +225,6 @@ export default {
     },
     // 确认设置 添加围栏
     doAddFence () {
-      // console.log(this.selectPonter);
-      console.log('unique Array', this.unique(this.selectPonter))
       let pointer = this.unique(this.selectPonter);
       if (pointer.length === 0) {
         onError(`${this.$t("fence.tipMsg.addPointer")}`);
@@ -284,6 +282,7 @@ export default {
       delFence(this.fenceId).then(res => {
         if (res.data.code === 0) {
           this.hasFenced = false;
+          this.selectPonter = [];
           onSuccess(`${this.$t("fence.tipMsg.delSuccess")}`);
           this.polygon.setMap(null);
         }
@@ -310,9 +309,6 @@ export default {
         if (res.data.code === 0) {
           this.selectPonter = [];
           map.clearMap();
-          // markers && map.remove(markers); // 清除marker点
-          // mouseTool && mouseTool.close(true); // 清除多边形
-          // markers = [];
           let result = res.data.data;
           if (result) {
             map.setDefaultCursor(); // 手势

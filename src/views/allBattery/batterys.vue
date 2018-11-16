@@ -64,7 +64,7 @@
 // import AMap from "AMap";
 import { mapState } from "vuex";
 import { websockets, GetDeviceList, GetCount } from "../../api/index.js";
-import { onError, onWarn } from "../../utils/callback.js";
+import { onWarn } from "../../utils/callback.js";
 import GaodeMap from "./gaode-map";
 import GoogleMap from "./google-map";
 let pointerObj = {};
@@ -137,7 +137,7 @@ export default {
           pointerObj = {};
           if (result.length > 0) {
             result.forEach(key => {
-              if (key.longitude && key.latitude && key.onlineStatus === 1) {
+              if (key.longitude && key.latitude && Number(key.longitude) > 0 && Number(key.latitude) > 0 && key.onlineStatus === 1) {
                 pointerObj[key.deviceId] = `${key.longitude},${key.latitude}`;
                 this.sendData.param.push(key.deviceId);
               }
@@ -164,7 +164,6 @@ export default {
         };
         ws.onmessage = evt => {
           let data = JSON.parse(evt.data);
-          console.log("all-battery-onmessage", data);
           if (data.code === 1) {
             this.onLine = data.data;
             if (Number(this.allDevice) < Number(this.onLine)) {
@@ -178,26 +177,25 @@ export default {
             // }
             // code 为 1时 既绑定成功，2时为 收到了数据
             let obj = data.data.split(",");
-            obj.forEach(() => {
+            if (Number(obj[2]) > 0 && Number(obj[1]) > 0) {
               pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
-            });
+              this.propData.data = pointerObj;
+              this.propData.type = "ws";
+            }
+            // obj.forEach(() => {
+            //   pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+            // });
 
-            this.propData.data = pointerObj;
             // this.mapInit(pointerObj);
-            this.propData.type = "ws";
 
             // this.$store.commit("GET_MAP_DATA", {
             //   data: pointerObj,
             //   type: "ws"
             // });
             // this.mapInit(pointerObj);
-            // console.log(pointerObj);
-            // this.propData = pointerObj;
-            // this.propData.type = "ws";
           }
         };
         ws.onerror = () => {
-          onError("服务器繁忙，请稍后重试");
           this.over();
         };
         this.over = () => {

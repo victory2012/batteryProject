@@ -157,8 +157,10 @@ module.exports = {
       manufactureDate: 'Date of manufacture',
       warrantyDate: 'Warranty',
       deviceId: 'Please enter device id.',
-      CheckmanufactureDate: '出厂日期应大于生产日期',
-      CheckWarrantyDate: '质保期应大于出厂日期'
+      CheckmanufactureDate:
+        'The date of production must before the date of manufacture.',
+      CheckWarrantyDate:
+        'The date of manufacture must before the date of warranty.'
     },
     success: 'Created Successfully.',
     delSuccess: 'Deleted Successfully.'

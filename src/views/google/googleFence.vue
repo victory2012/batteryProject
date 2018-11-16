@@ -274,6 +274,7 @@ export default {
 
         if (res.data.code === 0) {
           onSuccess(`${this.$t("fence.tipMsg.delSuccess")}`);
+          this.selectPonter = [];
           this.getData({
             batteryId: this.clickItme.batteryId,
             deviceId: this.clickItme.deviceId
