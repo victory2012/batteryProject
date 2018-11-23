@@ -141,34 +141,33 @@ export default {
       });
     },
     localPosition () {
-      websockets(ws => {
-        ws.onopen = () => {
-          console.log("open....");
-          this.singleDevice(ws);
-        };
-        ws.onmessage = evt => {
-          let data = JSON.parse(evt.data);
-          console.log(data);
-          if (data.code === 2) {
-            if (this.markers.length > 0) {
-              map.remove(this.markers);
-            }
-            // code 为 1时 既绑定成功，2时为 收到了数据
-            let obj = data.data.split(",");
-            obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
-            });
-            this.mapInit(pointerObj);
+      this.WS = websockets()
+      this.WS.onopen = () => {
+        console.log("open....");
+        this.singleDevice(this.WS);
+      };
+      this.WS.onmessage = evt => {
+        let data = JSON.parse(evt.data);
+        console.log(data);
+        if (data.code === 2) {
+          if (this.markers.length > 0) {
+            map.remove(this.markers);
           }
-        };
-        ws.onerror = () => {
-          console.log("onerror...");
-          this.over();
-        };
-        this.over = () => {
-          ws.close();
-        };
-      });
+          // code 为 1时 既绑定成功，2时为 收到了数据
+          let obj = data.data.split(",");
+          obj.forEach(() => {
+            pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+          });
+          this.mapInit(pointerObj);
+        }
+      };
+      this.WS.onerror = () => {
+        console.log("onerror...");
+        this.over();
+      };
+    },
+    over () {
+      this.WS.close();
     },
     singleDevice (ws) {
       let NowDeviceId = this.$route.query.deviceId;

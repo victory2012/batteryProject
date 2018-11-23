@@ -3,43 +3,85 @@
     <div class="mapcontainer">
       <div class="control">
         <div class="date">
-          <vue-datepicker-local v-model="starts" clearable :placeholder="$t('history.startTime')" format="YYYY-MM-DD HH:mm:ss" show-buttons @confirm="selectedDate" />
-          <vue-datepicker-local v-model="endtime" format="YYYY-MM-DD HH:mm:ss" clearable :placeholder="$t('history.endTime')" show-buttons @confirm="selectedDate" />
-          <el-button v-show="trajectory" size="mini" plain @click="startMove" :title="$t('history.start')">
+          <vue-datepicker-local v-model="starts"
+            clearable
+            :placeholder="$t('history.startTime')"
+            format="YYYY-MM-DD HH:mm:ss"
+            show-buttons
+            @confirm="selectedDate" />
+          <vue-datepicker-local v-model="endtime"
+            format="YYYY-MM-DD HH:mm:ss"
+            clearable
+            :placeholder="$t('history.endTime')"
+            show-buttons
+            @confirm="selectedDate" />
+          <el-button v-show="trajectory"
+            size="mini"
+            plain
+            @click="startMove"
+            :title="$t('history.start')">
             <i class="iconfont icon-ic_song_next"></i>
           </el-button>
-          <el-button v-show="trajectory" type="danger" size="small" @click="heatmap">{{$t('history.heatActive')}}</el-button>
-          <el-button v-show="active" type="primary" size="mini" @click="track">{{$t('history.TrackReplay')}}</el-button>
+          <el-button v-show="trajectory"
+            type="danger"
+            size="small"
+            @click="heatmap">{{$t('history.heatActive')}}</el-button>
+          <el-button v-show="active"
+            type="primary"
+            size="mini"
+            @click="track">{{$t('history.TrackReplay')}}</el-button>
         </div>
       </div>
-      <div class="timeRange" v-show="trajectory">
+      <div class="timeRange"
+        v-show="trajectory">
         <span>{{$t('history.times')}}(s)</span>
-        <el-slider :max='max' :min="min" v-model="timeSeconds" @change="speedChange" vertical height="200px">
+        <el-slider :max='max'
+          :min="min"
+          v-model="timeSeconds"
+          @change="speedChange"
+          vertical
+          height="200px">
         </el-slider>
       </div>
-      <div id="mapcontainer" class="map"></div>
-      <div class="HisMask" v-show="mapLoading" v-loading="mapLoading"></div>
+      <div id="mapcontainer"
+        class="map"></div>
+      <div class="HisMask"
+        v-show="mapLoading"
+        v-loading="mapLoading"></div>
     </div>
-    <div class="panel" v-loading="loading">
+    <div class="panel"
+      v-loading="loading">
       <h2>{{$t('history.batteryList')}}</h2>
       <div class="panelTop">
         <ul class="list_warp">
-          <li v-for="(item, index) in pointerArr" :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]" :key="item.deviceId" @click="checkItem(item)">
+          <li v-for="(item, index) in pointerArr"
+            :class="[ devicelabel == item.batteryId ? 'selected': '',devicelabel == item.deviceId ? 'selected': '' ]"
+            :key="item.deviceId"
+            @click="checkItem(item)">
             <span style="margin-right:5px;">{{index+1}}、{{item.batteryId}}</span>
           </li>
         </ul>
       </div>
       <div class="page">
-        <el-pagination @current-change="pageChange" :current-page.sync="pageNum" small layout="prev, pager, next" :total="total">
+        <el-pagination @current-change="pageChange"
+          :current-page.sync="pageNum"
+          small
+          layout="prev, pager, next"
+          :total="total">
         </el-pagination>
       </div>
       <div class="checkTime">
         <ul>
-          <li v-for="(key, index) in blockArr" @click="showThisData(key, index, $event)" :class="[{'yollew': key.bgColor === 'yellow'},{'gray': key.bgColor === 'gray'},{'green': key.bgColor === 'green'}]" :key="key.id"></li>
+          <li v-for="(key, index) in blockArr"
+            @click="showThisData(key, index, $event)"
+            :class="[{'yollew': key.bgColor === 'yellow'},{'gray': key.bgColor === 'gray'},{'green': key.bgColor === 'green'}]"
+            :key="key.id"></li>
         </ul>
-        <div v-show="showTimeDetail" class="blockInfo">
+        <div v-show="showTimeDetail"
+          class="blockInfo">
           <div class="blockInfo_warp">
-            <div v-for="item in activePointer" :key="item.createTime">{{item.dateFormat}}: {{item.onlineStatus}}</div>
+            <div v-for="item in activePointer"
+              :key="item.createTime">{{item.dateFormat}}: {{item.onlineStatus}}</div>
           </div>
         </div>
       </div>
@@ -64,7 +106,7 @@ let line;
 let animate1;
 let pointArr = [];
 export default {
-  data() {
+  data () {
     return {
       mapLoading: false,
       loading: false,
@@ -96,12 +138,12 @@ export default {
       activePointer: []
     };
   },
-  mounted() {
+  mounted () {
     this.init();
   },
   methods: {
     /* 点击小格子 事件 */
-    showThisData(key, index, event) {
+    showThisData (key, index, event) {
       // console.log(this.$refs.blockInfo)
       this.activePointer = [];
       pointArr.forEach(key => {
@@ -112,7 +154,7 @@ export default {
       });
     },
     // 通过设备id 来查看对应的上下线时间数据
-    getTimeList(id) {
+    getTimeList (id) {
       let param = {
         deviceId: id,
         startTime: timeFormat(this.starts),
@@ -183,12 +225,12 @@ export default {
         }
       });
     },
-    speedChange() {
+    speedChange () {
       let speed = this.gridData.length / this.timeSeconds;
       this.haomiao = 1000 / speed;
       this.animateCircle(this.haomiao);
     },
-    pageChange() {
+    pageChange () {
       this.blockArr = [];
       let pageObj = {
         pageNum: this.pageNum,
@@ -197,7 +239,7 @@ export default {
       this.getHisData(pageObj);
     },
     /* 时间确认按钮 */
-    selectedDate(date) {
+    selectedDate (date) {
       if (!this.starts) {
         onWarn(`${this.$t("history.startTime")}`);
         return;
@@ -220,7 +262,7 @@ export default {
       this.getData(opts);
     },
     /* 获取数据 */
-    getData(params) {
+    getData (params) {
       this.mapLoading = true;
       GetTrajectory(params).then(res => {
         console.log(res);
@@ -237,9 +279,11 @@ export default {
               obj.pushTime = key.pushTime;
               obj.ponter = new google.maps.LatLng(key.latitude, key.longitude);
               this.lineArr.push(obj);
-              this.gridData.push(
-                new google.maps.LatLng(key.latitude, key.longitude)
-              );
+              if (Number(key.latitude) > 1 && Number(key.longitude) > 1) {
+                this.gridData.push(
+                  new google.maps.LatLng(key.latitude, key.longitude)
+                );
+              }
             }
             map.setCenter(this.gridData[0]);
             if (this.active) {
@@ -253,7 +297,7 @@ export default {
         }
       });
     },
-    heatmap() {
+    heatmap () {
       this.mapLoading = true;
       this.trajectory = false;
       this.active = true;
@@ -285,7 +329,7 @@ export default {
       this.mapLoading = false;
       // heatmapData.set("gradient", gradient);
     },
-    init() {
+    init () {
       try {
         map = new google.maps.Map(document.getElementById("mapcontainer"), {
           center: {
@@ -321,7 +365,7 @@ export default {
               latLngData +
               "&key=AIzaSyAz6eHKxmBqalyW0LVFjs9mugr5t0PxvYI&fields=formatted_address",
             async: true,
-            success: function(data) {
+            success: function (data) {
               console.log(data);
               let site = `${this.$t(
                 "history.latLng"
@@ -348,7 +392,7 @@ export default {
       }
     },
     // 获取列表数据
-    getHisData() {
+    getHisData () {
       let pageObj = {
         pageNum: this.pageNum,
         pageSize: 10,
@@ -393,10 +437,10 @@ export default {
         }
       });
     },
-    startMove() {
+    startMove () {
       this.animateCircle(this.timeSeconds);
     },
-    animateCircle(times) {
+    animateCircle (times) {
       let seconds = times || 10;
       var count = 0;
       animate1 && clearInterval(animate1);
@@ -414,7 +458,7 @@ export default {
       }, seconds);
     },
     // 历史轨迹 轨迹配置
-    track() {
+    track () {
       this.trajectory = true;
       this.active = false;
       this.clearMap();
@@ -461,7 +505,7 @@ export default {
       this.markerPointer.sdPointer.push(end);
     },
     // 清除地图上的覆盖物
-    clearMap() {
+    clearMap () {
       animate1 && clearInterval(animate1);
       heatmapData && heatmapData.setMap(null);
       line && line.setMap(null);
@@ -484,7 +528,7 @@ export default {
       }
     },
     // 列表点击事件
-    checkItem(item) {
+    checkItem (item) {
       this.activePointer = [];
       this.blockArr = [];
       animate1 && clearInterval(animate1);
@@ -500,7 +544,7 @@ export default {
       this.getTimeList(this.queryDevice);
     }
   },
-  beforeDestroy() {
+  beforeDestroy () {
     animate1 && clearInterval(animate1);
   }
 };

@@ -220,11 +220,10 @@ export default {
           if (result.length > 0) {
             if (this.pathParams && this.pageNum === 1) {
               result.forEach((key, index) => {
-                pointerObj[key.deviceId] = `${key.longitude},${
-                  key.latitude
-                },${trakTimeformat(key.pushTime)},${key.batteryId},${
-                  key.onlineStatus
-                },0,${index + 1},${key.voltage}`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态
+                if (Number(key.longitude) > 0 && Number(key.latitude) > 0) {
+                  pointerObj[key.deviceId] = `${key.longitude},${key.latitude},${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus},0,${index + 1},${key.voltage}`;
+                  // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态
+                }
                 if (key.onlineStatus === 1) {
                   key.onLine = this.$t("positions.onLine");
                   if (key.deviceId) {
@@ -253,52 +252,57 @@ export default {
     },
     // websockets 请求
     sockets (data) {
-      websockets(ws => {
-        ws.onopen = () => {
-          console.log("open....");
-          ws.send(data);
-        };
-        ws.onmessage = evt => {
-          let data = JSON.parse(evt.data);
-          console.log(data);
+      this.WX = websockets();
+      this.WX.onopen = () => {
+        console.log("open....");
+        this.WX.send(data);
+      };
+      this.WX.onmessage = evt => {
+        let data = JSON.parse(evt.data);
+        console.log(data);
 
-          if (data.code === 2) {
-            // code 为 1时 既绑定成功，2时为 收到了数据
-            let obj = data.data.split(",");
-            let battery = batteryIdArr[obj[0]]; // 从电池id 字典中获取电池id，obj[0] 为设备id。
-            let pointerObjKeys = Object.keys(pointerObj);
-            let ponterIndexs = pointerObjKeys.indexOf(obj[0]);
-            obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[2]},${
-                obj[1]
-              },${nowDate()},${battery},1,1,${ponterIndexs + 1},${obj[3]}`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、
-              // 依次顺序为 经度、纬度、时间、电池id、在线状态、推送数据标志, 电压
-            });
-            if ((this.deviceId || this.pathParams) && !this.viewAll) {
-              let keys = Object.keys(pointerObj);
-              let nextObj = {};
-              keys.forEach((item, index) => {
-                if (item === this.deviceId || item === this.pathParams) {
-                  nextObj[item] = pointerObj[item];
-                }
-              });
-              this.GaoDeMap(nextObj, "fromClick");
-            } else {
-              this.GaoDeMap(pointerObj, "fromWs");
-            }
+        if (data.code === 2) {
+          // code 为 1时 既绑定成功，2时为 收到了数据
+          let obj = data.data.split(",");
+          let battery = batteryIdArr[obj[0]]; // 从电池id 字典中获取电池id，obj[0] 为设备id。
+          let pointerObjKeys = Object.keys(pointerObj);
+          let ponterIndexs = pointerObjKeys.indexOf(obj[0]);
+          if (Number(obj[2]) > 0 && Number(obj[1]) > 0) {
+            pointerObj[obj[0]] = `${obj[2]},${obj[1]},${nowDate()},${battery},1,1,${ponterIndexs + 1},${obj[3]}`;
+            // pointerObj 对象。其key为设备id（唯一性），value为字符串、
+            // 依次顺序为 经度、纬度、时间、电池id、在线状态、推送数据标志, 电压
           }
-        };
-        ws.onerror = () => {
-          console.log("onerror...");
-          this.over();
-        };
-        ws.onclose = () => {
-          console.log("closed...");
-        };
-        this.over = () => {
-          ws.close();
-        };
-      });
+
+          // obj.forEach(() => {
+          //   pointerObj[obj[0]] = `${obj[2]},${
+          //     obj[1]
+          //   },${nowDate()},${battery},1,1,${ponterIndexs + 1},${obj[3]}`; // pointerObj 对象。其key为设备id（唯一性），value为字符串、
+          //   // 依次顺序为 经度、纬度、时间、电池id、在线状态、推送数据标志, 电压
+          // });
+          if ((this.deviceId || this.pathParams) && !this.viewAll) {
+            let keys = Object.keys(pointerObj);
+            let nextObj = {};
+            keys.forEach((item, index) => {
+              if (item === this.deviceId || item === this.pathParams) {
+                nextObj[item] = pointerObj[item];
+              }
+            });
+            this.GaoDeMap(nextObj, "fromClick");
+          } else {
+            this.GaoDeMap(pointerObj, "fromWs");
+          }
+        }
+      };
+      this.WX.onerror = () => {
+        console.log("onerror...");
+        this.over();
+      };
+      this.WX.onclose = () => {
+        console.log("closed...");
+      };
+    },
+    over () {
+      this.WX.close();
     },
     /*
      @params batteryIdArr 为电池ID对象 key为设备id，value为电池id
@@ -309,11 +313,9 @@ export default {
       pointerObj = {};
       let sendData = { api: "bind", param: [] };
       data.forEach((key, index) => {
-        pointerObj[key.deviceId] = `${key.longitude},${
-          key.latitude
-        },${trakTimeformat(key.pushTime)},${key.batteryId},${
-          key.onlineStatus
-        },0,${index + 1},${key.voltage}`;
+        if (Number(key.longitude) > 0 && Number(key.latitude) > 0) {
+          pointerObj[key.deviceId] = `${key.longitude},${key.latitude},${trakTimeformat(key.pushTime)},${key.batteryId},${key.onlineStatus},0,${index + 1},${key.voltage}`;
+        }
         if (key.onlineStatus === 1) {
           // onlineStatus 判断是否在线的标识。1 在线。0 离线；
           key.onLine = this.$t("positions.onLine");

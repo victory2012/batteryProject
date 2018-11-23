@@ -127,38 +127,37 @@ export default {
       });
     },
     localPosition (data) {
-      websockets(ws => {
-        ws.onopen = () => {
-          console.log("open....");
-          ws.send(data);
-        };
-        ws.onmessage = evt => {
-          let data = JSON.parse(evt.data);
-          console.log(data);
-          if (data.code === 2) {
-            if (this.markers.length > 0) {
-              this.markers.forEach(key => {
-                key.setMap(null);
-              });
-              this.markers = [];
-            }
-            // code 为 1时 既绑定成功，2时为 收到了数据
-            let obj = data.data.split(",");
-            obj.forEach(() => {
-              pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+      this.WX = websockets();
+      this.WX.onopen = () => {
+        console.log("open....");
+        this.WX.send(data);
+      };
+      this.WX.onmessage = evt => {
+        let data = JSON.parse(evt.data);
+        console.log(data);
+        if (data.code === 2) {
+          if (this.markers.length > 0) {
+            this.markers.forEach(key => {
+              key.setMap(null);
             });
-            this.mapInit(pointerObj);
+            this.markers = [];
           }
-        };
-        ws.onerror = () => {
-          console.log("onerror...");
-          onError(`${this.$t("connectErr")}`);
-          this.over();
-        };
-        this.over = () => {
-          ws.close();
-        };
-      });
+          // code 为 1时 既绑定成功，2时为 收到了数据
+          let obj = data.data.split(",");
+          obj.forEach(() => {
+            pointerObj[obj[0]] = `${obj[2]},${obj[1]}`;
+          });
+          this.mapInit(pointerObj);
+        }
+      };
+      this.WX.onerror = () => {
+        console.log("onerror...");
+        onError(`${this.$t("connectErr")}`);
+        this.over();
+      };
+    },
+    over () {
+      this.WX.close();
     },
     singleDevice () {
       let NowDeviceId = this.$route.query.deviceId;

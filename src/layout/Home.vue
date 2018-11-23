@@ -2,9 +2,11 @@
   <div class="wrapper">
     <v-head></v-head>
     <v-sidebar></v-sidebar>
-    <div class="content-box" :class="{'content-collapse':collapse}">
+    <div class="content-box"
+      :class="{'content-collapse':collapse}">
       <div class="content">
-        <transition name="move" mode="out-in">
+        <transition name="move"
+          mode="out-in">
           <keep-alive :include="tagsList">
             <router-view></router-view>
           </keep-alive>
@@ -27,7 +29,7 @@ import vHead from "./Header.vue";
 import vSidebar from "./Sidebar.vue";
 import bus from "../utils/bus";
 export default {
-  data() {
+  data () {
     return {
       tagsList: [],
       collapse: false
@@ -37,7 +39,7 @@ export default {
     "v-head": vHead,
     "v-sidebar": vSidebar
   },
-  created() {
+  created () {
     bus.$on("collapse", msg => {
       this.collapse = msg;
     });

@@ -1,9 +1,11 @@
 <template>
   <div>
     <div>
-      <el-row :gutter="20" class="mgb20">
+      <el-row :gutter="20"
+        class="mgb20">
         <el-col :span="6">
-          <el-card shadow="hover" :body-style="{padding: '0px'}">
+          <el-card shadow="hover"
+            :body-style="{padding: '0px'}">
             <div class="grid-content grid-con-1">
               <i class="grid-con-icon iconfont">&#xe644;</i>
               <div class="grid-cont-right">
@@ -14,7 +16,8 @@
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" :body-style="{padding: '0px'}">
+          <el-card shadow="hover"
+            :body-style="{padding: '0px'}">
             <div class="grid-content grid-con-2">
               <i class="grid-con-icon iconfont">&#xe656;</i>
               <div class="grid-cont-right">
@@ -25,7 +28,8 @@
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" :body-style="{padding: '0px'}">
+          <el-card shadow="hover"
+            :body-style="{padding: '0px'}">
             <div class="grid-content grid-con-3">
               <i class="grid-con-icon iconfont">&#xe6a8;</i>
               <div class="grid-cont-right">
@@ -36,7 +40,8 @@
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" :body-style="{padding: '0px'}">
+          <el-card shadow="hover"
+            :body-style="{padding: '0px'}">
             <div class="grid-content grid-con-4">
               <i class="grid-con-icon iconfont">&#xe6f5;</i>
               <div class="grid-cont-right">
@@ -58,7 +63,8 @@
       </div>
       <div id="container" class="mapWarrp"></div>
     </div> -->
-    <div id="container" class="mapWarrp"></div>
+    <div id="container"
+      class="mapWarrp"></div>
   </div>
 </template>
 <script>
@@ -69,7 +75,7 @@ let map;
 let pointerObj = {};
 export default {
   name: "battery",
-  data() {
+  data () {
     return {
       lnglats: [],
       onLine: 0,
@@ -82,7 +88,7 @@ export default {
     };
   },
   methods: {
-    mapInit(obj, type) {
+    mapInit (obj, type) {
       let allmarkerArr = Object.values(obj);
       let labelIndex = 1;
       allmarkerArr.forEach(key => {
@@ -134,7 +140,7 @@ export default {
     /*
       http请求 获取全部电池设备
      */
-    narmleHttp() {
+    narmleHttp () {
       // let loginData = JSON.parse(sessionStorage.getItem("loginData"));
       let pageObj = {
         pageNum: 1,
@@ -173,7 +179,7 @@ export default {
     /*
       websockets 请求
      */
-    sockets() {
+    sockets () {
       websockets(ws => {
         ws.onopen = () => {
           console.log("open....");
@@ -216,7 +222,7 @@ export default {
         };
       });
     },
-    initMap() {
+    initMap () {
       try {
         map = new google.maps.Map(document.getElementById("container"), {
           center: {
@@ -232,10 +238,10 @@ export default {
       }
     }
   },
-  mounted() {
+  mounted () {
     this.initMap();
   },
-  beforeDestroy() {
+  beforeDestroy () {
     if (typeof this.over === "function") {
       this.over();
     }

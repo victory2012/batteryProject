@@ -41,6 +41,7 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.userName')"
+                :error="nameErr"
                 prop="userName">
                 <el-input v-model.trim="adminForm.userName"
                   auto-complete="off"></el-input>
@@ -65,7 +66,6 @@
             </el-col>
             <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.email')"
-                :error="emailsError"
                 prop="email">
                 <el-input v-model.trim="adminForm.email"
                   auto-complete="off"></el-input>
@@ -114,6 +114,7 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.userName')"
+                :error="nameErr"
                 prop="userName">
                 <el-input v-model.trim="customerForm.userName"
                   auto-complete="off"></el-input>
@@ -147,7 +148,6 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.email')"
-                :error="emailsError"
                 prop="email">
                 <el-input v-model.trim="customerForm.email"
                   auto-complete="off"></el-input>
@@ -187,6 +187,7 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.userName')"
+                :error="nameErr"
                 prop="userName">
                 <el-input v-model.trim="manAdminForm.userName"
                   auto-complete="off"></el-input>
@@ -232,7 +233,6 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.email')"
-                :error="emailsError"
                 prop="email">
                 <el-input v-model.trim="manAdminForm.email"
                   auto-complete="off"></el-input>
@@ -258,6 +258,7 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.userName')"
+                :error="nameErr"
                 prop="userName">
                 <el-input v-model.trim="CustormAdminForm.userName"
                   auto-complete="off"></el-input>
@@ -303,7 +304,6 @@
           <el-row :gutter="40">
             <el-col :span="12">
               <el-form-item :label="$t('useMsg.add.email')"
-                :error="emailsError"
                 prop="email">
                 <el-input v-model.trim="CustormAdminForm.email"
                   auto-complete="off"></el-input>
@@ -423,7 +423,7 @@ export default {
   name: "userTable",
   data () {
     return {
-      emailsError: '',
+      nameErr: '',
       totalPage: 0, // 总页数
       currentPage: 1, // 当前页
       handleSize: 10, // 每页显示条数
@@ -457,6 +457,12 @@ export default {
             message: this.$t("useMsg.warn.userName"),
             trigger: "change"
           },
+          // {
+          //   pattern: false,
+          //   // pattern: !(/[\s""]/g),
+          //   message: this.$t("useMsg.warn.phoneCheck"),
+          //   trigger: "change"
+          // },
           {
             min: 4,
             message: this.$t("useMsg.warn.nameLimit"),
@@ -500,13 +506,18 @@ export default {
             message: this.$t("useMsg.warn.nature"),
             trigger: "change"
           }
+        ],
+        email: [
+          { required: false, message: '', trigger: 'blur' },
+          { type: 'email', message: this.$t('useMsg.warn.emailCheck'), trigger: ['blur', 'change'] }
         ]
       },
       email: /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/,
       creatAdmin: false,
       creatCustorm: false,
       customerAdmin: false,
-      formLabelWidth: "120px"
+      formLabelWidth: "120px",
+      space: /[\s""]/g
     };
   },
   created () {
@@ -537,29 +548,28 @@ export default {
   methods: {
     creatAdminClick () {
       this.creatAdmin = true;
-      this.emailsError = '';
+      this.nameErr = "";
     },
     customerClick () {
       this.creatCustorm = true;
-      this.emailsError = '';
+      this.nameErr = "";
     },
     manAdminClick () {
       this.manAdmin = true;
-      this.emailsError = '';
+      this.nameErr = "";
     },
     creatCustormAdminClick () {
       this.creatCustormAdmin = true;
-      this.emailsError = '';
+      this.nameErr = "";
     },
     // 添加客户企业管理员
     submitCustomer (formName) {
+      if (this.space.test(this.customerForm.userName)) {
+        this.nameErr = "用户名不能有空格"
+        return
+      }
       this.$refs[formName].validate(valid => {
         if (valid) {
-          this.emailsError = "";
-          if (this.customerForm.email && !this.email.test(this.customerForm.email)) {
-            this.emailsError = this.$t('useMsg.warn.emailCheck'); // "邮箱格式有误";
-            return;
-          }
           let paramsAdmin = {
             userName: this.customerForm.userName,
             password: this.customerForm.password,
@@ -588,13 +598,12 @@ export default {
     },
     // 创建生产企业超级管理员
     submitAdmin (formName) {
+      if (this.space.test(this.adminForm.userName)) {
+        this.nameErr = "用户名不能有空格"
+        return
+      }
       this.$refs[formName].validate(valid => {
         if (valid) {
-          this.emailsError = "";
-          if (this.adminForm.email && !this.email.test(this.adminForm.email)) {
-            this.emailsError = this.$t('useMsg.warn.emailCheck'); // "邮箱格式有误";
-            return;
-          }
           let paramsAdmin = {
             userName: this.adminForm.userName,
             password: this.adminForm.password,
@@ -623,13 +632,12 @@ export default {
     },
     // 添加生产企业普通管理员
     submitManufacturerAdmin (formName) {
+      if (this.space.test(this.manAdminForm.userName)) {
+        this.nameErr = "用户名不能有空格"
+        return
+      }
       this.$refs[formName].validate(valid => {
         if (valid) {
-          this.emailsError = "";
-          if (this.manAdminForm.email && !this.email.test(this.manAdminForm.email)) {
-            this.emailsError = this.$t('useMsg.warn.emailCheck'); // "邮箱格式有误";
-            return;
-          }
           let paramsAdmin = {
             userName: this.manAdminForm.userName,
             password: this.manAdminForm.password,
@@ -654,12 +662,12 @@ export default {
       });
     },
     submitCustormAdmin (formName) {
+      if (this.space.test(this.CustormAdminForm.userName)) {
+        this.nameErr = "用户名不能有空格"
+        return
+      }
       this.$refs[formName].validate(valid => {
         if (valid) {
-          if (this.CustormAdminForm.email && !this.email.test(this.CustormAdminForm.email)) {
-            this.emailsError = this.$t('useMsg.warn.emailCheck'); // "邮箱格式有误";
-            return;
-          }
           let paramsAdmin = {
             userName: this.CustormAdminForm.userName,
             password: this.CustormAdminForm.password,

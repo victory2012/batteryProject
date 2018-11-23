@@ -60,19 +60,23 @@
             </el-button>
           </template>
         </el-table-column>
-        <!-- <el-table-column label="操作" align="center">
+        <el-table-column label="操作"
+          align="center">
           <template slot-scope="scope">
-            <el-button @click.native.prevent="addBlack(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].status" size="small">
-              拉黑
+            <el-button @click.native.prevent="DeciveActive(scope.row)"
+              type="text"
+              :disabled="scope.row.activeState === 1"
+              size="small">
+              激活
             </el-button>
-            <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
+            <!-- <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
               删除
             </el-button>
             <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
               设备升级
-            </el-button>
+            </el-button> -->
           </template>
-        </el-table-column> -->
+        </el-table-column>
       </el-table>
       <div class="block">
         <el-pagination @size-change="handleSizeChange"
@@ -149,6 +153,7 @@ import {
   deviceList,
   createDeviceList,
   enterpriseList,
+  websockets,
   enterpriseCustomer
 } from "../../api/index.js";
 // import { timeFormats } from "../../utils/transition.js";
@@ -186,7 +191,8 @@ export default {
       options: [],
       manufacturerOptions: [],
       customerOptions: [],
-      value: ""
+      value: "",
+      sendData: { api: "active", param: '' }
     };
   },
   methods: {
@@ -220,6 +226,26 @@ export default {
           }
         }
       });
+      this.sockets();
+    },
+    /*
+      websockets 请求
+     */
+    sockets () {
+      this.WX = websockets();
+      this.WX.onopen = () => {
+        console.log("open....");
+        // ws.send(JSON.stringify(result));
+      };
+      this.WX.onmessage = evt => {
+
+      };
+      this.WX.onerror = () => {
+        this.over();
+      };
+    },
+    over () {
+      this.WX.close();
     },
     batteryReg () {
       this.regForm = true;
@@ -228,6 +254,11 @@ export default {
       this.$router.push({
         path: "/blacklist"
       });
+    },
+    DeciveActive (data) {
+      console.log(data);
+      this.sendData.param = data.deviceId;
+      this.WX.send(JSON.stringify(this.sendData));
     },
     submitForm (form) {
       this.$refs[form].validate(valid => {

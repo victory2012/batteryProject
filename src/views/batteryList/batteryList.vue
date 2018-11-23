@@ -351,6 +351,16 @@ export default {
       return new Date(date).getTime();
     },
     regBattery (form) {
+      console.log('adsasdasdasdasds');
+      console.log('form', form);
+      if (this.getTime(this.BatteryForm.manufactureDate) < this.getTime(this.BatteryForm.createDate)) {
+        this.manufactureDateError = this.$t('batteryList.warn.CheckmanufactureDate')
+        return
+      }
+      if (this.getTime(this.BatteryForm.warrantyDate) < this.getTime(this.BatteryForm.manufactureDate)) {
+        this.warrantyDateError = this.$t('batteryList.warn.CheckWarrantyDate')
+        return
+      }
       this.$refs[form].validate(valid => {
         if (valid) {
           let loginData = JSON.parse(sessionStorage.getItem("loginData"));
@@ -358,19 +368,14 @@ export default {
           //   this.BatteryForm.customerId = loginData.customer.customerId;
           //   this.BatteryForm.customerName = loginData.customer.customerName;
           // }
-          if (this.getTime(this.BatteryForm.manufactureDate) < this.getTime(this.BatteryForm.createDate)) {
-            this.manufactureDateError = this.$t('batteryList.warn.CheckmanufactureDate')
-            return
-          }
-          if (this.getTime(this.BatteryForm.warrantyDate) < this.getTime(this.BatteryForm.manufactureDate)) {
-            this.warrantyDateError = this.$t('batteryList.warn.CheckWarrantyDate')
-            return
-          }
           this.BatteryForm.customerId = "";
           this.BatteryForm.customerName = "";
           this.BatteryForm.manufacturerName = loginData.enterpriseName;
           this.BatteryForm.manufacturerId = loginData.enterpriseId;
           console.log("BatteryForm", this.BatteryForm);
+          // if (loginData.enterpriseName) {
+          //   return
+          // }
           addBattery(this.BatteryForm).then(res => {
             console.log(res);
             if (res.data.code === 0) {
@@ -384,6 +389,8 @@ export default {
       });
     },
     resetBatteryForm (form) {
+      this.warrantyDateError = "";
+      this.manufactureDateError = "";
       this.$refs[form].resetFields();
     },
     getDeviceListOnly () {
