@@ -65,7 +65,7 @@
           <template slot-scope="scope">
             <el-button @click.native.prevent="DeciveActive(scope.row)"
               type="text"
-              :disabled="scope.row.activeState === 1"
+              :disabled="scope.row.activeState === 1 || scope.row.bindingStatus === 0"
               size="small">
               激活
             </el-button>
@@ -153,7 +153,7 @@ import {
   deviceList,
   createDeviceList,
   enterpriseList,
-  websockets,
+  activeDevice,
   enterpriseCustomer
 } from "../../api/index.js";
 // import { timeFormats } from "../../utils/transition.js";
@@ -191,8 +191,7 @@ export default {
       options: [],
       manufacturerOptions: [],
       customerOptions: [],
-      value: "",
-      sendData: { api: "active", param: '' }
+      value: ""
     };
   },
   methods: {
@@ -226,27 +225,8 @@ export default {
           }
         }
       });
-      this.sockets();
     },
-    /*
-      websockets 请求
-     */
-    sockets () {
-      this.WX = websockets();
-      this.WX.onopen = () => {
-        console.log("open....");
-        // ws.send(JSON.stringify(result));
-      };
-      this.WX.onmessage = evt => {
 
-      };
-      this.WX.onerror = () => {
-        this.over();
-      };
-    },
-    over () {
-      this.WX.close();
-    },
     batteryReg () {
       this.regForm = true;
     },
@@ -257,8 +237,20 @@ export default {
     },
     DeciveActive (data) {
       console.log(data);
-      this.sendData.param = data.deviceId;
-      this.WX.send(JSON.stringify(this.sendData));
+      const param = {
+        batteryId: data.batteryId,
+        deviceId: data.deviceId
+      }
+      activeDevice(param).then(res => {
+        console.log('active', res)
+        if (res.data && res.data.code === 0) {
+          this.$message({
+            message: this.$t("device.activeSuccess"),
+            type: 'success'
+          })
+          this.init();
+        }
+      });
     },
     submitForm (form) {
       this.$refs[form].validate(valid => {

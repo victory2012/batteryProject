@@ -245,7 +245,9 @@ module.exports = {
     nobind: 'Unbound',
     hasbind: 'Bound',
     online: 'Online',
-    offline: 'Offline'
+    offline: 'Offline',
+    activeSuccess: 'Successful activation',
+    activeErr: 'Activation failed'
   },
   addDevice: {
     title: 'Device Registration',

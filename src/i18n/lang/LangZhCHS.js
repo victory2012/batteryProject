@@ -252,7 +252,9 @@ module.exports = {
     nobind: '未绑定',
     hasbind: '已绑定',
     online: '在线',
-    offline: '离线'
+    offline: '离线',
+    activeSuccess: '激活成功',
+    activeErr: '激活失败'
   },
   addDevice: {
     title: '添加设备',

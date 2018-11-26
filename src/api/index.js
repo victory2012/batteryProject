@@ -246,3 +246,8 @@ export function updatePolicy(params) {
 export function getFenceById(params) {
   return http.post(`/fence/get`, params);
 }
+
+/* 激活设备 */
+export function activeDevice(params) {
+  return http.post(`/battery/active`, params);
+}

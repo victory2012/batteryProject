@@ -264,6 +264,40 @@ export default {
             this.markers.forEach(key => {
               key.setMap(null);
             });
+    sockets (data) {
+      websockets(ws => {
+        ws.onopen = () => {
+          console.log("open....");
+          ws.send(data);
+        };
+        ws.onmessage = evt => {
+          let data = JSON.parse(evt.data);
+          if (data.code === 2) {
+            // code 为 1时 既绑定成功，2时为 收到了数据
+            if (this.markers.length > 0) {
+              // 收到websocket推送过来的数据时，如果地图上有mark点 就先清除掉。
+              this.markers.forEach(key => {
+                key.setMap(null);
+              });
+              this.markers = [];
+            }
+            let obj = data.data.split(",");
+            let battery = batteryIdArr[obj[0]]; // 从电池id 字典中获取电池id，obj[0] 为设备id。
+            let pointerObjKeys = Object.keys(pointerObj);
+            let ponterIndexs = pointerObjKeys.indexOf(obj[0]);
+            if (Number(obj[1]) > 0 && Number(obj[2]) > 0) {
+              pointerObj[obj[0]] = `${obj[1]},${
+                obj[2]
+              },${nowDate()},${battery},1,1,${ponterIndexs + 1},${obj[3]}`;
+              // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
+            }
+
+            // obj.forEach(() => {
+            //   pointerObj[obj[0]] = `${obj[1]},${
+            //     obj[2]
+            //   },${nowDate()},${battery},1,1,${ponterIndexs + 1},${obj[3]}`;
+            //   // pointerObj 对象。其key为设备id（唯一性），value为字符串、依次顺序为经度、纬度、时间、电池id、在线状态、推送数据标志
+            // });
             this.markers = [];
           }
           let obj = data.data.split(",");
