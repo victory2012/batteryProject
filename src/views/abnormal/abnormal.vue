@@ -197,7 +197,7 @@ export default {
     this.init();
   },
   beforeDestroy () {
-    if (typeof this.over === "function") {
+    if (typeof this.WS.close === "function") {
       this.over();
     }
   }

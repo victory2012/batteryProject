@@ -211,7 +211,9 @@ export default {
     ...mapState(["loginData"])
   },
   beforeDestroy () {
-    this.over();
+    if (typeof this.WX.close === 'object') {
+      this.over();
+    }
   }
 };
 </script>
@@ -608,7 +610,9 @@ export default {
     ...mapState(["loginData"])
   },
   beforeDestroy () {
-    this.over();
+    if (typeof this.WX === 'object') {
+      this.over();
+    }
   }
 };
 </script>

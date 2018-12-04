@@ -253,8 +253,11 @@ module.exports = {
     hasbind: '已绑定',
     online: '在线',
     offline: '离线',
-    activeSuccess: '激活成功',
-    activeErr: '激活失败'
+    activeReqSuccess: '请求激活成功',
+    activeSuccess: '激活完成',
+    activeErr: '激活失败',
+    activing: '激活中',
+    active: '激活'
   },
   addDevice: {
     title: '添加设备',

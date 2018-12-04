@@ -60,14 +60,15 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作"
+        <el-table-column :label="$t('alarmList.handle')"
           align="center">
           <template slot-scope="scope">
+            <!-- :disabled="scope.row.activeState === 1 || scope.row.bindingStatus === 0" -->
             <el-button @click.native.prevent="DeciveActive(scope.row)"
               type="text"
-              :disabled="scope.row.activeState === 1 || scope.row.bindingStatus === 0"
+              :disabled="scope.row.activeState > 0 || scope.row.bindingStatus === 0"
               size="small">
-              激活
+              {{scope.row.activeText}}
             </el-button>
             <!-- <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
               删除
@@ -202,6 +203,7 @@ export default {
       };
       deviceList(pageObj).then(res => {
         this.loading = false;
+        console.log('deviceList', res);
         let result = res.data;
         if (result.code === 0) {
           if (result.data.data) {
@@ -213,15 +215,26 @@ export default {
                 key.bindingName = this.$t("device.nobind");
               } else {
                 key.bindingName = this.$t("device.hasbind");
+                if (key.activeState === 0) {
+                  key.activeText = this.$t("device.active"); // '激活';
+                }
+                if (key.activeState === 1) {
+                  key.activeText = this.$t("device.activing"); // '激活中';
+                }
+                if (key.activeState === 2) {
+                  key.activeText = this.$t("device.activeSuccess"); // '激活完成';
+                }
               }
               key.online =
                 key.onlineStatus === 0
                   ? this.$t("device.offline")
                   : this.$t("device.online");
               // key.createTime = key.createTime;
-              key.status = key.status === 0 ? true : false;
+              key.status = key.status === 0;
+
               this.tableData.push(key);
             });
+            console.log('tableData', this.tableData);
           }
         }
       });
@@ -237,6 +250,12 @@ export default {
     },
     DeciveActive (data) {
       console.log(data);
+      if (data.bindingStatus !== 1) {
+        return
+      }
+      if (data.activeState !== 0) {
+        return
+      }
       const param = {
         batteryId: data.batteryId,
         deviceId: data.deviceId
@@ -245,7 +264,7 @@ export default {
         console.log('active', res)
         if (res.data && res.data.code === 0) {
           this.$message({
-            message: this.$t("device.activeSuccess"),
+            message: this.$t("device.activeReqSuccess"),
             type: 'success'
           })
           this.init();

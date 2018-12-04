@@ -79,9 +79,17 @@
             </el-button>
           </template>
         </el-table-column>
-        <!-- <el-table-column label="操作" align="center" width="200">
+        <el-table-column :label="$t('alarmList.handle')"
+          align="center"
+          width="200">
           <template slot-scope="scope">
-            <el-button @click.native.prevent="bind(scope.$index, tableData)" type="text" :disabled="tableData[scope.$index].bindingStatus" size="small">
+            <el-button @click.native.prevent="DeciveActive(scope.row)"
+              type="text"
+              :disabled="scope.row.activeState > 0 || scope.row.bindingStatus === 0"
+              size="small">
+              {{scope.row.activeText}}
+            </el-button>
+            <!-- <el-button @click.native.prevent="bind(scope.$index, tableData)" type="text" :disabled="tableData[scope.$index].bindingStatus" size="small">
             绑定
           </el-button>
           <el-button @click.native.prevent="unBind(scope.$index, tableData)" type="text" :disabled="!tableData[scope.$index].bindingStatus" size="small">
@@ -92,9 +100,9 @@
           </el-button>
             <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
               删除
-            </el-button>
+            </el-button> -->
           </template>
-        </el-table-column> -->
+        </el-table-column>
       </el-table>
       <div class="block">
         <el-pagination @size-change="handleSizeChange"
@@ -238,6 +246,7 @@ import {
   addBattery,
   deviceListOnly,
   GetList,
+  activeDevice,
   deleteBattery
 } from "../../api/index.js";
 import { onSuccess } from "../../utils/callback.js";
@@ -328,6 +337,29 @@ export default {
     this.getData();
   },
   methods: {
+    DeciveActive (data) {
+      console.log(data);
+      if (data.bindingStatus !== 1) {
+        return
+      }
+      if (data.activeState !== 0) {
+        return
+      }
+      const param = {
+        batteryId: data.batteryId,
+        deviceId: data.deviceId
+      }
+      activeDevice(param).then(res => {
+        console.log('active', res)
+        if (res.data && res.data.code === 0) {
+          this.$message({
+            message: this.$t("device.activeReqSuccess"),
+            type: 'success'
+          })
+          this.getData();
+        }
+      });
+    },
     batteryReg () {
       this.regForm = true;
     },
@@ -418,6 +450,20 @@ export default {
             this.totalPage = result.data.total;
             this.tableData = [];
             tableObj.forEach(key => {
+              if (key.bindingStatus === 0) {
+                key.bindingName = this.$t("device.nobind");
+              } else {
+                key.bindingName = this.$t("device.hasbind");
+                if (key.activeState === 0) {
+                  key.activeText = this.$t("device.active"); // '激活';
+                }
+                if (key.activeState === 1) {
+                  key.activeText = this.$t("device.activing"); // '激活中';
+                }
+                if (key.activeState === 2) {
+                  key.activeText = this.$t("device.activeSuccess"); // '激活完成';
+                }
+              }
               if (key.onlineStatus === 1) {
                 key.online = this.$t("batteryList.online");
                 key.OLS = true;
@@ -425,10 +471,10 @@ export default {
                 key.online = this.$t("batteryList.offline");
                 key.OLS = false;
               }
-              key.bindingName =
-                key.bindingStatus === 0
-                  ? this.$t("batteryList.noBind")
-                  : this.$t("batteryList.hasBind");
+              // key.bindingName =
+              //   key.bindingStatus === 0
+              //     ? this.$t("batteryList.noBind")
+              //     : this.$t("batteryList.hasBind");
               // key.online = key.onlineStatus === 1 ? "离线" : "在线";
               key.status = key.status === 0 ? false : true;
               this.tableData.push(key);
